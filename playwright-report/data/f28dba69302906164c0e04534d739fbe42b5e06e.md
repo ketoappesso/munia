@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Back to Home" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - img [ref=e5] [cursor=pointer]
+      - generic [ref=e7] [cursor=pointer]: Back to Home
+    - generic [ref=e8]:
+      - heading "Sign Up" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Enter your email to create an account
+      - generic [ref=e12]:
+        - img [ref=e14]
+        - textbox "Email" [ref=e16]
+        - generic [ref=e17]: Email
+      - button "Sign up with Email" [ref=e19] [cursor=pointer]:
+        - img [ref=e20] [cursor=pointer]
+        - text: Sign up with Email
+      - generic [ref=e26]: OR CONTINUE WITH
+      - generic [ref=e27]:
+        - button "Github" [ref=e28] [cursor=pointer]:
+          - img [ref=e29] [cursor=pointer]
+          - text: Github
+        - generic [ref=e31]:
+          - button "Google" [ref=e32] [cursor=pointer]:
+            - img [ref=e33] [cursor=pointer]
+            - text: Google
+          - button "Facebook" [ref=e35] [cursor=pointer]:
+            - img [ref=e36] [cursor=pointer]
+            - text: Facebook
+      - paragraph [ref=e38]: Alreay have an account?
+      - paragraph [ref=e39] [cursor=pointer]:
+        - link "Login" [ref=e40] [cursor=pointer]:
+          - /url: /login
+  - generic [ref=e41]:
+    - img [ref=e43]
+    - button "Open Tanstack query devtools" [ref=e92] [cursor=pointer]:
+      - img [ref=e93] [cursor=pointer]
+  - alert [ref=e142]
+```
