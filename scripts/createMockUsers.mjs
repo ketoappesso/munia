@@ -101,12 +101,14 @@ async function main() {
     const user = await prisma.user.create({
       data: fakeUser.user,
     });
-    const post = await prisma.post.createMany({
-      data: fakeUser.posts,
-    });
+    for (const postData of fakeUser.posts) {
+      const post = await prisma.post.create({
+        data: { ...postData, userId: user.id },
+      });
+      console.log(post);
+    }
 
     console.log(user);
-    console.log(post);
   }
 }
 

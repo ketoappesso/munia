@@ -20,7 +20,10 @@ export function useCreateCommentMutations() {
         }),
       });
 
-      if (!res.ok) throw new Error(res.statusText);
+      if (!res.ok) {
+        if (res.status === 401) throw new Error('401 Unauthorized');
+        throw new Error(res.statusText);
+      }
       return (await res.json()) as GetComment;
     },
     onSuccess: (createdComment) => {
@@ -51,7 +54,10 @@ export function useCreateCommentMutations() {
         }),
       });
 
-      if (!res.ok) throw new Error(res.statusText);
+      if (!res.ok) {
+        if (res.status === 401) throw new Error('401 Unauthorized');
+        throw new Error(res.statusText);
+      }
       return (await res.json()) as GetComment;
     },
     onSuccess: (createdReply) => {

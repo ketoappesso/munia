@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { useCreatePostModal } from '@/hooks/useCreatePostModal';
 import SvgImage from '@/svg_components/Image';
 import { useCallback } from 'react';
@@ -7,13 +8,18 @@ import { ProfilePhotoOwn } from './ui/ProfilePhotoOwn';
 import { ButtonNaked } from './ui/ButtonNaked';
 
 export function CreatePostModalLauncher() {
+  const { data: session } = useSession();
   const { launchCreatePost } = useCreatePostModal();
-  const launcCreatePostFinderClosed = useCallback(() => launchCreatePost({}), [launchCreatePost]);
+  const launcCreatePostFinderClosed = useCallback(() => {
+    if (!session?.user) return;
+    launchCreatePost({});
+  }, [launchCreatePost, session]);
   const launchCreatePostFinderOpened = useCallback(() => {
+    if (!session?.user) return;
     launchCreatePost({
       shouldOpenFileInputOnMount: true,
     });
-  }, [launchCreatePost]);
+  }, [launchCreatePost, session]);
 
   return (
     <div className="rounded-xl bg-card px-4 py-4 shadow sm:px-8 sm:py-5">

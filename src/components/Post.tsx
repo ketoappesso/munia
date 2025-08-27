@@ -46,13 +46,17 @@ export const Post = memo(
     const unLikePost = useCallback(() => unLikeMutation.mutate(), [unLikeMutation]);
     const handleLikeToggle = useCallback(
       (isSelected: boolean) => {
+        if (!session?.user) {
+          window.location.href = '/login';
+          return;
+        }
         if (isSelected) {
           likePost();
         } else {
           unLikePost();
         }
       },
-      [likePost, unLikePost],
+      [likePost, unLikePost, session],
     );
     const handleCommentsToggle = useCallback(() => {
       toggleComments(postId);

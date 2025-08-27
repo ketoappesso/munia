@@ -11,7 +11,8 @@ export function searchUser(search: string):
       OR?: (
         | {
             name: {
-              search: string;
+              contains: string;
+              mode: 'insensitive';
             };
           }
         | {
@@ -33,7 +34,8 @@ export function searchUser(search: string):
     OR: [
       {
         name: {
-          search: search.trim().replace(/ +/g, ' ').replaceAll(' ', '|'),
+          contains: search.trim(),
+          mode: 'insensitive',
         },
       },
       {

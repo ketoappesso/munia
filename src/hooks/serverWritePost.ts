@@ -65,7 +65,7 @@ export async function serverWritePost({ formData, type, postId }: Props) {
               create: savedFiles.map((savedFile) => ({
                 type: savedFile.type,
                 fileName: savedFile.fileName,
-                userId,
+                user: { connect: { id: userId } },
               })),
             },
           }),

@@ -1,4 +1,4 @@
-import { VisualMediaType, User, Follow, ActivityType, Gender, VisualMedia, RelationshipStatus } from '@prisma/client';
+import { User, Follow, VisualMedia } from '@prisma/client';
 
 type UserSummary = Pick<User, 'id' | 'username' | 'name' | 'profilePhoto'>;
 /**
@@ -39,7 +39,7 @@ export interface GetUser extends UserAfterSetUp {
 }
 
 export interface GetVisualMedia {
-  type: VisualMediaType;
+  type: string;
   url: string;
 }
 
@@ -150,25 +150,25 @@ export interface GetComment {
 export type DiscoverFilterKeys = 'gender' | 'relationship-status';
 
 export interface DiscoverFilters {
-  gender?: Gender;
-  'relationship-status'?: RelationshipStatus;
+  gender?: string;
+  'relationship-status'?: string;
 }
 
 interface FindActivityResult {
   id: number;
-  type: ActivityType;
+  type: string;
   sourceId: number;
   targetId: number | null;
   createdAt: Date;
   isNotificationRead: boolean;
-  sourceUser: UserSummary & { gender: Gender | null };
-  targetUser: UserSummary & { gender: Gender | null };
+  sourceUser: UserSummary & { gender: string | null };
+  targetUser: UserSummary & { gender: string | null };
 }
 export type FindActivityResults = FindActivityResult[];
 
 export interface GetActivity extends FindActivityResult {
-  sourceUser: UserSummaryAfterSetUp & { gender: Gender | null };
-  targetUser: UserSummaryAfterSetUp & { gender: Gender | null };
+  sourceUser: UserSummaryAfterSetUp & { gender: string | null };
+  targetUser: UserSummaryAfterSetUp & { gender: string | null };
   content?: string | null;
 }
 export type GetActivities = GetActivity[];

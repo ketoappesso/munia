@@ -49,6 +49,7 @@ export function useCommentLikesMutations({ queryKey }: { queryKey: QueryKey }) {
          * roll back the optimistic LIKE mutation.
          */
         if (res.status === 409) return true;
+        if (res.status === 401) throw Error('401 Unauthorized');
         throw Error('Error liking post.');
       }
 
@@ -85,6 +86,7 @@ export function useCommentLikesMutations({ queryKey }: { queryKey: QueryKey }) {
          * NOT roll back the optimistic UNLIKE mutation.
          */
         if (res.status === 409) return true;
+        if (res.status === 401) throw Error('401 Unauthorized');
         throw Error('Error unliking post.');
       }
 

@@ -18,6 +18,11 @@ export function CommentCreate({ postId }: { postId: number }) {
         onSuccess: () => {
           setContent('');
         },
+        onError: (error) => {
+          if (error.message.includes('401')) {
+            window.location.href = '/login';
+          }
+        },
       },
     );
   }, [content, createCommentMutation, postId]);

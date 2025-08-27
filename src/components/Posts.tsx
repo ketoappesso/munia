@@ -19,6 +19,7 @@ import { GenericLoading } from './GenericLoading';
 
 // If the `type` is 'profile' or 'feed', the `userId` property is required
 // If the `type` is 'hashtag', the `hashtag` property is required
+// If the `type` is 'public', no additional props are required
 type PostsProps =
   | {
       type: 'hashtag';
@@ -29,13 +30,23 @@ type PostsProps =
       type: 'profile' | 'feed';
       userId: string;
       hashtag?: undefined;
+    }
+  | {
+      type: 'public';
+      userId?: undefined;
+      hashtag?: undefined;
     };
 
 export function Posts({ type, hashtag, userId }: PostsProps) {
   const qc = useQueryClient();
   // Need to memoize `queryKey`, so when used in a dependency array, it won't trigger the `useEffect`/`useCallback`
   const queryKey = useMemo(
-    () => (type === 'hashtag' ? ['posts', { hashtag }] : ['users', userId, 'posts', { type }]),
+    () =>
+      type === 'hashtag'
+        ? ['posts', { hashtag }]
+        : type === 'public'
+        ? ['posts', 'public']
+        : ['users', userId, 'posts', { type }],
     [type, userId, hashtag],
   );
   const topElRef = useRef<HTMLDivElement>(null);
@@ -73,6 +84,8 @@ export function Posts({ type, hashtag, userId }: PostsProps) {
       const fetchUrl =
         type === 'hashtag'
           ? `/api/posts/hashtag/${hashtag}`
+          : type === 'public'
+          ? '/api/posts'
           : `/api/users/${userId}/${type === 'profile' ? 'posts' : 'feed'}`;
       const res = await fetch(`${fetchUrl}?${params.toString()}`);
 

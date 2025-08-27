@@ -65,6 +65,11 @@ export const Comment = memo(
             },
             {
               onSuccess: () => !repliesShown && toggleReplies(),
+              onError: (error) => {
+                if (error.message.includes('401')) {
+                  window.location.href = '/login';
+                }
+              },
             },
           );
         },

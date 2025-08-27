@@ -32,8 +32,15 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
       bio: userData?.bio || null,
       website: userData?.website || null,
       address: userData?.address || null,
-      gender: userData?.gender || null,
-      relationshipStatus: userData?.relationshipStatus || null,
+      gender:
+        userData?.gender && ['FEMALE', 'MALE', 'NONBINARY'].includes(userData.gender)
+          ? (userData.gender as 'FEMALE' | 'MALE' | 'NONBINARY')
+          : null,
+      relationshipStatus:
+        userData?.relationshipStatus &&
+        ['SINGLE', 'IN_A_RELATIONSHIP', 'ENGAGED', 'MARRIED'].includes(userData.relationshipStatus)
+          ? (userData.relationshipStatus as 'SINGLE' | 'IN_A_RELATIONSHIP' | 'ENGAGED' | 'MARRIED')
+          : null,
       birthDate: userData?.birthDate?.toString() || null,
     }),
     [userData],

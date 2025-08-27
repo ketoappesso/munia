@@ -1,3 +1,4 @@
+import { useSession } from 'next-auth/react';
 import { Item, Section } from 'react-stately';
 import { useDialogs } from '@/hooks/useDialogs';
 import { GetVisualMedia } from '@/types/definitions';
@@ -15,11 +16,13 @@ export function PostOptions({
   content: string | null;
   visualMedia?: GetVisualMedia[];
 }) {
+  const { data: session } = useSession();
   const { confirm } = useDialogs();
   const { launchEditPost } = useCreatePostModal();
   const { deleteMutation } = useDeletePostMutation();
 
   const handleDeleteClick = useCallback(() => {
+    if (!session?.user) return;
     confirm({
       title: 'Delete Post',
       message: 'Do you really wish to delete this post?',
@@ -29,15 +32,16 @@ export function PostOptions({
         setTimeout(() => deleteMutation.mutate({ postId }), 300);
       },
     });
-  }, [confirm, deleteMutation, postId]);
+  }, [confirm, deleteMutation, postId, session]);
 
   const handleEditClick = useCallback(() => {
+    if (!session?.user) return;
     launchEditPost({
       postId,
       initialContent: content ?? '',
       initialVisualMedia: visualMedia ?? [],
     });
-  }, [launchEditPost, postId, content, visualMedia]);
+  }, [launchEditPost, postId, content, visualMedia, session]);
 
   const handleOptionClick = useCallback(
     (key: Key) => {

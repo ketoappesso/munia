@@ -1,7 +1,6 @@
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") // Only needed when using a cloud provider that doesn't support the creation of new databases, like Heroku. Learn more: https://pris.ly/d/migrate-shadow
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -15,12 +14,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -44,13 +43,13 @@ model User {
   username           String?             @unique
   email              String?             @unique
   name               String?
-  gender             Gender?
+  gender             String?
   birthDate          DateTime?
-  phoneNumber        String?
+  phoneNumber        String?             @unique
   address            String?
   bio                String?
   website            String?
-  relationshipStatus RelationshipStatus?
+  relationshipStatus String?
   emailVerified      DateTime?
   image              String?
   accounts           Account[]
@@ -66,6 +65,7 @@ model User {
   following          Follow[]            @relation("follower")
   activities         Activity[]          @relation("activity")
   notifications      Activity[]          @relation("notification")
+  passwordHash       String?             // For phone+password authentication
 }
 
 model VerificationToken {
@@ -141,7 +141,7 @@ model CommentLike {
 
 model VisualMedia {
   id         Int             @id @default(autoincrement())
-  type       VisualMediaType @default(PHOTO)
+  type       String @default("PHOTO")
   fileName   String
   uploadedAt DateTime        @default(now())
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -163,7 +163,7 @@ model VisualMedia {
 model Activity {
   id                   Int          @id @default(autoincrement())
   createdAt            DateTime     @default(now())
-  type                 ActivityType
+  type                 String
   sourceId             Int
   targetId             Int?
   sourceUser           User         @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
@@ -174,35 +174,22 @@ model Activity {
   isNotificationRead   Boolean      @default(false)
 }
 
-enum ActivityType {
-  CREATE_FOLLOW // CREATE_FOLLOW does not use a `targetId`, only `targetUserId`
-
-  POST_LIKE
-  POST_MENTION // POST_MENTION does not use a `targetId`, only `targetUserId`
-
-  CREATE_COMMENT
-  COMMENT_MENTION
-  COMMENT_LIKE
-
-  CREATE_REPLY
-  REPLY_MENTION
-  REPLY_LIKE
+model ActivityType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 }
 
-enum VisualMediaType {
-  PHOTO
-  VIDEO
+model VisualMediaType {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 }
 
-enum Gender {
-  FEMALE
-  MALE
-  NONBINARY
+model Gender {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 }
 
-enum RelationshipStatus {
-  SINGLE
-  IN_A_RELATIONSHIP
-  ENGAGED
-  MARRIED
+model RelationshipStatus {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 }

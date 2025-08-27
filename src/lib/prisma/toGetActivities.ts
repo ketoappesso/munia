@@ -1,14 +1,9 @@
 import { FindActivityResults, GetActivities } from '@/types/definitions';
-import { ActivityType } from '@prisma/client';
 import prisma from './prisma';
 import { convertMentionUsernamesToIds } from '../convertMentionUsernamesToIds';
 import { fileNameToUrl } from '../s3/fileNameToUrl';
 
-async function getContentFromPostOrComment(
-  type: ActivityType,
-  sourceId: number,
-  targetId: number | null,
-): Promise<string> {
+async function getContentFromPostOrComment(type: string, sourceId: number, targetId: number | null): Promise<string> {
   const entity =
     type === 'POST_LIKE' || type === 'POST_MENTION'
       ? await prisma.post.findUnique({

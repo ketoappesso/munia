@@ -3,7 +3,6 @@ import SvgAtSign from '@/svg_components/AtSign';
 import SvgComment from '@/svg_components/Comment';
 import SvgHeart from '@/svg_components/Heart';
 import SvgProfile from '@/svg_components/Profile';
-import { ActivityType } from '@prisma/client';
 
 function CreateFollowNotificationIcon() {
   return (
@@ -56,6 +55,7 @@ const ActivityIcons = {
   REPLY_MENTION: () => <MentionNotificationIcon />,
 };
 
-export function ActivityIcon({ type }: { type: ActivityType }) {
-  return <>{ActivityIcons[type]()}</>;
+export function ActivityIcon({ type }: { type: string }) {
+  const IconComponent = ActivityIcons[type as keyof typeof ActivityIcons];
+  return IconComponent ? <IconComponent /> : null;
 }

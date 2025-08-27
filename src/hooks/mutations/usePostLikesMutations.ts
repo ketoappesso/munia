@@ -27,6 +27,7 @@ export function usePostLikesMutations({ postId }: { postId: number }) {
          * roll back the optimistic LIKE mutation.
          */
         if (res.status === 409) return true;
+        if (res.status === 401) throw Error('401 Unauthorized');
         throw Error('Error liking post.');
       }
 
@@ -75,6 +76,7 @@ export function usePostLikesMutations({ postId }: { postId: number }) {
          * NOT roll back the optimistic UNLIKE mutation.
          */
         if (res.status === 409) return true;
+        if (res.status === 401) throw Error('401 Unauthorized');
         throw Error('Error unliking post.');
       }
 
