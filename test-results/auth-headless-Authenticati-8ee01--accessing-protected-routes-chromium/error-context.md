@@ -8,8 +8,8 @@
       - img [ref=e5] [cursor=pointer]
       - generic [ref=e7] [cursor=pointer]: Back to Home
     - generic [ref=e8]:
-      - heading "Sign Up" [level=1] [ref=e9]
-      - paragraph [ref=e10]: Enter your email to create an account
+      - heading "Login" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Enter your email to login
       - generic [ref=e11]:
         - button "Email" [ref=e12] [cursor=pointer]
         - button "Phone" [ref=e13] [cursor=pointer]
@@ -17,9 +17,9 @@
         - img [ref=e17]
         - textbox "Email" [ref=e19]
         - generic [ref=e20]: Email
-      - button "Sign up with Email" [ref=e22] [cursor=pointer]:
+      - button "Login with Email" [ref=e22] [cursor=pointer]:
         - img [ref=e23] [cursor=pointer]
-        - text: Sign up with Email
+        - text: Login with Email
       - generic [ref=e29]: OR CONTINUE WITH
       - generic [ref=e30]:
         - button "Github" [ref=e31] [cursor=pointer]:
@@ -32,13 +32,13 @@
           - button "Facebook" [ref=e38] [cursor=pointer]:
             - img [ref=e39] [cursor=pointer]
             - text: Facebook
-      - paragraph [ref=e41]: Alreay have an account?
+      - paragraph [ref=e41]: No account yet?
       - paragraph [ref=e42] [cursor=pointer]:
-        - link "Login" [ref=e43] [cursor=pointer]:
-          - /url: /login
+        - link "Create an account" [ref=e43] [cursor=pointer]:
+          - /url: /register
   - generic [ref=e44]:
     - img [ref=e46]
-    - button "Open Tanstack query devtools" [ref=e95] [cursor=pointer]:
-      - img [ref=e96] [cursor=pointer]
-  - alert [ref=e145]
+    - button "Open Tanstack query devtools" [ref=e94] [cursor=pointer]:
+      - img [ref=e95] [cursor=pointer]
+  - alert [ref=e143]
 ```
