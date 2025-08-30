@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/cn';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
@@ -29,6 +29,7 @@ export const Post = memo(
     const { data: session } = useSession();
     const userId = session?.user?.id;
     const { likeMutation, unLikeMutation } = usePostLikesMutations({ postId });
+    const [timeAgo, setTimeAgo] = useState<string>('');
 
     const { data, isPending, isError } = useQuery<GetPost>({
       queryKey: ['posts', postId],
@@ -84,13 +85,25 @@ export const Post = memo(
     const isOwnPost = userId === author.id;
     const numberOfLikes = _count.postLikes;
 
+    // Calculate time ago on client side only to avoid hydration mismatch
+    useEffect(() => {
+      setTimeAgo(formatDistanceStrict(new Date(createdAt), new Date()));
+      
+      // Update time every minute
+      const interval = setInterval(() => {
+        setTimeAgo(formatDistanceStrict(new Date(createdAt), new Date()));
+      }, 60000);
+      
+      return () => clearInterval(interval);
+    }, [createdAt]);
+
     return (
       <div className="rounded-2xl bg-card px-4 shadow sm:px-8">
         <div className="flex items-center justify-between pt-4 sm:pt-5">
           <ProfileBlock
             name={author.name!}
             username={author.username!}
-            time={formatDistanceStrict(new Date(createdAt), new Date())}
+            time={timeAgo || createdAt}
             photoUrl={author.profilePhoto!}
           />
           {isOwnPost && <PostOptions postId={postId} content={content} visualMedia={visualMedia} />}

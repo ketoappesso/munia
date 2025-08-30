@@ -36,9 +36,5 @@
       - paragraph [ref=e42] [cursor=pointer]:
         - link "Login" [ref=e43] [cursor=pointer]:
           - /url: /login
-  - generic [ref=e44]:
-    - img [ref=e46]
-    - button "Open Tanstack query devtools" [ref=e94] [cursor=pointer]:
-      - img [ref=e95] [cursor=pointer]
-  - alert [ref=e143]
+  - alert [ref=e44]
 ```

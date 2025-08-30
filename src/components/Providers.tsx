@@ -10,6 +10,7 @@ import { VisualMediaModalContextProvider } from '@/contexts/VisualMediaModalCont
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import React from 'react';
+import { OfflineQueueProcessor } from './OfflineQueueProcessor';
 
 export function Providers({ children, session }: { children: React.ReactNode; session: Session | null }) {
   return (
@@ -20,7 +21,10 @@ export function Providers({ children, session }: { children: React.ReactNode; se
             <DialogsContextProvider>
               <VisualMediaModalContextProvider>
                 <CreatePostModalContextProvider>
-                  <ShouldAnimateContextProvider>{children}</ShouldAnimateContextProvider>
+                  <ShouldAnimateContextProvider>
+                    <OfflineQueueProcessor />
+                    {children}
+                  </ShouldAnimateContextProvider>
                 </CreatePostModalContextProvider>
               </VisualMediaModalContextProvider>
             </DialogsContextProvider>

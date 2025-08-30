@@ -6,6 +6,9 @@ import { POSTS_PER_PAGE } from '@/constants';
 import { revokeVisualMediaObjectUrls } from '@/lib/revokeVisualMediaObjectUrls';
 import { useToast } from '../useToast';
 import { useErrorNotifier } from '../useErrorNotifier';
+import { offlineQueue, OfflinePost } from '@/lib/offlineQueue';
+import { useNetworkStatus } from '../useNetworkStatus';
+import { useTelemetry } from '../useTelemetry';
 
 export function useWritePostMutations({
   content,
@@ -18,9 +21,11 @@ export function useWritePostMutations({
 }) {
   const qc = useQueryClient();
   const { data: session } = useSession();
+  const { isOnline } = useNetworkStatus();
   const queryKey = ['users', session?.user?.id, 'posts'];
   const { showToast } = useToast();
   const { notifyError } = useErrorNotifier();
+  const { logPostAttempt, logQueueOperation } = useTelemetry();
 
   const generateFormData = async (): Promise<FormData> => {
     const formData = new FormData();
@@ -43,6 +48,20 @@ export function useWritePostMutations({
 
   const createPostMutation = useMutation({
     mutationFn: async () => {
+      if (!isOnline) {
+        // Store offline and throw special error to trigger offline handling
+        const clientId = session?.user?.id || 'anonymous';
+        const postId = await offlineQueue.addPost({
+          content,
+          visualMedia,
+          timestamp: Date.now(),
+          clientId,
+        });
+        logPostAttempt(false, true, 0);
+        logQueueOperation('add_offline', postId);
+        throw new Error('OFFLINE_QUEUED');
+      }
+
       const res = await fetch(`/api/posts`, {
         method: 'POST',
         body: await generateFormData(),
@@ -79,11 +98,23 @@ export function useWritePostMutations({
         };
       });
       showToast({ title: 'Successfully Posted', type: 'success' });
+      logPostAttempt(true, false, 0);
       revokeVisualMediaObjectUrls(visualMedia);
       exitCreatePostModal();
     },
     onError: (err) => {
-      notifyError(err, 'Error Creating Post');
+      if (err.message === 'OFFLINE_QUEUED') {
+        showToast({ 
+          title: 'Post queued for offline', 
+          message: 'Your post will be sent when you are back online',
+          type: 'info',
+          duration: 3000
+        });
+        revokeVisualMediaObjectUrls(visualMedia);
+        exitCreatePostModal();
+      } else {
+        notifyError(err, 'Error Creating Post');
+      }
     },
   });
 
