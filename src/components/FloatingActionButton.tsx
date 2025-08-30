@@ -4,11 +4,10 @@ import { useSession } from 'next-auth/react';
 import { useCreatePostModal } from '@/hooks/useCreatePostModal';
 import Button from '@/components/ui/Button';
 import { Plus, Wifi, WifiOff } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { offlineQueue } from '@/lib/offlineQueue';
-import { useEffect, useState } from 'react';
 
 interface FloatingActionButtonProps {
   className?: string;
@@ -40,10 +39,10 @@ export function FloatingActionButton({ className = '' }: FloatingActionButtonPro
     };
 
     updateQueueCount();
-    
+
     // Update queue count when network status changes
     const interval = setInterval(updateQueueCount, 5000);
-    
+
     return () => clearInterval(interval);
   }, [isOnline]);
 
@@ -53,28 +52,28 @@ export function FloatingActionButton({ className = '' }: FloatingActionButtonPro
         shape="circle"
         size="xl"
         onPress={handleCreatePost}
-        className="h-14 w-14 transform rounded-full bg-black text-white shadow-xl transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-black dark:bg-white dark:text-black dark:focus:ring-white relative"
+        className="relative h-14 w-14 transform rounded-full bg-black text-white shadow-xl transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-black dark:bg-white dark:text-black dark:focus:ring-white"
         aria-label={isOnline ? 'Create new post' : 'Offline - posts will be sent when online'}>
         <Plus className="h-6 w-6" strokeWidth={3} />
-        
+
         {/* Network status indicator */}
         {!isOnline && (
-          <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1">
+          <div className="absolute -right-1 -top-1 rounded-full bg-yellow-500 p-1">
             <WifiOff className="h-3 w-3 text-white" />
           </div>
         )}
-        
+
         {/* Queued posts badge */}
         {queuedPosts > 0 && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
             {queuedPosts}
           </div>
         )}
       </Button>
-      
+
       {/* Offline status tooltip */}
       {!isOnline && (
-        <div className="absolute bottom-full right-0 mb-2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+        <div className="absolute bottom-full right-0 mb-2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white">
           Offline - {queuedPosts} post{queuedPosts !== 1 ? 's' : ''} queued
         </div>
       )}

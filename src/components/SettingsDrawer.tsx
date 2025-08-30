@@ -35,7 +35,7 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
             onClick={onClose}
             aria-hidden="true"
           />
-          
+
           {/* Drawer */}
           <motion.div
             initial={{ x: '-100%' }}
@@ -45,26 +45,24 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
             className="fixed left-0 top-0 z-50 h-full w-80 bg-background shadow-xl"
             role="dialog"
             aria-modal="true"
-            aria-label="Settings"
-          >
+            aria-label="Settings">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border p-4">
               <h2 className="text-xl font-semibold text-foreground">Settings</h2>
               <ButtonNaked
                 onPress={onClose}
                 className="rounded-full p-1 hover:bg-foreground/5"
-                aria-label="Close settings"
-              >
+                aria-label="Close settings">
                 <X className="h-6 w-6 stroke-foreground" />
               </ButtonNaked>
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-6">
+            <div className="space-y-6 p-4">
               {/* Theme Section */}
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Appearance</h3>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Appearance</h3>
+                <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                   <span className="text-foreground">Theme</span>
                   <ThemeSwitch />
                 </div>
@@ -72,18 +70,17 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
 
               {/* Account Section */}
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Account</h3>
-                
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Account</h3>
+
                 {/* Wallet Link */}
                 <ButtonNaked
                   onPress={handleWalletClick}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 mb-3 hover:bg-muted/70 transition-colors"
-                >
+                  className="mb-3 flex w-full items-center justify-between rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted/70">
                   <div className="flex items-center">
-                    <Wallet className="h-5 w-5 mr-3 stroke-foreground" />
+                    <Wallet className="mr-3 h-5 w-5 stroke-foreground" />
                     <span className="text-foreground">Wallet</span>
                   </div>
-                  <span className="text-foreground font-medium">¥1,250.50</span>
+                  <span className="font-medium text-foreground">¥1,250.50</span>
                 </ButtonNaked>
 
                 {/* Logout */}

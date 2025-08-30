@@ -12,9 +12,8 @@ export function SettingsButton({ onPress, className = '' }: SettingsButtonProps)
   return (
     <ButtonNaked
       onPress={onPress}
-      className={`rounded-full p-2 hover:bg-foreground/5 transition-colors ${className}`}
-      aria-label="Open settings"
-    >
+      className={`rounded-full p-2 transition-colors hover:bg-foreground/5 ${className}`}
+      aria-label="Open settings">
       <Menu className="h-6 w-6 stroke-foreground" />
     </ButtonNaked>
   );

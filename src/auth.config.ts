@@ -10,67 +10,67 @@ import bcrypt from 'bcryptjs';
 
 export default {
   providers: [
-    GitHub, 
-    Facebook, 
+    GitHub,
+    Facebook,
     Google,
     Credentials({
       name: 'credentials',
       credentials: {
         phoneNumber: { label: 'Phone Number', type: 'text' },
         password: { label: 'Password', type: 'password' },
-        smsCode: { label: 'SMS Code', type: 'text' }
+        smsCode: { label: 'SMS Code', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials) return null;
-        
+
         const { phoneNumber, password, smsCode } = credentials;
-        
+
         // Only run on server-side
         if (typeof window !== 'undefined') return null;
-        
+
         console.log('Credentials received:', { phoneNumber, password, smsCode });
-        
+
         // Initialize PrismaClient only when needed (server-side)
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient();
-        
+
         if (phoneNumber && password) {
           // Phone + password authentication (for registration/login)
           console.log('Looking for user with phone:', phoneNumber);
           const user = await prisma.user.findFirst({
-            where: { phoneNumber }
+            where: { phoneNumber },
           });
-          
+
           console.log('User found:', user);
-          
+
           if (!user) {
             // Create new user if not found (registration)
             console.log('Creating new user with phone:', phoneNumber);
-            
+
             try {
               const hashedPassword = await bcrypt.hash(password, 12);
               const newUser = await prisma.user.create({
                 data: {
                   phoneNumber,
                   passwordHash: hashedPassword,
-                  username: phoneNumber // Use phone number as default username
-                }
+                  username: phoneNumber, // Use phone number as default username
+                },
               });
               console.log('New user created successfully:', newUser.id);
               return newUser;
             } catch (error) {
               console.error('Error creating user in database:', error);
-              
+
               // Check for duplicate constraint violation
               if (String(error).includes('unique') || String(error).includes('duplicate')) {
                 console.log('Duplicate phone number detected');
                 return null;
               }
-              
+
               return null;
             }
           }
-          
+
           // Verify password for existing user (login)
           if (user.passwordHash) {
             const isValid = await bcrypt.compare(password, user.passwordHash);
@@ -80,20 +80,20 @@ export default {
           console.log('Password validation failed or no password hash');
           return null;
         }
-        
+
         if (phoneNumber && smsCode) {
           // SMS verification (for login)
           // Implement SMS code verification logic
           const user = await prisma.user.findUnique({
-            where: { phoneNumber }
+            where: { phoneNumber },
           });
           return user;
         }
-        
+
         console.log('No valid credentials provided');
         return null;
-      }
-    })
+      },
+    }),
   ],
   pages: {
     signIn: '/login',

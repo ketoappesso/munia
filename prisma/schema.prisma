@@ -95,6 +95,7 @@ model Post {
   userId      String
   postLikes   PostLike[]
   comments    Comment[]
+  isTask      Boolean       @default(false)
 }
 
 model PostLike {

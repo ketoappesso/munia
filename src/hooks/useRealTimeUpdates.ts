@@ -1,8 +1,8 @@
 'use client';
 
-import { useWebSocket } from './useWebSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useWebSocket } from './useWebSocket';
 
 interface RealTimeUpdate {
   type: 'post_created' | 'post_updated' | 'post_deleted' | 'comment_created' | 'like_toggled';
@@ -22,34 +22,36 @@ export function useRealTimeUpdates() {
         queryClient.invalidateQueries({ queryKey: ['users', session?.user?.id, 'posts'] });
         queryClient.invalidateQueries({ queryKey: ['feed'] });
         break;
-        
+
       case 'post_updated':
         queryClient.setQueryData(['posts', update.data.id], update.data);
         break;
-        
+
       case 'post_deleted':
         queryClient.removeQueries({ queryKey: ['posts', update.data.id] });
         queryClient.invalidateQueries({ queryKey: ['users', session?.user?.id, 'posts'] });
         queryClient.invalidateQueries({ queryKey: ['feed'] });
         break;
-        
+
       case 'comment_created':
         queryClient.invalidateQueries({ queryKey: ['posts', update.data.postId, 'comments'] });
         break;
-        
+
       case 'like_toggled':
         queryClient.invalidateQueries({ queryKey: ['posts', update.data.postId, 'likes'] });
         break;
     }
   };
 
-  const { isConnected } = useWebSocket({
-    url: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3002/ws',
-    onMessage: handleMessage,
-    reconnect: true,
-    maxReconnectAttempts: Infinity,
-    reconnectDelay: 1000,
-  });
+  // Temporarily disabled WebSocket connection to fix runtime errors
+  // TODO: Implement WebSocket server endpoint or remove this functionality
+  // const { isConnected } = useWebSocket({
+  //   url: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3002/ws',
+  //   onMessage: handleMessage,
+  //   reconnect: true,
+  //   maxReconnectAttempts: Infinity,
+  //   reconnectDelay: 1000,
+  // });
 
-  return { isConnected };
+  return { isConnected: false };
 }

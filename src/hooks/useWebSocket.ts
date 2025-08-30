@@ -57,17 +57,20 @@ export function useWebSocket({
 
       wsRef.current.onclose = () => {
         onClose?.();
-        
+
         if (reconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
           const delay = Math.min(
-            reconnectDelay * Math.pow(2, reconnectAttemptsRef.current),
-            30000 // Max 30 seconds
+            reconnectDelay * 2 ** reconnectAttemptsRef.current,
+            30000, // Max 30 seconds
           );
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttemptsRef.current++;
-            connect();
-          }, delay + Math.random() * 1000); // Add jitter
+
+          reconnectTimeoutRef.current = setTimeout(
+            () => {
+              reconnectAttemptsRef.current++;
+              connect();
+            },
+            delay + Math.random() * 1000,
+          ); // Add jitter
         }
       };
 
@@ -83,7 +86,7 @@ export function useWebSocket({
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
-    
+
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;

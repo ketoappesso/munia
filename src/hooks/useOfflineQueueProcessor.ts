@@ -48,7 +48,7 @@ export function useOfflineQueueProcessor(options: QueueProcessorOptions = {}) {
       return true;
     } catch (error) {
       console.error('Failed to process offline post:', error);
-      
+
       // Update retry count
       const newRetryCount = post.retryCount + 1;
       if (newRetryCount >= maxRetries) {
@@ -76,7 +76,7 @@ export function useOfflineQueueProcessor(options: QueueProcessorOptions = {}) {
 
     try {
       const posts = await offlineQueue.getPosts();
-      
+
       for (const post of posts) {
         // Skip if we've retried too recently
         if (post.lastAttempt && Date.now() - post.lastAttempt < retryDelay) {
@@ -84,10 +84,10 @@ export function useOfflineQueueProcessor(options: QueueProcessorOptions = {}) {
         }
 
         const success = await processPost(post);
-        
+
         // Add delay between processing to avoid overwhelming the server
         if (!success) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
     } catch (error) {

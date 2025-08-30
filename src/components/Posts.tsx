@@ -19,7 +19,7 @@ import { GenericLoading } from './GenericLoading';
 
 // If the `type` is 'profile' or 'feed', the `userId` property is required
 // If the `type` is 'hashtag', the `hashtag` property is required
-// If the `type` is 'public', no additional props are required
+// If the `type` is 'public' or 'tasks', no additional props are required
 type PostsProps =
   | {
       type: 'hashtag';
@@ -32,7 +32,7 @@ type PostsProps =
       hashtag?: undefined;
     }
   | {
-      type: 'public';
+      type: 'public' | 'tasks';
       userId?: undefined;
       hashtag?: undefined;
     };
@@ -46,6 +46,8 @@ export function Posts({ type, hashtag, userId }: PostsProps) {
         ? ['posts', { hashtag }]
         : type === 'public'
         ? ['posts', 'public']
+        : type === 'tasks'
+        ? ['posts', 'tasks']
         : ['users', userId, 'posts', { type }],
     [type, userId, hashtag],
   );
@@ -86,6 +88,8 @@ export function Posts({ type, hashtag, userId }: PostsProps) {
           ? `/api/posts/hashtag/${hashtag}`
           : type === 'public'
           ? '/api/posts'
+          : type === 'tasks'
+          ? '/api/posts/tasks'
           : `/api/users/${userId}/${type === 'profile' ? 'posts' : 'feed'}`;
       const res = await fetch(`${fetchUrl}?${params.toString()}`);
 

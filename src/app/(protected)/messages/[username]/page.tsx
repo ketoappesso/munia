@@ -39,14 +39,14 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const router = useRouter();
   const queryClient = useQueryClient();
   const { username } = params;
-  
+
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch conversation and other user info
   const { data: otherUser } = useQuery({
     queryKey: ['user', username],
-    queryFn: () => fetcher(`/api/users-basic?usernames=${username}`).then(res => res[0]),
+    queryFn: () => fetcher(`/api/users-basic?usernames=${username}`).then((res) => res[0]),
     enabled: !!username,
   });
 
@@ -116,7 +116,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
         handleSendMessage();
       }
     },
-    [handleSendMessage]
+    [handleSendMessage],
   );
 
   if (!otherUser) {
@@ -147,7 +147,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
             <p className="text-sm text-gray-500 dark:text-gray-400">在线</p>
           </div>
 
-          <ButtonNaked 
+          <ButtonNaked
             onPress={handleBack}
             className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
@@ -178,7 +178,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
                       height={32}
                       className="rounded-full"
                     />
-                    <div className="max-w-xs md:max-w-md rounded-2xl bg-white px-4 py-2 shadow-sm dark:bg-gray-800">
+                    <div className="max-w-xs rounded-2xl bg-white px-4 py-2 shadow-sm dark:bg-gray-800 md:max-w-md">
                       <p className="text-sm text-gray-900 dark:text-white">{message.content}</p>
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
@@ -186,7 +186,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
                     </div>
                   </div>
                 ) : (
-                  <div className="max-w-xs md:max-w-md rounded-2xl bg-blue-500 px-4 py-2 shadow-sm">
+                  <div className="max-w-xs rounded-2xl bg-blue-500 px-4 py-2 shadow-sm md:max-w-md">
                     <p className="text-sm text-white">{message.content}</p>
                     <p className="mt-1 text-xs text-blue-100">
                       {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
@@ -207,7 +207,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
             value={message}
             onChange={setMessage}
             label="输入消息..."
-            className="flex-1 border-0 bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white resize-none"
+            className="flex-1 resize-none border-0 bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             onKeyDown={handleKeyDown}
             rows={1}
             minRows={1}
@@ -216,7 +216,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
           <ButtonNaked
             onPress={handleSendMessage}
             isDisabled={!message.trim() || sendMessageMutation.isPending}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-600 dark:disabled:text-gray-400 transition-colors">
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-600 dark:disabled:text-gray-400">
             <Send className="h-4 w-4" />
           </ButtonNaked>
         </div>

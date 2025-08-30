@@ -88,12 +88,12 @@ export const Post = memo(
     // Calculate time ago on client side only to avoid hydration mismatch
     useEffect(() => {
       setTimeAgo(formatDistanceStrict(new Date(createdAt), new Date()));
-      
+
       // Update time every minute
       const interval = setInterval(() => {
         setTimeAgo(formatDistanceStrict(new Date(createdAt), new Date()));
       }, 60000);
-      
+
       return () => clearInterval(interval);
     }, [createdAt]);
 

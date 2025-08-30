@@ -22,8 +22,11 @@ export interface OfflineQueueManager {
 
 class IndexedDBOfflineQueue implements OfflineQueueManager {
   private dbName = 'munia-offline-queue';
+
   private storeName = 'posts';
+
   private version = 1;
+
   private db: IDBDatabase | null = null;
 
   async init(): Promise<void> {
@@ -43,7 +46,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         if (!db.objectStoreNames.contains(this.storeName)) {
           const store = db.createObjectStore(this.storeName, { keyPath: 'id' });
           store.createIndex('timestamp', 'timestamp', { unique: false });
@@ -73,11 +76,11 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
   async addPost(postData: Omit<OfflinePost, 'id' | 'retryCount'>): Promise<string> {
     const db = await this.ensureDB();
-    
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      
+
       const post: OfflinePost = {
         ...postData,
         id: crypto.randomUUID(),
@@ -93,7 +96,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
   async getPosts(): Promise<OfflinePost[]> {
     const db = await this.ensureDB();
-    
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
@@ -116,7 +119,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
   async removePost(id: string): Promise<void> {
     const db = await this.ensureDB();
-    
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
@@ -129,7 +132,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
   async updateRetryCount(id: string, retryCount: number): Promise<void> {
     const db = await this.ensureDB();
-    
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
@@ -141,7 +144,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
         if (post) {
           post.retryCount = retryCount;
           post.lastAttempt = Date.now();
-          
+
           const putRequest = store.put(post);
           putRequest.onerror = () => reject(putRequest.error);
           putRequest.onsuccess = () => resolve();
@@ -154,7 +157,7 @@ class IndexedDBOfflineQueue implements OfflineQueueManager {
 
   async clear(): Promise<void> {
     const db = await this.ensureDB();
-    
+
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);

@@ -24,10 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <FloatingActionButton />
       </div>
 
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
+      <SettingsDrawer isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </>
   );
 }

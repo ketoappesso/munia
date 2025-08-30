@@ -2,13 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { conversationId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { conversationId: string } }) {
   try {
     const user = await getAuthenticatedUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -20,8 +17,8 @@ export async function GET(
       where: { id: conversationId },
       select: {
         participant1Id: true,
-        participant2Id: true
-      }
+        participant2Id: true,
+      },
     });
 
     if (!conversation) {
@@ -44,13 +41,13 @@ export async function GET(
             id: true,
             username: true,
             name: true,
-            profilePhoto: true
-          }
-        }
+            profilePhoto: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'asc'
-      }
+        createdAt: 'asc',
+      },
     });
 
     return NextResponse.json(messages);
@@ -60,13 +57,10 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { conversationId: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { conversationId: string } }) {
   try {
     const user = await getAuthenticatedUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -83,8 +77,8 @@ export async function POST(
       where: { id: conversationId },
       select: {
         participant1Id: true,
-        participant2Id: true
-      }
+        participant2Id: true,
+      },
     });
 
     if (!conversation) {
@@ -99,7 +93,7 @@ export async function POST(
       data: {
         conversationId,
         senderId: user.id,
-        content: content.trim()
+        content: content.trim(),
       },
       select: {
         id: true,
@@ -111,18 +105,18 @@ export async function POST(
             id: true,
             username: true,
             name: true,
-            profilePhoto: true
-          }
-        }
-      }
+            profilePhoto: true,
+          },
+        },
+      },
     });
 
     // Update conversation's last message time
     await prisma.conversation.update({
       where: { id: conversationId },
       data: {
-        lastMessageAt: new Date()
-      }
+        lastMessageAt: new Date(),
+      },
     });
 
     return NextResponse.json(message, { status: 201 });

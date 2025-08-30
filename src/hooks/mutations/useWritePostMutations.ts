@@ -4,9 +4,9 @@ import { useSession } from 'next-auth/react';
 import { GetVisualMedia, GetPost, PostIds } from '@/types/definitions';
 import { POSTS_PER_PAGE } from '@/constants';
 import { revokeVisualMediaObjectUrls } from '@/lib/revokeVisualMediaObjectUrls';
+import { offlineQueue, OfflinePost } from '@/lib/offlineQueue';
 import { useToast } from '../useToast';
 import { useErrorNotifier } from '../useErrorNotifier';
-import { offlineQueue, OfflinePost } from '@/lib/offlineQueue';
 import { useNetworkStatus } from '../useNetworkStatus';
 import { useTelemetry } from '../useTelemetry';
 
@@ -104,11 +104,11 @@ export function useWritePostMutations({
     },
     onError: (err) => {
       if (err.message === 'OFFLINE_QUEUED') {
-        showToast({ 
-          title: 'Post queued for offline', 
+        showToast({
+          title: 'Post queued for offline',
           message: 'Your post will be sent when you are back online',
           type: 'info',
-          duration: 3000
+          duration: 3000,
         });
         revokeVisualMediaObjectUrls(visualMedia);
         exitCreatePostModal();

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useNetworkStatus } from './useNetworkStatus';
 import { offlineQueue } from '@/lib/offlineQueue';
+import { useNetworkStatus } from './useNetworkStatus';
 
 interface TelemetryEvent {
   type: string;
@@ -12,6 +12,7 @@ interface TelemetryEvent {
 
 class TelemetryService {
   private events: TelemetryEvent[] = [];
+
   private maxEvents = 100;
 
   logEvent(type: string, data?: any) {
@@ -22,7 +23,7 @@ class TelemetryService {
     };
 
     this.events.push(event);
-    
+
     // Keep only the most recent events
     if (this.events.length > this.maxEvents) {
       this.events = this.events.slice(-this.maxEvents);
@@ -49,13 +50,13 @@ export function useTelemetry() {
     const logNetworkChange = async () => {
       if (isOnline) {
         const posts = await offlineQueue.getPosts();
-        telemetry.logEvent('network_online', { 
+        telemetry.logEvent('network_online', {
           queuedPosts: posts.length,
-          lastOnline: Date.now()
+          lastOnline: Date.now(),
         });
       } else if (isOffline) {
-        telemetry.logEvent('network_offline', { 
-          lastOffline: Date.now()
+        telemetry.logEvent('network_offline', {
+          lastOffline: Date.now(),
         });
       }
     };
@@ -68,7 +69,7 @@ export function useTelemetry() {
       success,
       isOffline,
       retryCount,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
 
@@ -76,7 +77,7 @@ export function useTelemetry() {
     telemetry.logEvent('queue_operation', {
       operation,
       postId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
 
@@ -84,7 +85,7 @@ export function useTelemetry() {
     telemetry.logEvent('websocket_event', {
       event,
       ...data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
 
