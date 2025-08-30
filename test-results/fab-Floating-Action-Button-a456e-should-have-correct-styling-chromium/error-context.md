@@ -3,145 +3,149 @@
 ```yaml
 - generic [active] [ref=e1]:
   - generic [ref=e2]:
-    - generic [ref=e3]:
-      - link "Munia" [ref=e4] [cursor=pointer]:
+    - button "Open settings" [ref=e4] [cursor=pointer]:
+      - img [ref=e5] [cursor=pointer]
+    - generic [ref=e6]:
+      - link "Munia" [ref=e7] [cursor=pointer]:
         - /url: /
-        - img [ref=e5] [cursor=pointer]
-        - heading "Munia" [level=1] [ref=e7] [cursor=pointer]
-      - button "Feed" [ref=e8] [cursor=pointer]:
-        - img [ref=e11] [cursor=pointer]
-        - paragraph [ref=e13] [cursor=pointer]: Feed
-      - button "Discover" [ref=e14] [cursor=pointer]:
-        - img [ref=e16] [cursor=pointer]
-        - paragraph [ref=e18] [cursor=pointer]: Discover
-      - button "Notifications" [ref=e19] [cursor=pointer]:
-        - img [ref=e21] [cursor=pointer]
-        - paragraph [ref=e23] [cursor=pointer]: Notifications
-      - button "My Profile" [ref=e24] [cursor=pointer]:
-        - img [ref=e26] [cursor=pointer]
-        - paragraph [ref=e28] [cursor=pointer]: My Profile
-      - button "Logout" [ref=e29] [cursor=pointer]:
-        - img [ref=e31] [cursor=pointer]
-        - paragraph [ref=e33] [cursor=pointer]: Logout
-    - generic [ref=e35]:
-      - generic [ref=e36]:
-        - heading "Feed" [level=1] [ref=e37]
-        - button "Switch theme" [ref=e39] [cursor=pointer]:
-          - img [ref=e42] [cursor=pointer]
-          - img [ref=e46] [cursor=pointer]
-          - img [ref=e50] [cursor=pointer]
-      - generic [ref=e52]:
-        - generic [ref=e54]:
-          - generic [ref=e56]:
-            - link "Wilbert VonRueden's avatar" [ref=e58] [cursor=pointer]:
+        - img [ref=e8] [cursor=pointer]
+        - heading "Munia" [level=1] [ref=e10] [cursor=pointer]
+      - button "Feed" [ref=e11] [cursor=pointer]:
+        - img [ref=e14] [cursor=pointer]
+        - paragraph [ref=e16] [cursor=pointer]: Feed
+      - button "Discover" [ref=e17] [cursor=pointer]:
+        - img [ref=e19] [cursor=pointer]
+        - paragraph [ref=e21] [cursor=pointer]: Discover
+      - button "Notifications" [ref=e22] [cursor=pointer]:
+        - img [ref=e24] [cursor=pointer]
+        - paragraph [ref=e26] [cursor=pointer]: Notifications
+      - button "My Profile" [ref=e27] [cursor=pointer]:
+        - img [ref=e29] [cursor=pointer]
+        - paragraph [ref=e31] [cursor=pointer]: My Profile
+      - button "Logout" [ref=e32] [cursor=pointer]:
+        - img [ref=e34] [cursor=pointer]
+        - paragraph [ref=e36] [cursor=pointer]: Logout
+    - generic [ref=e38]:
+      - heading "Feed" [level=1] [ref=e40]
+      - generic [ref=e41]:
+        - generic [ref=e43]:
+          - generic [ref=e45]:
+            - link "Wilbert VonRueden's avatar" [ref=e47] [cursor=pointer]:
               - /url: /wilbert58
-              - img "Wilbert VonRueden's avatar" [ref=e59] [cursor=pointer]
-            - generic [ref=e60]:
-              - heading "Wilbert VonRueden" [level=2] [ref=e62] [cursor=pointer]:
-                - link "Wilbert VonRueden" [ref=e63] [cursor=pointer]:
+              - img "Wilbert VonRueden's avatar" [ref=e48] [cursor=pointer]
+            - generic [ref=e49]:
+              - heading "Wilbert VonRueden" [level=2] [ref=e51] [cursor=pointer]:
+                - link "Wilbert VonRueden" [ref=e52] [cursor=pointer]:
                   - /url: /wilbert58
-              - heading "1 day ago" [level=2] [ref=e64]
-          - paragraph [ref=e65]: Fugit tempore veritatis fugit cupiditate.
-          - generic [ref=e66]:
-            - button "0" [ref=e67] [cursor=pointer]:
-              - img [ref=e68] [cursor=pointer]
-              - paragraph [ref=e70] [cursor=pointer]: "0"
-            - button "0" [ref=e71] [cursor=pointer]:
-              - img [ref=e72] [cursor=pointer]
-              - paragraph [ref=e74] [cursor=pointer]: "0"
-        - generic [ref=e76]:
-          - generic [ref=e78]:
-            - link "Wilbert VonRueden's avatar" [ref=e80] [cursor=pointer]:
+              - heading "3 days ago" [level=2] [ref=e53]
+          - paragraph [ref=e54]: Fugit tempore veritatis fugit cupiditate.
+          - generic [ref=e55]:
+            - button "0" [ref=e56] [cursor=pointer]:
+              - img [ref=e57] [cursor=pointer]
+              - paragraph [ref=e59] [cursor=pointer]: "0"
+            - button "0" [ref=e60] [cursor=pointer]:
+              - img [ref=e61] [cursor=pointer]
+              - paragraph [ref=e63] [cursor=pointer]: "0"
+        - generic [ref=e65]:
+          - generic [ref=e67]:
+            - link "Wilbert VonRueden's avatar" [ref=e69] [cursor=pointer]:
               - /url: /wilbert58
-              - img "Wilbert VonRueden's avatar" [ref=e81] [cursor=pointer]
-            - generic [ref=e82]:
-              - heading "Wilbert VonRueden" [level=2] [ref=e84] [cursor=pointer]:
-                - link "Wilbert VonRueden" [ref=e85] [cursor=pointer]:
+              - img "Wilbert VonRueden's avatar" [ref=e70] [cursor=pointer]
+            - generic [ref=e71]:
+              - heading "Wilbert VonRueden" [level=2] [ref=e73] [cursor=pointer]:
+                - link "Wilbert VonRueden" [ref=e74] [cursor=pointer]:
                   - /url: /wilbert58
-              - heading "1 day ago" [level=2] [ref=e86]
-          - paragraph [ref=e87]: Quam dolorum neque hic.
-          - generic [ref=e88]:
-            - button "0" [ref=e89] [cursor=pointer]:
-              - img [ref=e90] [cursor=pointer]
-              - paragraph [ref=e92] [cursor=pointer]: "0"
-            - button "0" [ref=e93] [cursor=pointer]:
-              - img [ref=e94] [cursor=pointer]
-              - paragraph [ref=e96] [cursor=pointer]: "0"
-        - generic [ref=e98]:
-          - generic [ref=e100]:
-            - link "Wilbert VonRueden's avatar" [ref=e102] [cursor=pointer]:
+              - heading "3 days ago" [level=2] [ref=e75]
+          - paragraph [ref=e76]: Quam dolorum neque hic.
+          - generic [ref=e77]:
+            - button "0" [ref=e78] [cursor=pointer]:
+              - img [ref=e79] [cursor=pointer]
+              - paragraph [ref=e81] [cursor=pointer]: "0"
+            - button "0" [ref=e82] [cursor=pointer]:
+              - img [ref=e83] [cursor=pointer]
+              - paragraph [ref=e85] [cursor=pointer]: "0"
+        - generic [ref=e87]:
+          - generic [ref=e89]:
+            - link "Wilbert VonRueden's avatar" [ref=e91] [cursor=pointer]:
               - /url: /wilbert58
-              - img "Wilbert VonRueden's avatar" [ref=e103] [cursor=pointer]
-            - generic [ref=e104]:
-              - heading "Wilbert VonRueden" [level=2] [ref=e106] [cursor=pointer]:
-                - link "Wilbert VonRueden" [ref=e107] [cursor=pointer]:
+              - img "Wilbert VonRueden's avatar" [ref=e92] [cursor=pointer]
+            - generic [ref=e93]:
+              - heading "Wilbert VonRueden" [level=2] [ref=e95] [cursor=pointer]:
+                - link "Wilbert VonRueden" [ref=e96] [cursor=pointer]:
                   - /url: /wilbert58
-              - heading "1 day ago" [level=2] [ref=e108]
-          - paragraph [ref=e109]: Corrupti voluptatibus vel nobis velit odit.
-          - generic [ref=e110]:
-            - button "0" [ref=e111] [cursor=pointer]:
-              - img [ref=e112] [cursor=pointer]
-              - paragraph [ref=e114] [cursor=pointer]: "0"
-            - button "0" [ref=e115] [cursor=pointer]:
-              - img [ref=e116] [cursor=pointer]
-              - paragraph [ref=e118] [cursor=pointer]: "0"
-        - generic [ref=e120]:
-          - generic [ref=e122]:
-            - link "Kelly Ratke's avatar" [ref=e124] [cursor=pointer]:
+              - heading "3 days ago" [level=2] [ref=e97]
+          - paragraph [ref=e98]: Corrupti voluptatibus vel nobis velit odit.
+          - generic [ref=e99]:
+            - button "0" [ref=e100] [cursor=pointer]:
+              - img [ref=e101] [cursor=pointer]
+              - paragraph [ref=e103] [cursor=pointer]: "0"
+            - button "0" [ref=e104] [cursor=pointer]:
+              - img [ref=e105] [cursor=pointer]
+              - paragraph [ref=e107] [cursor=pointer]: "0"
+        - generic [ref=e109]:
+          - generic [ref=e111]:
+            - link "Kelly Ratke's avatar" [ref=e113] [cursor=pointer]:
               - /url: /kelly_ratke0
-              - img "Kelly Ratke's avatar" [ref=e125] [cursor=pointer]
-            - generic [ref=e126]:
-              - heading "Kelly Ratke" [level=2] [ref=e128] [cursor=pointer]:
-                - link "Kelly Ratke" [ref=e129] [cursor=pointer]:
+              - img "Kelly Ratke's avatar" [ref=e114] [cursor=pointer]
+            - generic [ref=e115]:
+              - heading "Kelly Ratke" [level=2] [ref=e117] [cursor=pointer]:
+                - link "Kelly Ratke" [ref=e118] [cursor=pointer]:
                   - /url: /kelly_ratke0
-              - heading "1 day ago" [level=2] [ref=e130]
-          - paragraph [ref=e131]: Odio quidem sapiente a.
-          - generic [ref=e132]:
-            - button "0" [ref=e133] [cursor=pointer]:
-              - img [ref=e134] [cursor=pointer]
-              - paragraph [ref=e136] [cursor=pointer]: "0"
-            - button "0" [ref=e137] [cursor=pointer]:
-              - img [ref=e138] [cursor=pointer]
-              - paragraph [ref=e140] [cursor=pointer]: "0"
-        - generic [ref=e142]:
-          - generic [ref=e144]:
-            - link "Kelly Ratke's avatar" [ref=e146] [cursor=pointer]:
+              - heading "3 days ago" [level=2] [ref=e119]
+          - paragraph [ref=e120]: Odio quidem sapiente a.
+          - generic [ref=e121]:
+            - button "0" [ref=e122] [cursor=pointer]:
+              - img [ref=e123] [cursor=pointer]
+              - paragraph [ref=e125] [cursor=pointer]: "0"
+            - button "0" [ref=e126] [cursor=pointer]:
+              - img [ref=e127] [cursor=pointer]
+              - paragraph [ref=e129] [cursor=pointer]: "0"
+        - generic [ref=e131]:
+          - generic [ref=e133]:
+            - link "Kelly Ratke's avatar" [ref=e135] [cursor=pointer]:
               - /url: /kelly_ratke0
-              - img "Kelly Ratke's avatar" [ref=e147] [cursor=pointer]
-            - generic [ref=e148]:
-              - heading "Kelly Ratke" [level=2] [ref=e150] [cursor=pointer]:
-                - link "Kelly Ratke" [ref=e151] [cursor=pointer]:
+              - img "Kelly Ratke's avatar" [ref=e136] [cursor=pointer]
+            - generic [ref=e137]:
+              - heading "Kelly Ratke" [level=2] [ref=e139] [cursor=pointer]:
+                - link "Kelly Ratke" [ref=e140] [cursor=pointer]:
                   - /url: /kelly_ratke0
-              - heading "1 day ago" [level=2] [ref=e152]
-          - paragraph [ref=e153]: Facilis unde totam ipsam ratione.
-          - generic [ref=e154]:
-            - button "0" [ref=e155] [cursor=pointer]:
-              - img [ref=e156] [cursor=pointer]
-              - paragraph [ref=e158] [cursor=pointer]: "0"
-            - button "0" [ref=e159] [cursor=pointer]:
-              - img [ref=e160] [cursor=pointer]
-              - paragraph [ref=e162] [cursor=pointer]: "0"
-        - generic [ref=e164]:
-          - generic [ref=e166]:
-            - link "Kelly Ratke's avatar" [ref=e168] [cursor=pointer]:
+              - heading "3 days ago" [level=2] [ref=e141]
+          - paragraph [ref=e142]: Facilis unde totam ipsam ratione.
+          - generic [ref=e143]:
+            - button "0" [ref=e144] [cursor=pointer]:
+              - img [ref=e145] [cursor=pointer]
+              - paragraph [ref=e147] [cursor=pointer]: "0"
+            - button "0" [ref=e148] [cursor=pointer]:
+              - img [ref=e149] [cursor=pointer]
+              - paragraph [ref=e151] [cursor=pointer]: "0"
+        - generic [ref=e153]:
+          - generic [ref=e155]:
+            - link "Kelly Ratke's avatar" [ref=e157] [cursor=pointer]:
               - /url: /kelly_ratke0
-              - img "Kelly Ratke's avatar" [ref=e169] [cursor=pointer]
-            - generic [ref=e170]:
-              - heading "Kelly Ratke" [level=2] [ref=e172] [cursor=pointer]:
-                - link "Kelly Ratke" [ref=e173] [cursor=pointer]:
+              - img "Kelly Ratke's avatar" [ref=e158] [cursor=pointer]
+            - generic [ref=e159]:
+              - heading "Kelly Ratke" [level=2] [ref=e161] [cursor=pointer]:
+                - link "Kelly Ratke" [ref=e162] [cursor=pointer]:
                   - /url: /kelly_ratke0
-              - heading "1 day ago" [level=2] [ref=e174]
-          - paragraph [ref=e175]: Dolore assumenda ad atque.
-          - generic [ref=e176]:
-            - button "0" [ref=e177] [cursor=pointer]:
-              - img [ref=e178] [cursor=pointer]
-              - paragraph [ref=e180] [cursor=pointer]: "0"
-            - button "0" [ref=e181] [cursor=pointer]:
-              - img [ref=e182] [cursor=pointer]
-              - paragraph [ref=e184] [cursor=pointer]: "0"
-  - generic [ref=e186]:
-    - img [ref=e188]
-    - button "Open Tanstack query devtools" [ref=e236] [cursor=pointer]:
-      - img [ref=e237] [cursor=pointer]
-  - alert [ref=e285]
+              - heading "3 days ago" [level=2] [ref=e163]
+          - paragraph [ref=e164]: Dolore assumenda ad atque.
+          - generic [ref=e165]:
+            - button "0" [ref=e166] [cursor=pointer]:
+              - img [ref=e167] [cursor=pointer]
+              - paragraph [ref=e169] [cursor=pointer]: "0"
+            - button "0" [ref=e170] [cursor=pointer]:
+              - img [ref=e171] [cursor=pointer]
+              - paragraph [ref=e173] [cursor=pointer]: "0"
+    - button "Create new post" [ref=e176] [cursor=pointer]:
+      - img [ref=e177] [cursor=pointer]
+  - generic [ref=e178]:
+    - img [ref=e180]
+    - button "Open Tanstack query devtools" [ref=e228] [cursor=pointer]:
+      - img [ref=e229] [cursor=pointer]
+  - alert [ref=e277]
+  - generic [ref=e280] [cursor=pointer]:
+    - img [ref=e281] [cursor=pointer]
+    - generic [ref=e283] [cursor=pointer]: 1 error
+    - button "Hide Errors" [ref=e284] [cursor=pointer]:
+      - img [ref=e285] [cursor=pointer]
 ```
