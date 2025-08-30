@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeSwitch } from '@/components/ui/ThemeSwitch';
 import { LogoutButton } from '@/components/LogoutButton';
-import { X } from 'lucide-react';
+import { X, Wallet } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
+import { useRouter } from 'next/navigation';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -14,6 +15,12 @@ interface SettingsDrawerProps {
 
 export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   const { theme } = useTheme();
+  const router = useRouter();
+
+  const handleWalletClick = () => {
+    onClose();
+    router.push('/wallet');
+  };
 
   return (
     <AnimatePresence>
@@ -67,11 +74,17 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Account</h3>
                 
-                {/* Wallet Balance */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 mb-3">
-                  <span className="text-foreground">Balance</span>
-                  <span className="text-foreground font-medium">¥0.00</span>
-                </div>
+                {/* Wallet Link */}
+                <ButtonNaked
+                  onPress={handleWalletClick}
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 mb-3 hover:bg-muted/70 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <Wallet className="h-5 w-5 mr-3 stroke-foreground" />
+                    <span className="text-foreground">Wallet</span>
+                  </div>
+                  <span className="text-foreground font-medium">¥1,250.50</span>
+                </ButtonNaked>
 
                 {/* Logout */}
                 <div className="p-3">
