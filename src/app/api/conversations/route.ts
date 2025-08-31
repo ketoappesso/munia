@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/getServerUser';
+import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser();
+    const [user] = await getServerUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser();
+    const [user] = await getServerUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -129,7 +129,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ conversationId: conversation.id });
+    return NextResponse.json({ 
+      id: conversation.id,
+      participant1Id: conversation.participant1Id,
+      participant2Id: conversation.participant2Id 
+    });
   } catch (error) {
     console.error('Error creating conversation:', error);
     return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useWebSocket } from './useWebSocket';
+import { useEnhancedWebSocket } from './useEnhancedWebSocket';
 import { useSession } from 'next-auth/react';
 
 interface ChatMessage {
@@ -48,21 +48,16 @@ export function useWebSocketChat({
     onConnectionChange?.(false);
   }, [onConnectionChange]);
 
-  // Temporarily disabled WebSocket connection to fix runtime errors
-  // TODO: Implement WebSocket server endpoint or remove this functionality
-  // const { send, isConnected: wsConnected } = useWebSocket({
-  //   url: conversationId ? `/api/ws/chat?conversationId=${conversationId}` : '/api/ws/chat',
-  //   onMessage: handleMessage,
-  //   onOpen: handleOpen,
-  //   onClose: handleClose,
-  //   reconnect: true,
-  //   maxReconnectAttempts: 10,
-  //   reconnectDelay: 1000,
-  // });
-  
-  // Mock implementation while WebSocket is disabled
-  const send = () => false;
-  const wsConnected = false;
+  const { send, isConnected: wsConnected, connectionState } = useEnhancedWebSocket({
+    url: conversationId ? `/api/ws/chat?conversationId=${conversationId}` : '/api/ws/chat',
+    onMessage: handleMessage,
+    onOpen: handleOpen,
+    onClose: handleClose,
+    reconnect: true,
+    maxReconnectAttempts: 10,
+    reconnectDelay: 1000,
+    enableMessageQueue: true,
+  });
 
   const sendMessage = useCallback(
     (content: string) => {
@@ -100,5 +95,6 @@ export function useWebSocketChat({
     sendMessage,
     markAsRead,
     isConnected,
+    connectionState,
   };
 }

@@ -24,10 +24,25 @@ export async function GET(request: Request) {
   const offset = parseInt(searchParams.get('offset') || '0', 10);
 
   const search = searchParams.get('search');
+  const username = searchParams.get('username');
   const gender = toUpper(snakeCase(searchParams.get('gender') || undefined));
   const relationshipStatus = toUpper(snakeCase(searchParams.get('relationship-status') || undefined));
   const followersOf = searchParams.get('followers-of');
   const followingOf = searchParams.get('following-of');
+
+  // If username is provided, fetch single user
+  if (username) {
+    const singleUser = await prisma.user.findUnique({
+      where: { username },
+      include: includeToUser(user?.id),
+    });
+    
+    if (!singleUser) {
+      return NextResponse.json(null);
+    }
+    
+    return NextResponse.json(toGetUser(singleUser));
+  }
 
   const res: FindUserResult[] | null = await prisma.user.findMany({
     where: {

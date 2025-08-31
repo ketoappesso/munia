@@ -14,7 +14,7 @@ import { usePostLikesMutations } from '@/hooks/mutations/usePostLikesMutations';
 import { ToggleStepper } from './ui/ToggleStepper';
 import { Comments } from './Comments';
 import { PostVisualMediaContainer } from './PostVisualMediaContainer';
-import ProfileBlock from './ProfileBlock';
+import ProfileBlockWithActions from './ProfileBlockWithActions';
 import { HighlightedMentionsAndHashTags } from './HighlightedMentionsAndHashTags';
 import { PostOptions } from './PostOptions';
 
@@ -100,7 +100,8 @@ export const Post = memo(
     return (
       <div className="rounded-2xl bg-card px-4 shadow sm:px-8">
         <div className="flex items-center justify-between pt-4 sm:pt-5">
-          <ProfileBlock
+          <ProfileBlockWithActions
+            userId={author.id}
             name={author.name!}
             username={author.username!}
             time={timeAgo || createdAt}

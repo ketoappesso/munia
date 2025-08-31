@@ -32,17 +32,17 @@ export function ProfileActionButtons({ targetUserId }: { targetUserId: string })
   return (
     <div className="flex flex-row items-center gap-2 md:gap-4">
       <Button onPress={handleClick} mode={isFollowing ? 'secondary' : 'primary'} shape="pill" loading={isPending}>
-        {isFollowing ? 'Unfollow' : 'Follow'}
+        {isFollowing ? '取消关注' : '关注'}
       </Button>
-      {isFollowing && (
-        <Button
-          onPress={handleDM}
-          mode="secondary"
-          shape="pill"
-          Icon={MessageCircle}
-          className="min-w-[40px] px-2"
-        />
-      )}
+      <Button
+        onPress={handleDM}
+        mode="secondary"
+        shape="pill"
+        Icon={MessageCircle}
+        className="min-w-[40px] px-2"
+        aria-label="私信"
+        title="私信"
+      />
     </div>
   );
 }

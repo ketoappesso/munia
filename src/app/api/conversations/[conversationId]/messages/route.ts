@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/getServerUser';
+import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
 export async function GET(request: NextRequest, { params }: { params: { conversationId: string } }) {
   try {
-    const user = await getAuthenticatedUser();
+    const [user] = await getServerUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, { params }: { params: { conversa
 
 export async function POST(request: NextRequest, { params }: { params: { conversationId: string } }) {
   try {
-    const user = await getAuthenticatedUser();
+    const [user] = await getServerUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
