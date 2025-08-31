@@ -30,6 +30,15 @@ export function useWebSocket({
   maxReconnectAttempts = 10,
   reconnectDelay = 1000,
 }: WebSocketOptions) {
+  // TEMPORARILY DISABLED: WebSocket functionality disabled to fix server errors
+  // Returning mock implementation
+  return {
+    send: () => false,
+    disconnect: () => {},
+    isConnected: false,
+  };
+  
+  /* Original implementation commented out
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef(0);
@@ -118,4 +127,5 @@ export function useWebSocket({
     disconnect,
     isConnected: wsRef.current?.readyState === WebSocket.OPEN,
   };
+  */
 }
