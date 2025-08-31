@@ -26,9 +26,9 @@ export function MenuBar() {
           route: '/feed',
         },
         {
-          title: 'Notifications',
+          title: 'Messages',
           Icon: NotificationBell,
-          route: '/notifications',
+          route: '/messages',
           badge: notificationCount,
         },
         { title: 'My Profile', Icon: Profile, route: `/${username}` },

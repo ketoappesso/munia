@@ -32,6 +32,7 @@ export function useEnhancedWebSocket({
   reconnectDelay = 1000,
   enableMessageQueue = true,
 }: WebSocketOptions) {
+  // IMPORTANT: All hooks must be called before any early returns
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef(0);
@@ -42,6 +43,9 @@ export function useEnhancedWebSocket({
   const [isConnected, setIsConnected] = useState(false);
   const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
   const { isOnline } = useNetworkStatus();
+  
+  // WEBSOCKET DISABLED: Preventing WebSocket connections to fix server errors
+  const WEBSOCKET_DISABLED = true;
 
   // Handle document visibility changes
   useEffect(() => {
@@ -88,6 +92,12 @@ export function useEnhancedWebSocket({
   }, [enableMessageQueue]);
 
   const connect = useCallback(() => {
+    // WebSocket connections are disabled
+    if (WEBSOCKET_DISABLED) {
+      setConnectionState('disconnected');
+      return;
+    }
+    
     if (!isOnline || visibilityStateRef.current === 'hidden') {
       setConnectionState('disconnected');
       return;

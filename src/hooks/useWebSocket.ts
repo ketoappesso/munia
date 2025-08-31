@@ -30,13 +30,18 @@ export function useWebSocket({
   maxReconnectAttempts = 10,
   reconnectDelay = 1000,
 }: WebSocketOptions) {
-  // Original implementation
+  // IMPORTANT: All hooks must be called regardless of conditions
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef(0);
   const { isOnline } = useNetworkStatus();
+  
+  // WEBSOCKET DISABLED: Preventing WebSocket connections to fix server errors
+  const WEBSOCKET_DISABLED = true;
 
   const connect = useCallback(() => {
+    // WebSocket connections are disabled
+    if (WEBSOCKET_DISABLED) return;
     if (!isOnline) return;
 
     try {
@@ -103,6 +108,11 @@ export function useWebSocket({
   }, []);
 
   useEffect(() => {
+    // Skip connection when WebSocket is disabled
+    if (WEBSOCKET_DISABLED) {
+      return;
+    }
+    
     if (isOnline) {
       connect();
     } else {

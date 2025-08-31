@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { AuthModal } from '@/components/AuthModal';
 import { MessagesList } from './MessagesList';
-import { useCallback } from 'react';
 import { Notifications } from '../notifications/Notifications';
 
 export default function MessagesPage() {
