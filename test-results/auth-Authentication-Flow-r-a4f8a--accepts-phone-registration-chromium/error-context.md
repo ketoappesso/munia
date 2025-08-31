@@ -1,44 +1,73 @@
 # Page snapshot
 
 ```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e2]:
-    - link "Back to Home" [ref=e4] [cursor=pointer]:
-      - /url: /
-      - img [ref=e5] [cursor=pointer]
-      - generic [ref=e7] [cursor=pointer]: Back to Home
-    - generic [ref=e8]:
-      - heading "Sign Up" [level=1] [ref=e9]
-      - paragraph [ref=e10]: Enter your email to create an account
-      - generic [ref=e11]:
-        - button "Email" [ref=e12] [cursor=pointer]
-        - button "Phone" [ref=e13] [cursor=pointer]
-      - generic [ref=e15]:
-        - img [ref=e17]
-        - textbox "Email" [ref=e19]
-        - generic [ref=e20]: Email
-      - button "Sign up with Email" [ref=e22] [cursor=pointer]:
-        - img [ref=e23] [cursor=pointer]
-        - text: Sign up with Email
-      - generic [ref=e29]: OR CONTINUE WITH
-      - generic [ref=e30]:
-        - button "Github" [ref=e31] [cursor=pointer]:
-          - img [ref=e32] [cursor=pointer]
-          - text: Github
-        - generic [ref=e34]:
-          - button "Google" [ref=e35] [cursor=pointer]:
-            - img [ref=e36] [cursor=pointer]
-            - text: Google
-          - button "Facebook" [ref=e38] [cursor=pointer]:
-            - img [ref=e39] [cursor=pointer]
-            - text: Facebook
-      - paragraph [ref=e41]: Alreay have an account?
-      - paragraph [ref=e42] [cursor=pointer]:
-        - link "Login" [ref=e43] [cursor=pointer]:
-          - /url: /login
-  - generic [ref=e44]:
-    - img [ref=e46]
-    - button "Open Tanstack query devtools" [ref=e94] [cursor=pointer]:
-      - img [ref=e95] [cursor=pointer]
-  - alert [ref=e143]
+- generic [active]:
+  - alert [ref=e1]
+  - dialog [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - heading "Build Error" [level=1] [ref=e7]
+        - paragraph [ref=e8]: Failed to compile
+        - generic [ref=e9]:
+          - generic "An outdated version detected (latest is 15.5.2), upgrade is highly recommended!" [ref=e11]: Next.js (14.2.5) is outdated
+          - link "(learn more)" [ref=e12] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - link "./src/components/VirtualizedMessages.tsx:4:1" [ref=e15] [cursor=pointer]:
+            - text: ./src/components/VirtualizedMessages.tsx:4:1
+            - img [ref=e16] [cursor=pointer]
+          - generic [ref=e20]:
+            - generic [ref=e21]: Module not found
+            - generic [ref=e22]: ": Can't resolve '"
+            - generic [ref=e23]: "@tanstack/react-virtual"
+            - generic [ref=e24]: "'"
+            - generic [ref=e26]: 2 |
+            - generic [ref=e28]: 3 |
+            - generic [ref=e30]: import
+            - generic [ref=e31]: "{ useRef"
+            - generic [ref=e32]: ","
+            - generic [ref=e33]: useEffect
+            - generic [ref=e34]: ","
+            - generic [ref=e35]: "useCallback }"
+            - generic [ref=e36]: from
+            - generic [ref=e38]: "'react'"
+            - generic [ref=e39]: ;
+            - generic [ref=e40]: ">"
+            - generic [ref=e41]: 4 |
+            - generic [ref=e43]: import
+            - generic [ref=e44]: "{ useVirtualizer }"
+            - generic [ref=e45]: from
+            - generic [ref=e47]: "'@tanstack/react-virtual'"
+            - generic [ref=e48]: ;
+            - generic [ref=e50]: "|"
+            - generic [ref=e52]: ^
+            - generic [ref=e54]: 5 |
+            - generic [ref=e56]: import
+            - generic [ref=e58]: Image
+            - generic [ref=e60]: from
+            - generic [ref=e62]: "'next/image'"
+            - generic [ref=e63]: ;
+            - generic [ref=e65]: 6 |
+            - generic [ref=e67]: import
+            - generic [ref=e68]: "{ formatDistanceToNow }"
+            - generic [ref=e69]: from
+            - generic [ref=e71]: "'date-fns'"
+            - generic [ref=e72]: ;
+            - generic [ref=e74]: 7 |
+            - generic [ref=e76]: import
+            - generic [ref=e77]: "{ useSession }"
+            - generic [ref=e78]: from
+            - generic [ref=e80]: "'next-auth/react'"
+            - generic [ref=e81]: ;
+            - generic [ref=e82]:
+              - link "https://nextjs.org/docs/messages/module-not-found" [ref=e83] [cursor=pointer]:
+                - /url: https://nextjs.org/docs/messages/module-not-found
+              - text: "Import trace for requested module:"
+            - link "./src/app/(protected)/messages/[username]/page.tsx" [ref=e84] [cursor=pointer]:
+              - text: ./src/app/(protected)/messages/[username]/page.tsx
+              - img [ref=e85] [cursor=pointer]
+        - contentinfo [ref=e89]:
+          - paragraph [ref=e90]:
+            - generic [ref=e91]: This error occurred during the build process and can only be dismissed by fixing the error.
 ```

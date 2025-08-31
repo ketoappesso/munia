@@ -8,9 +8,9 @@ import { ArrowLeft, Send } from 'lucide-react';
 import { Textarea } from '@/components/ui/Textarea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
-import { getServerUser } from '@/lib/getServerUser';
-import { includeUserSummary } from '@/lib/prisma/includeUserSummary';
 import { fetcher } from '@/lib/fetcher';
+import { useWebSocketChat } from '@/hooks/useWebSocketChat';
+import { VirtualizedMessages } from '@/components/VirtualizedMessages';
 
 interface Message {
   id: string;
@@ -46,7 +46,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
   // Fetch conversation and other user info
   const { data: otherUser } = useQuery({
     queryKey: ['user', username],
-    queryFn: () => fetcher(`/api/users-basic?usernames=${username}`).then((res) => res[0]),
+    queryFn: () => fetcher(`/api/users?username=${username}`),
     enabled: !!username,
   });
 
@@ -54,26 +54,65 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const { data: conversation } = useQuery({
     queryKey: ['conversation', username],
     queryFn: async () => {
+      if (!otherUser?.id) return null;
       const response = await fetcher('/api/conversations', {
         method: 'POST',
         body: JSON.stringify({ targetUserId: otherUser.id }),
       });
       return response;
     },
-    enabled: !!otherUser,
+    enabled: !!otherUser?.id,
   });
 
   // Fetch messages
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ['messages', conversation?.id],
-    queryFn: () => fetcher(`/api/conversations/${conversation.id}/messages`),
+    queryFn: () => {
+      if (!conversation?.id) return [];
+      return fetcher(`/api/conversations/${conversation.id}/messages`);
+    },
     enabled: !!conversation?.id,
     refetchInterval: 5000, // Poll every 5 seconds for new messages
+  });
+
+  // WebSocket chat hook
+  const { sendMessage: sendWebSocketMessage, isConnected } = useWebSocketChat({
+    conversationId: conversation?.id,
+    onNewMessage: (newMessage) => {
+      queryClient.setQueryData(['messages', conversation?.id], (old: Message[] = []) => {
+        // Check if message already exists to avoid duplicates
+        if (!old.some(msg => msg.id === newMessage.id)) {
+          const mergedMessage = {
+            ...newMessage,
+            sender: {
+              id: newMessage.senderId,
+              username: '',
+              name: '',
+              profilePhoto: '',
+            },
+          };
+          return [...old, mergedMessage];
+        }
+        return old;
+      });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
+      if (!conversation?.id) throw new Error('No conversation');
+      
+      // Try WebSocket first
+      if (isConnected) {
+        const success = sendWebSocketMessage(content);
+        if (success) {
+          return { success: true };
+        }
+      }
+      
+      // Fallback to HTTP
       const response = await fetch(`/api/conversations/${conversation.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,7 +124,9 @@ export default function MessagesPage({ params }: { params: { username: string } 
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', conversation.id] });
+      if (conversation?.id) {
+        queryClient.invalidateQueries({ queryKey: ['messages', conversation.id] });
+      }
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       setMessage('');
     },
@@ -104,10 +145,10 @@ export default function MessagesPage({ params }: { params: { username: string } 
   }, [router]);
 
   const handleSendMessage = useCallback(() => {
-    if (message.trim() && !sendMessageMutation.isPending) {
+    if (message.trim() && !sendMessageMutation.isPending && conversation?.id) {
       sendMessageMutation.mutate(message.trim());
     }
-  }, [message, sendMessageMutation]);
+  }, [message, sendMessageMutation, conversation?.id]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -123,7 +164,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-lg text-gray-500">Loading...</p>
+          <p className="text-lg text-gray-500">Loading user...</p>
         </div>
       </div>
     );
@@ -144,60 +185,22 @@ export default function MessagesPage({ params }: { params: { username: string } 
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               {otherUser.name || otherUser.username}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">在线</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {conversation ? '在线' : '加载中...'}
+            </p>
           </div>
 
-          <ButtonNaked
-            onPress={handleBack}
-            className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-            <ArrowLeft className="h-5 w-5" />
-          </ButtonNaked>
+          <div className="w-9" /> {/* Spacer for symmetry */}
         </div>
       </div>
 
       {/* Messages fill the space between header and input */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900">
-        {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <p>还没有消息，开始对话吧！</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender.username === username ? 'justify-start' : 'justify-end'}`}>
-                {message.sender.username === username ? (
-                  <div className="flex items-start gap-2">
-                    <Image
-                      src={message.sender.profilePhoto || '/images/default-avatar.jpg'}
-                      alt={message.sender.name}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                    <div className="max-w-xs rounded-2xl bg-white px-4 py-2 shadow-sm dark:bg-gray-800 md:max-w-md">
-                      <p className="text-sm text-gray-900 dark:text-white">{message.content}</p>
-                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="max-w-xs rounded-2xl bg-blue-500 px-4 py-2 shadow-sm md:max-w-md">
-                    <p className="text-sm text-white">{message.content}</p>
-                    <p className="mt-1 text-xs text-blue-100">
-                      {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+      <div className="flex-1 bg-gray-50 dark:bg-gray-900">
+        <VirtualizedMessages 
+          messages={messages} 
+          currentUsername={username}
+          className="p-4"
+        />
       </div>
 
       {/* Message input fixed at bottom with no FAB */}
@@ -207,16 +210,13 @@ export default function MessagesPage({ params }: { params: { username: string } 
             value={message}
             onChange={setMessage}
             label="输入消息..."
-            className="flex-1 resize-none border-0 bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+            className="flex-1 resize-none border-0 bg-gray-100 focus:ring-2 focus:ring-gray-800"
             onKeyDown={handleKeyDown}
-            rows={1}
-            minRows={1}
-            maxRows={4}
           />
           <ButtonNaked
             onPress={handleSendMessage}
             isDisabled={!message.trim() || sendMessageMutation.isPending}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white transition-colors hover:bg-blue-600 disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-600 dark:disabled:text-gray-400">
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-800 text-white transition-colors hover:bg-gray-700 disabled:bg-gray-300 disabled:text-gray-500">
             <Send className="h-4 w-4" />
           </ButtonNaked>
         </div>

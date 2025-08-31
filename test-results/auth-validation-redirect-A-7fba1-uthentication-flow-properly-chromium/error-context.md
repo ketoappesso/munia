@@ -41,4 +41,71 @@
     - button "Open Tanstack query devtools" [ref=e94] [cursor=pointer]:
       - img [ref=e95] [cursor=pointer]
   - alert [ref=e143]
+  - dialog [ref=e146]:
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - heading "Build Error" [level=1] [ref=e149]
+        - paragraph [ref=e150]: Failed to compile
+        - generic [ref=e151]:
+          - generic "An outdated version detected (latest is 15.5.2), upgrade is highly recommended!" [ref=e153]: Next.js (14.2.5) is outdated
+          - link "(learn more)" [ref=e154] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+      - generic [ref=e155]:
+        - generic [ref=e156]:
+          - link "./src/components/VirtualizedMessages.tsx:4:1" [ref=e157] [cursor=pointer]:
+            - text: ./src/components/VirtualizedMessages.tsx:4:1
+            - img [ref=e158] [cursor=pointer]
+          - generic [ref=e162]:
+            - generic [ref=e163]: Module not found
+            - generic [ref=e164]: ": Can't resolve '"
+            - generic [ref=e165]: "@tanstack/react-virtual"
+            - generic [ref=e166]: "'"
+            - generic [ref=e168]: 2 |
+            - generic [ref=e170]: 3 |
+            - generic [ref=e172]: import
+            - generic [ref=e173]: "{ useRef"
+            - generic [ref=e174]: ","
+            - generic [ref=e175]: useEffect
+            - generic [ref=e176]: ","
+            - generic [ref=e177]: "useCallback }"
+            - generic [ref=e178]: from
+            - generic [ref=e180]: "'react'"
+            - generic [ref=e181]: ;
+            - generic [ref=e182]: ">"
+            - generic [ref=e183]: 4 |
+            - generic [ref=e185]: import
+            - generic [ref=e186]: "{ useVirtualizer }"
+            - generic [ref=e187]: from
+            - generic [ref=e189]: "'@tanstack/react-virtual'"
+            - generic [ref=e190]: ;
+            - generic [ref=e192]: "|"
+            - generic [ref=e194]: ^
+            - generic [ref=e196]: 5 |
+            - generic [ref=e198]: import
+            - generic [ref=e200]: Image
+            - generic [ref=e202]: from
+            - generic [ref=e204]: "'next/image'"
+            - generic [ref=e205]: ;
+            - generic [ref=e207]: 6 |
+            - generic [ref=e209]: import
+            - generic [ref=e210]: "{ formatDistanceToNow }"
+            - generic [ref=e211]: from
+            - generic [ref=e213]: "'date-fns'"
+            - generic [ref=e214]: ;
+            - generic [ref=e216]: 7 |
+            - generic [ref=e218]: import
+            - generic [ref=e219]: "{ useSession }"
+            - generic [ref=e220]: from
+            - generic [ref=e222]: "'next-auth/react'"
+            - generic [ref=e223]: ;
+            - generic [ref=e224]:
+              - link "https://nextjs.org/docs/messages/module-not-found" [ref=e225] [cursor=pointer]:
+                - /url: https://nextjs.org/docs/messages/module-not-found
+              - text: "Import trace for requested module:"
+            - link "./src/app/(protected)/messages/[username]/page.tsx" [ref=e226] [cursor=pointer]:
+              - text: ./src/app/(protected)/messages/[username]/page.tsx
+              - img [ref=e227] [cursor=pointer]
+        - contentinfo [ref=e231]:
+          - paragraph [ref=e232]:
+            - generic [ref=e233]: This error occurred during the build process and can only be dismissed by fixing the error.
 ```

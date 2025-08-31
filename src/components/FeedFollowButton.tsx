@@ -61,7 +61,7 @@ export function FeedFollowButton({ authorId, authorUsername }: FeedFollowButtonP
       ) : (
         <ButtonNaked
           onPress={handleDM}
-          className="flex items-center gap-1.5 rounded-full bg-purple-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-purple-700">
+          className="flex items-center gap-1.5 rounded-full bg-gray-800 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700">
           <MessageCircle className="h-4 w-4" />
           私信
         </ButtonNaked>
