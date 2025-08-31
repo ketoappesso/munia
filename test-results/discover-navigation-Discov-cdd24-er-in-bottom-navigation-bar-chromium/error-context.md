@@ -1,0 +1,104 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - button "Open settings" [ref=e4] [cursor=pointer]:
+      - img [ref=e5] [cursor=pointer]
+    - generic [ref=e6]:
+      - button "Feed" [ref=e7] [cursor=pointer]:
+        - img [ref=e10] [cursor=pointer]
+      - button "Messages" [ref=e12] [cursor=pointer]:
+        - img [ref=e14] [cursor=pointer]
+      - button "My Profile" [ref=e16] [cursor=pointer]:
+        - img [ref=e18] [cursor=pointer]
+      - button "Logout" [ref=e20] [cursor=pointer]:
+        - img [ref=e22] [cursor=pointer]
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e28]:
+          - button "关注" [ref=e29] [cursor=pointer]
+          - button "发现" [ref=e30] [cursor=pointer]
+          - button "任务" [ref=e31] [cursor=pointer]
+        - link [ref=e33] [cursor=pointer]:
+          - /url: /discover
+          - img [ref=e34] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e38]:
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - link [ref=e43] [cursor=pointer]:
+                - /url: /19974749999
+              - generic [ref=e45]:
+                - generic:
+                  - heading [level=2]:
+                    - link:
+                      - /url: /19974749999
+                - heading "2 hours ago" [level=2] [ref=e46]
+            - button "关注" [ref=e48] [cursor=pointer]
+          - paragraph [ref=e49]: this is 199
+          - generic [ref=e50]:
+            - button "0" [ref=e51] [cursor=pointer]:
+              - img [ref=e52] [cursor=pointer]
+              - paragraph [ref=e54] [cursor=pointer]: "0"
+            - button "0" [ref=e55] [cursor=pointer]:
+              - img [ref=e56] [cursor=pointer]
+              - paragraph [ref=e58] [cursor=pointer]: "0"
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - link [ref=e65] [cursor=pointer]:
+                - /url: /19974749999
+              - generic [ref=e67]:
+                - generic:
+                  - heading [level=2]:
+                    - link:
+                      - /url: /19974749999
+                - heading "2 hours ago" [level=2] [ref=e68]
+            - button "关注" [ref=e70] [cursor=pointer]
+          - paragraph [ref=e71]: gogogo
+          - generic [ref=e72]:
+            - button "0" [ref=e73] [cursor=pointer]:
+              - img [ref=e74] [cursor=pointer]
+              - paragraph [ref=e76] [cursor=pointer]: "0"
+            - button "0" [ref=e77] [cursor=pointer]:
+              - img [ref=e78] [cursor=pointer]
+              - paragraph [ref=e80] [cursor=pointer]: "0"
+        - generic [ref=e82]:
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - link [ref=e87] [cursor=pointer]:
+                - /url: /18874748888
+              - generic [ref=e89]:
+                - generic:
+                  - heading [level=2]:
+                    - link:
+                      - /url: /18874748888
+                - heading "3 hours ago" [level=2] [ref=e90]
+            - button "私信" [ref=e92] [cursor=pointer]:
+              - img [ref=e93] [cursor=pointer]
+              - text: 私信
+          - paragraph [ref=e95]: "11"
+          - generic [ref=e96]:
+            - button "0" [ref=e97] [cursor=pointer]:
+              - img [ref=e98] [cursor=pointer]
+              - paragraph [ref=e100] [cursor=pointer]: "0"
+            - button "0" [ref=e101] [cursor=pointer]:
+              - img [ref=e102] [cursor=pointer]
+              - paragraph [ref=e104] [cursor=pointer]: "0"
+      - generic [ref=e108]:
+        - img [ref=e109]
+        - paragraph [ref=e111]: All caught up!
+    - button "Create new post" [ref=e113] [cursor=pointer]:
+      - img [ref=e114] [cursor=pointer]
+  - generic [ref=e115]:
+    - img [ref=e117]
+    - button "Open Tanstack query devtools" [ref=e165] [cursor=pointer]:
+      - img [ref=e166] [cursor=pointer]
+  - alert [ref=e214]
+  - generic [ref=e217] [cursor=pointer]:
+    - img [ref=e218] [cursor=pointer]
+    - generic [ref=e220] [cursor=pointer]: 1 error
+    - button "Hide Errors" [ref=e221] [cursor=pointer]:
+      - img [ref=e222] [cursor=pointer]
+```
