@@ -39,11 +39,13 @@ export function useEnhancedWebSocket({
   const messageQueueRef = useRef<QueuedMessage[]>([]);
   const isManualDisconnectRef = useRef(false);
   const visibilityStateRef = useRef<'visible' | 'hidden'>('visible');
-  
+
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  const [connectionState, setConnectionState] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>(
+    'disconnected',
+  );
   const { isOnline } = useNetworkStatus();
-  
+
   // WEBSOCKET DISABLED: Preventing WebSocket connections to fix server errors
   const WEBSOCKET_DISABLED = true;
 
@@ -52,7 +54,7 @@ export function useEnhancedWebSocket({
     const handleVisibilityChange = () => {
       const isVisible = document.visibilityState === 'visible';
       visibilityStateRef.current = isVisible ? 'visible' : 'hidden';
-      
+
       if (isVisible && !wsRef.current && !isManualDisconnectRef.current) {
         // Resume connection when coming to foreground
         connect();
@@ -97,7 +99,7 @@ export function useEnhancedWebSocket({
       setConnectionState('disconnected');
       return;
     }
-    
+
     if (!isOnline || visibilityStateRef.current === 'hidden') {
       setConnectionState('disconnected');
       return;
@@ -119,7 +121,7 @@ export function useEnhancedWebSocket({
       // Use HTTP polling as fallback since Next.js doesn't support native WebSocket
       // In production, you would use a separate WebSocket server or Socket.io
       const wsUrl = url.replace('ws://', 'http://').replace('wss://', 'https://');
-      
+
       // Simulate WebSocket behavior with polling
       const simulateWebSocket = () => {
         setConnectionState('connected');
@@ -135,16 +137,26 @@ export function useEnhancedWebSocket({
       // For now, we'll skip actual WebSocket connection since Next.js doesn't support it
       // In production, use Socket.io or a separate WebSocket server
       console.log('WebSocket simulation active - using HTTP fallback');
-      
     } catch (error) {
       setConnectionState('error');
       console.error('Connection failed:', error);
     }
-  }, [url, onMessage, onOpen, onClose, onError, reconnect, maxReconnectAttempts, reconnectDelay, isOnline, processMessageQueue]);
+  }, [
+    url,
+    onMessage,
+    onOpen,
+    onClose,
+    onError,
+    reconnect,
+    maxReconnectAttempts,
+    reconnectDelay,
+    isOnline,
+    processMessageQueue,
+  ]);
 
   const disconnect = useCallback(() => {
     isManualDisconnectRef.current = true;
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
@@ -153,20 +165,32 @@ export function useEnhancedWebSocket({
       wsRef.current.close();
       wsRef.current = null;
     }
-    
+
     setIsConnected(false);
     setConnectionState('disconnected');
   }, []);
 
-  const send = useCallback((data: any) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      try {
-        wsRef.current.send(JSON.stringify(data));
-        return true;
-      } catch (error) {
-        console.error('Failed to send message:', error);
-        
-        // Queue the message for retry
+  const send = useCallback(
+    (data: any) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        try {
+          wsRef.current.send(JSON.stringify(data));
+          return true;
+        } catch (error) {
+          console.error('Failed to send message:', error);
+
+          // Queue the message for retry
+          if (enableMessageQueue) {
+            messageQueueRef.current.push({
+              data,
+              timestamp: Date.now(),
+              retries: 0,
+            });
+          }
+          return false;
+        }
+      } else {
+        // Queue message if not connected
         if (enableMessageQueue) {
           messageQueueRef.current.push({
             data,
@@ -176,18 +200,9 @@ export function useEnhancedWebSocket({
         }
         return false;
       }
-    } else {
-      // Queue message if not connected
-      if (enableMessageQueue) {
-        messageQueueRef.current.push({
-          data,
-          timestamp: Date.now(),
-          retries: 0,
-        });
-      }
-      return false;
-    }
-  }, [enableMessageQueue]);
+    },
+    [enableMessageQueue],
+  );
 
   // Cleanup old queued messages (older than 5 minutes)
   useEffect(() => {
@@ -195,9 +210,7 @@ export function useEnhancedWebSocket({
 
     const cleanupInterval = setInterval(() => {
       const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-      messageQueueRef.current = messageQueueRef.current.filter(
-        (msg) => msg.timestamp > fiveMinutesAgo
-      );
+      messageQueueRef.current = messageQueueRef.current.filter((msg) => msg.timestamp > fiveMinutesAgo);
     }, 60000); // Check every minute
 
     return () => clearInterval(cleanupInterval);

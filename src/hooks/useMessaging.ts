@@ -34,7 +34,7 @@ export function useMessaging({ conversationId, onNewMessage }: UseMessagingOptio
         }
 
         const message = await response.json();
-        
+
         // Trigger callback for new message
         if (onNewMessage) {
           onNewMessage({
@@ -53,7 +53,7 @@ export function useMessaging({ conversationId, onNewMessage }: UseMessagingOptio
         return false;
       }
     },
-    [conversationId, session?.user?.id, onNewMessage, queryClient]
+    [conversationId, session?.user?.id, onNewMessage, queryClient],
   );
 
   const markAsRead = useCallback(
@@ -69,7 +69,7 @@ export function useMessaging({ conversationId, onNewMessage }: UseMessagingOptio
         return false;
       }
     },
-    [conversationId]
+    [conversationId],
   );
 
   return {

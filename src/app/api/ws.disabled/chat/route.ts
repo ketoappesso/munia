@@ -1,6 +1,5 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { WebSocketServer, WebSocket } from 'ws';
-import { NextResponse } from 'next/server';
 
 // In-memory store for WebSocket connections
 const connections = new Map<string, WebSocket>();
@@ -9,22 +8,22 @@ const connections = new Map<string, WebSocket>();
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const conversationId = searchParams.get('conversationId');
-  
+
   if (request.headers.get('upgrade') !== 'websocket') {
     return NextResponse.json({ error: 'Expected WebSocket upgrade' }, { status: 400 });
   }
 
   // Create WebSocket server
   const wss = new WebSocketServer({ noServer: true });
-  
+
   wss.on('connection', (ws, request) => {
     const url = new URL(request.url!, 'http://localhost');
     const conversationId = url.searchParams.get('conversationId');
-    
+
     // Store connection
     const connectionId = `${conversationId || 'global'}-${Date.now()}`;
     connections.set(connectionId, ws);
-    
+
     ws.on('message', (data) => {
       try {
         const message = JSON.parse(data.toString());
@@ -33,11 +32,11 @@ export async function GET(request: NextRequest) {
         console.error('Failed to parse WebSocket message:', error);
       }
     });
-    
+
     ws.on('close', () => {
       connections.delete(connectionId);
     });
-    
+
     ws.on('error', (error) => {
       console.error('WebSocket error:', error);
       connections.delete(connectionId);
@@ -72,7 +71,7 @@ function handleWebSocketMessage(ws: WebSocket, message: any) {
         },
       });
       break;
-    
+
     case 'MARK_AS_READ':
       // Handle read receipts
       broadcastToConversation(message.conversationId, {
@@ -81,7 +80,7 @@ function handleWebSocketMessage(ws: WebSocket, message: any) {
         conversationId: message.conversationId,
       });
       break;
-    
+
     default:
       console.warn('Unknown WebSocket message type:', message.type);
   }

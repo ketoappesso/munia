@@ -35,7 +35,7 @@ export function useWebSocket({
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const reconnectAttemptsRef = useRef(0);
   const { isOnline } = useNetworkStatus();
-  
+
   // WEBSOCKET DISABLED: Preventing WebSocket connections to fix server errors
   const WEBSOCKET_DISABLED = true;
 
@@ -112,7 +112,7 @@ export function useWebSocket({
     if (WEBSOCKET_DISABLED) {
       return;
     }
-    
+
     if (isOnline) {
       connect();
     } else {

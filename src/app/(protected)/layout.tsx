@@ -3,7 +3,6 @@
 import { MenuBar } from '@/components/MenuBar';
 import { ResponsiveContainer } from '@/components/ui/ResponsiveContainer';
 import React, { useState, useCallback } from 'react';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { SettingsButton } from '@/components/SettingsButton';
 import { SettingsDrawer } from '@/components/SettingsDrawer';
 import { useScroll } from '@/hooks/useScroll';
@@ -18,15 +17,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Settings Button - Top Left */}
         <div
           className="fixed left-4 top-4 z-40 transition-transform duration-300 md:left-6 md:top-6"
-          style={scrollY > 50 ? { transform: 'translateY(-100%)' } : undefined}
-        >
+          style={scrollY > 50 ? { transform: 'translateY(-100%)' } : undefined}>
           <SettingsButton onPress={() => setIsSettingsOpen(true)} />
         </div>
 
         <MenuBar />
 
         <ResponsiveContainer className="pb-20 md:pb-4">{children}</ResponsiveContainer>
-        <FloatingActionButton />
+        {/* <FloatingActionButton /> */}
       </div>
 
       <SettingsDrawer

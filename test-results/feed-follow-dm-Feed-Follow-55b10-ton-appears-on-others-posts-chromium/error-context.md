@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - button "Open settings" [ref=e4] [cursor=pointer]:
+      - img [ref=e5] [cursor=pointer]
+    - generic [ref=e6]:
+      - link "Munia" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e8] [cursor=pointer]
+        - heading "Munia" [level=1] [ref=e10] [cursor=pointer]
+      - button "Feed" [ref=e11] [cursor=pointer]:
+        - img [ref=e14] [cursor=pointer]
+        - paragraph [ref=e16] [cursor=pointer]: Feed
+      - button "Messages" [ref=e17] [cursor=pointer]:
+        - img [ref=e19] [cursor=pointer]
+        - paragraph [ref=e21] [cursor=pointer]: Messages
+      - button "My Profile" [ref=e22] [cursor=pointer]:
+        - img [ref=e24] [cursor=pointer]
+        - paragraph [ref=e26] [cursor=pointer]: My Profile
+      - button "Logout" [ref=e27] [cursor=pointer]:
+        - img [ref=e29] [cursor=pointer]
+        - paragraph [ref=e31] [cursor=pointer]: Logout
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e36]:
+          - button "关注" [ref=e37] [cursor=pointer]
+          - button "发现" [ref=e38] [cursor=pointer]
+          - button "任务" [ref=e39] [cursor=pointer]
+        - link [ref=e41] [cursor=pointer]:
+          - /url: /discover
+          - img [ref=e42] [cursor=pointer]
+      - generic [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - link [ref=e51] [cursor=pointer]:
+              - /url: /18874748888
+            - generic [ref=e53]:
+              - generic:
+                - heading [level=2]:
+                  - link:
+                    - /url: /18874748888
+              - heading "14 minutes ago" [level=2] [ref=e54]
+          - button "关注" [ref=e56] [cursor=pointer]
+        - paragraph [ref=e57]: "11"
+        - generic [ref=e58]:
+          - button "0" [ref=e59] [cursor=pointer]:
+            - img [ref=e60] [cursor=pointer]
+            - paragraph [ref=e62] [cursor=pointer]: "0"
+          - button "0" [ref=e63] [cursor=pointer]:
+            - img [ref=e64] [cursor=pointer]
+            - paragraph [ref=e66] [cursor=pointer]: "0"
+      - generic [ref=e70]:
+        - img [ref=e71]
+        - paragraph [ref=e73]: All caught up!
+    - button "Create new post" [ref=e75] [cursor=pointer]:
+      - img [ref=e76] [cursor=pointer]
+  - generic [ref=e77]:
+    - img [ref=e79]
+    - button "Open Tanstack query devtools" [ref=e127] [cursor=pointer]:
+      - img [ref=e128] [cursor=pointer]
+  - alert [ref=e176]
+  - generic [ref=e179] [cursor=pointer]:
+    - img [ref=e180] [cursor=pointer]
+    - generic [ref=e182] [cursor=pointer]: 1 error
+    - button "Hide Errors" [ref=e183] [cursor=pointer]:
+      - img [ref=e184] [cursor=pointer]
+```

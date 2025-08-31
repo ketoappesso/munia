@@ -62,8 +62,7 @@ export function VirtualizedMessages({ messages, currentUsername, className = '' 
           height: virtualizer.getTotalSize(),
           width: '100%',
           position: 'relative',
-        }}
-      >
+        }}>
         <div
           style={{
             position: 'absolute',
@@ -71,8 +70,7 @@ export function VirtualizedMessages({ messages, currentUsername, className = '' 
             left: 0,
             width: '100%',
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
-          }}
-        >
+          }}>
           {virtualItems.map((virtualRow) => {
             const message = messages[virtualRow.index];
             const isOwnMessage = message.sender.username === currentUsername;
@@ -82,8 +80,7 @@ export function VirtualizedMessages({ messages, currentUsername, className = '' 
                 key={message.id}
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
-                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-3`}
-              >
+                className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-3`}>
                 {!isOwnMessage ? (
                   <div className="flex items-start gap-2">
                     <Image

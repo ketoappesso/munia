@@ -106,7 +106,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       if (!conversation?.id) throw new Error('No conversation');
-      
+
       // Use the messaging hook to send
       const success = await sendWebSocketMessage(content);
       if (success) {
@@ -133,12 +133,12 @@ export default function MessagesPage({ params }: { params: { username: string } 
   }, [router]);
 
   const handleSendMessage = useCallback(() => {
-    console.log('Send button clicked', { 
-      message: message.trim(), 
-      isPending: sendMessageMutation.isPending, 
-      conversationId: conversation?.id 
+    console.log('Send button clicked', {
+      message: message.trim(),
+      isPending: sendMessageMutation.isPending,
+      conversationId: conversation?.id,
     });
-    
+
     if (message.trim() && !sendMessageMutation.isPending && conversation?.id) {
       sendMessageMutation.mutate(message.trim());
     }
@@ -170,7 +170,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-lg text-red-500">Failed to start conversation</p>
-          <p className="text-sm text-gray-500 mt-2">Please try again later</p>
+          <p className="mt-2 text-sm text-gray-500">Please try again later</p>
         </div>
       </div>
     );
@@ -186,26 +186,19 @@ export default function MessagesPage({ params }: { params: { username: string } 
             className="flex items-center gap-2 p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </ButtonNaked>
-
           <div className="ml-3 flex-1">
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               {otherUser.name || otherUser.username}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {isConnected ? '在线' : '离线'}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{isConnected ? '在线' : '离线'}</p>
           </div>
-
           <div className="w-9" /> {/* Spacer for symmetry */}
         </div>
       </div>
 
       {/* Messages fill the space between header and input */}
       <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900">
-        <ChatMessages 
-          messages={messages} 
-          otherUser={otherUser}
-        />
+        <ChatMessages messages={messages} otherUser={otherUser} />
       </div>
 
       {/* Message input fixed at bottom with XiaoHongShu style */}
@@ -214,9 +207,13 @@ export default function MessagesPage({ params }: { params: { username: string } 
           <ButtonNaked
             onPress={() => setShowActions(!showActions)}
             className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
-            <Plus className={`h-5 w-5 text-gray-600 transition-transform dark:text-gray-400 ${showActions ? 'rotate-45' : ''}`} />
+            <Plus
+              className={`h-5 w-5 text-gray-600 transition-transform dark:text-gray-400 ${
+                showActions ? 'rotate-45' : ''
+              }`}
+            />
           </ButtonNaked>
-          
+
           <div className="relative flex-1">
             <textarea
               value={message}
@@ -228,7 +225,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
               rows={1}
             />
           </div>
-          
+
           {message.trim() ? (
             <ButtonNaked
               onPress={handleSendMessage}
@@ -238,18 +235,16 @@ export default function MessagesPage({ params }: { params: { username: string } 
             </ButtonNaked>
           ) : (
             <div className="flex gap-1">
-              <ButtonNaked
-                className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
+              <ButtonNaked className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
                 <Camera className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </ButtonNaked>
-              <ButtonNaked
-                className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
+              <ButtonNaked className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
                 <ImageIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </ButtonNaked>
             </div>
           )}
         </div>
-        
+
         {/* Quick actions (shown when + is clicked) */}
         {showActions && (
           <div className="grid grid-cols-4 gap-4 border-t border-gray-100 p-4 dark:border-gray-800">

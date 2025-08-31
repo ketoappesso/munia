@@ -2,8 +2,7 @@
 
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import Image from 'next/image';
-import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { format, isToday, isYesterday, parseISO, zhCN } from 'date-fns';
 import { cn } from '@/lib/cn';
 import { ChevronDown } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -41,40 +40,38 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
 
   // Sort messages by serverTs to ensure correct order
   const sortedMessages = useMemo(() => {
-    return [...messages].sort((a, b) => 
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
+    return [...messages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [messages]);
 
   const formatMessageTime = (dateString: string) => {
     const date = parseISO(dateString);
-    
+
     if (isToday(date)) {
       return format(date, 'HH:mm');
-    } else if (isYesterday(date)) {
-      return `昨天 ${format(date, 'HH:mm')}`;
-    } else {
-      return format(date, 'MM/dd HH:mm', { locale: zhCN });
     }
+    if (isYesterday(date)) {
+      return `昨天 ${format(date, 'HH:mm')}`;
+    }
+    return format(date, 'MM/dd HH:mm', { locale: zhCN });
   };
 
   const shouldShowTimestamp = (currentMsg: Message, prevMsg: Message | null) => {
     if (!prevMsg) return true;
-    
+
     const currentTime = new Date(currentMsg.createdAt).getTime();
     const prevTime = new Date(prevMsg.createdAt).getTime();
-    
+
     // Show timestamp if more than 5 minutes apart
-    return (currentTime - prevTime) > 5 * 60 * 1000;
+    return currentTime - prevTime > 5 * 60 * 1000;
   };
 
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     const bottomThreshold = 100;
     const atBottom = scrollHeight - scrollTop - clientHeight < bottomThreshold;
-    
+
     setIsAtBottom(atBottom);
     setShowScrollToBottom(!atBottom && messages.length > 0);
   }, [messages.length]);
@@ -111,11 +108,7 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className={cn(
-          "h-full overflow-y-auto scroll-smooth px-4 py-2",
-          className
-        )}
-      >
+        className={cn('h-full overflow-y-auto scroll-smooth px-4 py-2', className)}>
         <div className="space-y-3">
           {sortedMessages.map((message, index) => {
             const isOwnMessage = message.sender.id === session?.user?.id;
@@ -126,16 +119,11 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
               <div key={message.id}>
                 {showTimestamp && (
                   <div className="my-2 text-center">
-                    <span className="text-xs text-gray-400">
-                      {formatMessageTime(message.createdAt)}
-                    </span>
+                    <span className="text-xs text-gray-400">{formatMessageTime(message.createdAt)}</span>
                   </div>
                 )}
-                
-                <div className={cn(
-                  "flex",
-                  isOwnMessage ? "justify-end" : "justify-start"
-                )}>
+
+                <div className={cn('flex', isOwnMessage ? 'justify-end' : 'justify-start')}>
                   {!isOwnMessage && (
                     <div className="mr-2 flex-shrink-0">
                       <Image
@@ -147,20 +135,17 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                       />
                     </div>
                   )}
-                  
-                  <div className={cn(
-                    "relative max-w-[70%] rounded-2xl px-4 py-2",
-                    isOwnMessage 
-                      ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-                      : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
-                  )}>
-                    <p className="whitespace-pre-wrap break-words text-sm">
-                      {message.content}
-                    </p>
+
+                  <div
+                    className={cn(
+                      'relative max-w-[70%] rounded-2xl px-4 py-2',
+                      isOwnMessage
+                        ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+                    )}>
+                    <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
                     {!message.isRead && isOwnMessage && (
-                      <div className="absolute -bottom-4 right-0 text-xs text-gray-400">
-                        未读
-                      </div>
+                      <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
                     )}
                   </div>
                 </div>
@@ -176,14 +161,13 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
         <button
           onClick={() => scrollToBottom('smooth')}
           className={cn(
-            "absolute bottom-4 right-4 z-10",
-            "flex h-10 w-10 items-center justify-center",
-            "rounded-full bg-white shadow-lg",
-            "hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700",
-            "transition-all duration-200"
+            'absolute bottom-4 right-4 z-10',
+            'flex h-10 w-10 items-center justify-center',
+            'rounded-full bg-white shadow-lg',
+            'hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700',
+            'transition-all duration-200',
           )}
-          aria-label="跳至最新消息"
-        >
+          aria-label="跳至最新消息">
           <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-300" />
         </button>
       )}

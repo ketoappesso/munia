@@ -129,10 +129,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       id: conversation.id,
       participant1Id: conversation.participant1Id,
-      participant2Id: conversation.participant2Id 
+      participant2Id: conversation.participant2Id,
     });
   } catch (error) {
     console.error('Error creating conversation:', error);

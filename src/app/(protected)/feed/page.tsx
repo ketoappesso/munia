@@ -69,13 +69,14 @@ export default function Page() {
         </div>
       </div>
 
-      {session?.user ? (
-        <>
-          <CreatePostModalLauncher />
-          {activeTab === 'following' && <Posts type="feed" userId={session.user.id} />}
-          {activeTab === 'discover' && <Posts type="public" />}
-          {activeTab === 'tasks' && <Posts type="tasks" />}
-        </>
+      {session?.user && <CreatePostModalLauncher />}
+
+      {activeTab === 'following' && session?.user ? (
+        <Posts type="feed" userId={session.user.id} />
+      ) : activeTab === 'discover' ? (
+        <Posts type="public" />
+      ) : activeTab === 'tasks' ? (
+        <Posts type="tasks" />
       ) : (
         <Posts type="public" />
       )}

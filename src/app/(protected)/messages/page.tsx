@@ -70,7 +70,7 @@ export default function MessagesPage() {
           )}
         </>
       ) : (
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <p className="text-gray-500">请登录后查看消息</p>
         </div>
       )}

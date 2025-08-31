@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useEnhancedWebSocket } from './useEnhancedWebSocket';
 import { useSession } from 'next-auth/react';
+import { useEnhancedWebSocket } from './useEnhancedWebSocket';
 
 interface ChatMessage {
   id: string;
@@ -19,11 +19,7 @@ interface UseWebSocketChatOptions {
   onConnectionChange?: (isConnected: boolean) => void;
 }
 
-export function useWebSocketChat({
-  conversationId,
-  onNewMessage,
-  onConnectionChange,
-}: UseWebSocketChatOptions) {
+export function useWebSocketChat({ conversationId, onNewMessage, onConnectionChange }: UseWebSocketChatOptions) {
   const { data: session } = useSession();
   const [isConnected, setIsConnected] = useState(false);
   const reconnectAttemptsRef = useRef(0);
@@ -34,7 +30,7 @@ export function useWebSocketChat({
         onNewMessage?.(data.message);
       }
     },
-    [onNewMessage]
+    [onNewMessage],
   );
 
   const handleOpen = useCallback(() => {
@@ -48,7 +44,11 @@ export function useWebSocketChat({
     onConnectionChange?.(false);
   }, [onConnectionChange]);
 
-  const { send, isConnected: wsConnected, connectionState } = useEnhancedWebSocket({
+  const {
+    send,
+    isConnected: wsConnected,
+    connectionState,
+  } = useEnhancedWebSocket({
     url: conversationId ? `/api/ws/chat?conversationId=${conversationId}` : '/api/ws/chat',
     onMessage: handleMessage,
     onOpen: handleOpen,
@@ -62,7 +62,7 @@ export function useWebSocketChat({
   const sendMessage = useCallback(
     (content: string) => {
       if (!session?.user?.id || !conversationId) return false;
-      
+
       return send({
         type: 'SEND_MESSAGE',
         conversationId,
@@ -71,20 +71,20 @@ export function useWebSocketChat({
         timestamp: new Date().toISOString(),
       });
     },
-    [send, conversationId, session?.user?.id]
+    [send, conversationId, session?.user?.id],
   );
 
   const markAsRead = useCallback(
     (messageId: string) => {
       if (!conversationId) return false;
-      
+
       return send({
         type: 'MARK_AS_READ',
         conversationId,
         messageId,
       });
     },
-    [send, conversationId]
+    [send, conversationId],
   );
 
   useEffect(() => {

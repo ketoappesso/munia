@@ -13,11 +13,12 @@ sesClient.js is a helper function that creates an Amazon Simple Email Services (
 import { SESClient } from '@aws-sdk/client-ses';
 
 // Create SES service object.
+// Use dummy credentials for development if not provided
 const sesClient = new SESClient({
-  region: process.env.AWS_REGION as string,
+  region: process.env.AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.SES_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.SES_SECRET_ACCESS_KEY as string,
+    accessKeyId: process.env.SES_ACCESS_KEY_ID || 'dummy-access-key',
+    secretAccessKey: process.env.SES_SECRET_ACCESS_KEY || 'dummy-secret-key',
   },
 });
 export { sesClient };

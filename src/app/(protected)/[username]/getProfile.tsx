@@ -15,7 +15,9 @@ export async function getProfile(username: string) {
   if (!check) return null;
 
   // Use the id to fetch from the /api/users/:userId endpoint
-  const res = await fetch(`${process.env.URL}/api/users/${check.id}`);
+  // In server components, we need to use absolute URLs
+  const baseUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'http://localhost:3002';
+  const res = await fetch(`${baseUrl}/api/users/${check.id}`);
   if (!res.ok) throw new Error('Error fetching profile information');
   const user: GetUser = await res.json();
 

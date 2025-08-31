@@ -36,11 +36,11 @@ export async function GET(request: Request) {
       where: { username },
       include: includeToUser(user?.id),
     });
-    
+
     if (!singleUser) {
       return NextResponse.json(null);
     }
-    
+
     return NextResponse.json(toGetUser(singleUser));
   }
 
