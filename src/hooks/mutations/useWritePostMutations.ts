@@ -14,10 +14,14 @@ export function useWritePostMutations({
   content,
   visualMedia,
   exitCreatePostModal,
+  rewardAmount = 0,
+  isTask = false,
 }: {
   content: string;
   visualMedia: GetVisualMedia[];
   exitCreatePostModal: () => void;
+  rewardAmount?: number;
+  isTask?: boolean;
 }) {
   const qc = useQueryClient();
   const { data: session } = useSession();
@@ -30,6 +34,10 @@ export function useWritePostMutations({
   const generateFormData = async (): Promise<FormData> => {
     const formData = new FormData();
     if (content) formData.append('content', content);
+    if (isTask) {
+      formData.append('isTask', 'true');
+      formData.append('rewardAmount', rewardAmount.toString());
+    }
 
     const visualMediaFilesPromises = visualMedia.map(async ({ url }) => {
       if (url.startsWith('blob:')) {

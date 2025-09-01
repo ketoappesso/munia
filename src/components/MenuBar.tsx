@@ -2,7 +2,7 @@
 
 import { Feather, GridFeedCards, NotificationBell, Profile } from '@/svg_components';
 import { useSessionUserData } from '@/hooks/useSessionUserData';
-import { useNotificationsCountQuery } from '@/hooks/queries/useNotificationsCountQuery';
+import { useMessagesUnreadCountQuery } from '@/hooks/queries/useMessagesUnreadCountQuery';
 import Link from 'next/link';
 import { LogoText } from './LogoText';
 import { MenuBarItem } from './MenuBarItem';
@@ -10,7 +10,7 @@ import { MenuBarItem } from './MenuBarItem';
 export function MenuBar() {
   const [user] = useSessionUserData();
   const username = user?.username || 'user-not-found';
-  const { data: notificationCount } = useNotificationsCountQuery();
+  const { data: messagesUnreadCount } = useMessagesUnreadCountQuery();
 
   return (
     <div className="fixed bottom-0 z-[2] flex w-full bg-background/70 shadow-inner backdrop-blur-sm md:sticky md:top-0 md:h-screen md:w-[212px] md:flex-col md:items-start md:bg-inherit md:p-4 md:shadow-none md:backdrop-blur-none">
@@ -29,7 +29,7 @@ export function MenuBar() {
           title: 'Messages',
           Icon: NotificationBell,
           route: '/messages',
-          badge: notificationCount,
+          badge: messagesUnreadCount,
         },
         { title: 'My Profile', Icon: Profile, route: `/${username}` },
       ].map((item) => (

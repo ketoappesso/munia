@@ -69,6 +69,13 @@ model User {
   conversationsAsParticipant1 Conversation[] @relation("ConversationParticipant1")
   conversationsAsParticipant2 Conversation[] @relation("ConversationParticipant2")
   messages           Message[]
+  
+  // Wallet fields
+  walletAddress      String?             @unique
+  apeBalance         Float               @default(0)
+  walletCreatedAt    DateTime?
+  sentTransactions   WalletTransaction[] @relation("sender")
+  receivedTransactions WalletTransaction[] @relation("receiver")
 }
 
 model VerificationToken {
@@ -99,6 +106,10 @@ model Post {
   postLikes   PostLike[]
   comments    Comment[]
   isTask      Boolean       @default(false)
+  rewardAmount Float        @default(0)
+  taskStatus  String?       // OPEN, IN_PROGRESS, COMPLETED
+  completedBy String?       // UserId who completed the task
+  completedAt DateTime?
 }
 
 model PostLike {
@@ -224,4 +235,26 @@ model Message {
   
   @@index([conversationId, createdAt])
   @@index([senderId])
+}
+
+model WalletTransaction {
+  id             String   @id @default(cuid())
+  type           String   // DEPOSIT, WITHDRAW, TRANSFER, REWARD
+  amount         Float
+  status         String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  description    String?
+  
+  fromUser       User?    @relation("sender", fields: [fromUserId], references: [id], onDelete: SetNull)
+  fromUserId     String?
+  
+  toUser         User?    @relation("receiver", fields: [toUserId], references: [id], onDelete: SetNull)
+  toUserId       String?
+  
+  txHash         String?  @unique // Blockchain transaction hash
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+  
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([createdAt])
 }

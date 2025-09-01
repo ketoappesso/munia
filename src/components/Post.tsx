@@ -81,7 +81,7 @@ export const Post = memo(
     if (!data) return <p>This post no longer exists.</p>;
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { content, createdAt, user: author, visualMedia, isLiked, _count } = data;
+    const { content, createdAt, user: author, visualMedia, isLiked, _count, isTask, rewardAmount } = data;
     const isOwnPost = userId === author.id;
     const numberOfLikes = _count.postLikes;
 
@@ -109,8 +109,14 @@ export const Post = memo(
           />
           {isOwnPost && <PostOptions postId={postId} content={content} visualMedia={visualMedia} />}
         </div>
+        {isTask && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
+            <span className="rounded-full bg-yellow-300 px-2 py-0.5 text-[10px] font-bold uppercase">Task</span>
+            <span>悬赏: {rewardAmount} APE</span>
+          </div>
+        )}
         {content && (
-          <p className="mb-4 mt-5 text-lg text-muted-foreground">
+          <p className="mb-4 mt-3 text-lg text-muted-foreground">
             <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
           </p>
         )}

@@ -42,6 +42,11 @@ export async function serverWritePost({ formData, type, postId }: Props) {
     const body = postWriteSchema.parse(formDataToObject(formData));
 
     const { content, files } = body;
+
+    // Task/Reward fields (optional)
+    const isTask = formData.get('isTask') === 'true';
+    const rewardAmountStr = formData.get('rewardAmount');
+    const rewardAmount = typeof rewardAmountStr === 'string' ? parseFloat(rewardAmountStr) : 0;
     const { str, usersMentioned } = await convertMentionUsernamesToIds({
       str: content || '',
     });
@@ -60,6 +65,8 @@ export async function serverWritePost({ formData, type, postId }: Props) {
       const res = await prisma.post.create({
         data: {
           content: str,
+          isTask: isTask || undefined,
+          rewardAmount: isTask ? rewardAmount : 0,
           ...(files !== undefined && {
             visualMedia: {
               create: savedFiles.map((savedFile) => ({

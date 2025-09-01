@@ -12,36 +12,48 @@ import { ToEditValues } from '@/lib/createPost';
 const CreatePostModalContextData = createContext<{
   toEditValues: ToEditValues | null;
   shouldOpenFileInputOnMount: boolean;
+  initialRewardAmount: number;
+  isTask: boolean;
 }>({
   toEditValues: null,
   shouldOpenFileInputOnMount: false,
+  initialRewardAmount: 0,
+  isTask: false,
 });
 
 const CreatePostModalContextApi = createContext<{
   setShown: (isOpen: boolean) => void;
   setToEditValues: Dispatch<SetStateAction<ToEditValues | null>>;
   setShouldOpenFileInputOnMount: Dispatch<SetStateAction<boolean>>;
+  setInitialRewardAmount: Dispatch<SetStateAction<number>>;
+  setIsTask: Dispatch<SetStateAction<boolean>>;
 }>({
   setShown: () => {},
   setToEditValues: () => {},
   setShouldOpenFileInputOnMount: () => {},
+  setInitialRewardAmount: () => {},
+  setIsTask: () => {},
 });
 
 export function CreatePostModalContextProvider({ children }: { children: React.ReactNode }) {
   const state = useOverlayTriggerState({});
   const [toEditValues, setToEditValues] = useState<ToEditValues | null>(null);
   const [shouldOpenFileInputOnMount, setShouldOpenFileInputOnMount] = useState(false);
+  const [initialRewardAmount, setInitialRewardAmount] = useState(0);
+  const [isTask, setIsTask] = useState(false);
 
   // Memoize to prevent re-rendering of consumers when the states change
   const dataValue = useMemo(
-    () => ({ toEditValues, shouldOpenFileInputOnMount }),
-    [shouldOpenFileInputOnMount, toEditValues],
+    () => ({ toEditValues, shouldOpenFileInputOnMount, initialRewardAmount, isTask }),
+    [shouldOpenFileInputOnMount, toEditValues, initialRewardAmount, isTask],
   );
   const apiValue = useMemo(
     () => ({
       setShown: state.setOpen,
       setToEditValues,
       setShouldOpenFileInputOnMount,
+      setInitialRewardAmount,
+      setIsTask,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [], // Don't add `state.setOpen` here, otherwise our memoization technique won't work
@@ -59,6 +71,8 @@ export function CreatePostModalContextProvider({ children }: { children: React.R
                 toEditValues={toEditValues}
                 shouldOpenFileInputOnMount={shouldOpenFileInputOnMount}
                 setShown={state.setOpen}
+                initialRewardAmount={initialRewardAmount}
+                isTaskInitial={isTask}
               />
             </Modal>
           )}

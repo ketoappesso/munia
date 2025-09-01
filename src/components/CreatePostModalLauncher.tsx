@@ -3,23 +3,46 @@
 import { useSession } from 'next-auth/react';
 import { useCreatePostModal } from '@/hooks/useCreatePostModal';
 import SvgImage from '@/svg_components/Image';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { Coins } from 'lucide-react';
 import { ProfilePhotoOwn } from './ui/ProfilePhotoOwn';
 import { ButtonNaked } from './ui/ButtonNaked';
+import { RewardModal } from './RewardModal';
+import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
 
 export function CreatePostModalLauncher() {
   const { data: session } = useSession();
   const { launchCreatePost } = useCreatePostModal();
+  const { data: wallet } = useWalletQuery();
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [pendingRewardAmount, setPendingRewardAmount] = useState<number>(0);
+  
   const launcCreatePostFinderClosed = useCallback(() => {
     if (!session?.user) return;
     launchCreatePost({});
   }, [launchCreatePost, session]);
+  
   const launchCreatePostFinderOpened = useCallback(() => {
     if (!session?.user) return;
     launchCreatePost({
       shouldOpenFileInputOnMount: true,
     });
   }, [launchCreatePost, session]);
+  
+  const handleRewardClick = useCallback(() => {
+    if (!session?.user) return;
+    setShowRewardModal(true);
+  }, [session]);
+  
+  const handleRewardSelect = useCallback((amount: number) => {
+    setPendingRewardAmount(amount);
+    setShowRewardModal(false);
+    // Launch create post with reward
+    launchCreatePost({
+      initialRewardAmount: amount,
+      isTask: true,
+    });
+  }, [launchCreatePost]);
 
   return (
     <div className="rounded-xl bg-card px-4 py-4 shadow sm:px-8 sm:py-5">
@@ -31,22 +54,35 @@ export function CreatePostModalLauncher() {
           <p className="text-muted-foreground/70">What&apos;s on your mind?</p>
         </ButtonNaked>
       </div>
-      <div className="flex flex-row gap-4">
-        <ButtonNaked
-          onPress={launchCreatePostFinderOpened}
-          className="group flex cursor-pointer flex-row items-center gap-4">
-          <SvgImage className="h-6 w-6 text-muted-foreground" />
-          <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
-            Image / Video
-          </p>
-        </ButtonNaked>
-        {/* <ButtonNaked className="group flex cursor-pointer flex-row items-center gap-4">
-          <EmojiHappySmile stroke="black" width={24} height={24} />
-          <p className="text-base font-semibold text-gray-500 group-hover:text-black">
-            Mood
-          </p>
-        </ButtonNaked> */}
+      <div className="flex flex-row justify-center">
+        <div className="flex gap-6">
+          <ButtonNaked
+            onPress={launchCreatePostFinderOpened}
+            className="group flex cursor-pointer flex-row items-center gap-4">
+            <SvgImage className="h-6 w-6 text-muted-foreground" />
+            <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
+              Image / Video
+            </p>
+          </ButtonNaked>
+          <ButtonNaked
+            onPress={handleRewardClick}
+            className="group flex cursor-pointer flex-row items-center gap-4">
+            <Coins className="h-6 w-6 text-muted-foreground" />
+            <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
+              悬赏
+            </p>
+          </ButtonNaked>
+        </div>
       </div>
+      
+      {showRewardModal && (
+        <RewardModal
+          isOpen={showRewardModal}
+          onClose={() => setShowRewardModal(false)}
+          onSelect={handleRewardSelect}
+          currentBalance={wallet?.apeBalance || 0}
+        />
+      )}
     </div>
   );
 }

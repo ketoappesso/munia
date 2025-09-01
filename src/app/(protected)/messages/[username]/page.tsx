@@ -92,6 +92,35 @@ export default function MessagesPage({ params }: { params: { username: string } 
     refetchInterval: 5000, // Poll every 5 seconds for new messages
   });
 
+  // Mark messages as read when entering the conversation
+  useEffect(() => {
+    if (conversation?.id && messages.length > 0) {
+      // Check if there are any unread messages
+      const hasUnreadMessages = messages.some(
+        (msg) => !msg.isRead && msg.sender.id !== sessionData?.user?.id
+      );
+      
+      if (hasUnreadMessages) {
+        // Mark all messages as read
+        fetch(`/api/conversations/${conversation.id}/messages/read`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              console.log(`Marked ${data.markedAsRead} messages as read`);
+              // Invalidate conversations query to update unread count
+              queryClient.invalidateQueries({ queryKey: ['conversations'] });
+            }
+          })
+          .catch((error) => {
+            console.error('Error marking messages as read:', error);
+          });
+      }
+    }
+  }, [conversation?.id, messages, sessionData?.user?.id, queryClient]);
+
   // Messaging hook
   const { sendMessage: sendWebSocketMessage, isConnected } = useMessaging({
     conversationId: conversation?.id,

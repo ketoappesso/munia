@@ -42,6 +42,8 @@ export function MessagesList() {
       return response.json();
     },
     enabled: !!session?.user,
+    refetchInterval: 3000, // 每3秒刷新一次，确保未读状态更新
+    refetchOnWindowFocus: true, // 窗口获得焦点时刷新
   });
 
   if (isLoading) {
