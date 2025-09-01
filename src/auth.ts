@@ -76,6 +76,13 @@ export const {
   },
   callbacks: {
     ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name || user.username || user.phoneNumber;
+      }
+      return token;
+    },
     session({ token, user, ...rest }) {
       return {
         /**
@@ -88,6 +95,7 @@ export const {
          */
         user: {
           id: token.sub!,
+          name: token.name as string,
         },
         expires: rest.session.expires,
       };

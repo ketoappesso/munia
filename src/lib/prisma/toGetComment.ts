@@ -15,10 +15,9 @@ export async function toGetComment(findCommentResult: FindCommentResult): Promis
     ...rest,
     user: {
       id: rest.user.id,
-      // The `name` and `username` are guaranteed to be filled after the user's registration,
-      // thus we can safely use non-null assertion here.
-      username: rest.user.username!,
-      name: rest.user.name!,
+      // For phone-registered users, name might be null, so we use username as fallback
+      username: rest.user.username || rest.user.id,
+      name: rest.user.name || rest.user.username || '用户',
       // Convert the `profilePhoto` file name to a full S3 URL
       profilePhoto: fileNameToUrl(rest.user.profilePhoto),
     },

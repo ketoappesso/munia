@@ -57,7 +57,12 @@ export default {
                 },
               });
               console.log('New user created successfully:', newUser.id);
-              return newUser;
+              return {
+                id: newUser.id,
+                name: newUser.name || newUser.username || newUser.phoneNumber,
+                username: newUser.username,
+                phoneNumber: newUser.phoneNumber,
+              };
             } catch (error) {
               console.error('Error creating user in database:', error);
 
@@ -75,7 +80,14 @@ export default {
           if (user.passwordHash) {
             const isValid = await bcrypt.compare(password, user.passwordHash);
             console.log('Password validation result:', isValid);
-            if (isValid) return user;
+            if (isValid) {
+              return {
+                id: user.id,
+                name: user.name || user.username || user.phoneNumber,
+                username: user.username,
+                phoneNumber: user.phoneNumber,
+              };
+            }
           }
           console.log('Password validation failed or no password hash');
           return null;

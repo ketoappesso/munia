@@ -6,8 +6,10 @@ import { ProfilePhoto } from './ProfilePhoto';
 export function ProfilePhotoOwn() {
   const [user] = useSessionUserData();
 
-  if (!user) {
-    return null;
-  }
-  return <ProfilePhoto name={user.name} username={user.username} photoUrl={user?.profilePhoto} />;
+  // Always render ProfilePhoto to maintain consistent hooks, but with conditional props
+  return <ProfilePhoto 
+    name={user?.name || ''} 
+    username={user?.username || ''} 
+    photoUrl={user?.profilePhoto} 
+  />;
 }

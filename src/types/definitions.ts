@@ -53,6 +53,11 @@ export interface FindPostResult {
   id: number;
   content: string | null;
   createdAt: Date;
+  isTask: boolean;
+  rewardAmount: number;
+  taskStatus: string | null;
+  completedBy: string | null;
+  completedAt: Date | null;
   /**
    * Use `postLikes` to store the <PostLike>'s id of the user to the Post.
    * If there is a <PostLike> id, that means the user requesting has
@@ -78,6 +83,11 @@ export interface GetPost {
   id: number;
   content: string | null;
   createdAt: Date;
+  isTask: boolean;
+  rewardAmount: number;
+  taskStatus: string | null;
+  completedBy: string | null;
+  completedAt: Date | null;
   /**
    * The `isLiked` is used to check whether the authenticated user requesting
    * the post has liked it or not.

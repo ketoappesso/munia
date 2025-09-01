@@ -4,6 +4,11 @@ export const selectPost = (userId: string | undefined) => ({
   id: true,
   content: true,
   createdAt: true,
+  isTask: true,
+  rewardAmount: true,
+  taskStatus: true,
+  completedBy: true,
+  completedAt: true,
   ...includeUserSummary(),
   visualMedia: true,
   /**

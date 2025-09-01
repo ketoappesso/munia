@@ -28,9 +28,15 @@ type Props =
     };
 
 export async function serverWritePost({ formData, type, postId }: Props) {
+  console.log('[serverWritePost] Starting with type:', type);
   const [user] = await getServerUser();
-  if (!user) return NextResponse.json({}, { status: 401 });
+  console.log('[serverWritePost] User from session:', user);
+  if (!user) {
+    console.error('[serverWritePost] No user found in session');
+    return NextResponse.json({}, { status: 401 });
+  }
   const userId = user.id;
+  console.log('[serverWritePost] User ID:', userId);
 
   if (type === 'edit') {
     if (!verifyAccessToPost(postId)) {
@@ -169,13 +175,16 @@ export async function serverWritePost({ formData, type, postId }: Props) {
 
     return NextResponse.json<GetPost>(await toGetPost(res));
   } catch (error) {
+    console.error('[serverWritePost] Error occurred:', error);
     if (error instanceof z.ZodError) {
+      console.error('[serverWritePost] Validation error:', error.issues);
       return NextResponse.json(null, {
         status: 422,
         statusText: error.issues[0].message,
       });
     }
 
+    console.error('[serverWritePost] Unexpected error:', error);
     return NextResponse.json({ error: 'Error creating post.' }, { status: 500 });
   }
 }
