@@ -7,7 +7,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { useCallback, useState } from 'react';
 import ActionsPlus from '@/svg_components/ActionsPlus';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
-import { FeedSidebar } from '@/components/FeedSidebar';
+import { NavigationSidebar } from '@/components/NavigationSidebar';
 import Link from 'next/link';
 
 export default function Page() {
@@ -23,30 +23,41 @@ export default function Page() {
 
   if (status === 'loading') {
     return (
-      <div className="px-4 pt-4">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex flex-1 items-center">
-            <button
-              type="button"
-              className="mr-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
-              <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
-            </button>
-          </div>
-          <div className="flex items-center">
-            <div className="flex rounded-lg bg-gray-200 p-1">
-              {['关注', '发现', '任务'].map((tab) => (
-                <div key={tab} className="rounded-md px-4 py-2 text-sm text-gray-500">
-                  {tab}
-                </div>
-              ))}
+      <>
+        <div className="px-4 pt-4">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex flex-1 items-center">
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(true)}
+                className="mr-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
+                <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
+              </button>
             </div>
+            <div className="flex items-center">
+              <div className="flex rounded-lg bg-gray-200 p-1">
+                {['关注', '发现', '任务'].map((tab) => (
+                  <div key={tab} className="rounded-md px-4 py-2 text-sm text-gray-500">
+                    {tab}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1" />
           </div>
-          <div className="flex-1" />
+          <div className="py-8 text-center">
+            <p>Loading...</p>
+          </div>
         </div>
-        <div className="py-8 text-center">
-          <p>Loading...</p>
-        </div>
-      </div>
+        
+        <NavigationSidebar
+          isOpen={isSidebarOpen}
+          onClose={handleCloseSidebar}
+          currentPage="feed"
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
+        />
+      </>
     );
   }
 
@@ -105,11 +116,12 @@ export default function Page() {
         <AuthModal isOpen={showAuthModal} onClose={handleCloseAuthModal} />
       </div>
 
-      <FeedSidebar
+      <NavigationSidebar
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
+        currentPage="feed"
         activeTab={activeTab}
-        onTabChange={handleTabChange}
+        onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
       />
     </>
   );

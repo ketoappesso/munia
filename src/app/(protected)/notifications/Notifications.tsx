@@ -2,23 +2,16 @@
 
 import useOnScreen from '@/hooks/useOnScreen';
 import { InfiniteData, QueryKey, useInfiniteQuery } from '@tanstack/react-query';
-import { Key, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { GetActivity } from '@/types/definitions';
 import { Activity } from '@/components/Activity';
 import { AllCaughtUp } from '@/components/AllCaughtUp';
-import { useNotificationsReadStatusMutations } from '@/hooks/mutations/useNotificationsReadStatusMutations';
 import { NO_PREV_DATA_LOADED } from '@/constants';
-import { DropdownMenuButton } from '@/components/ui/DropdownMenuButton';
-import { Section, Item } from 'react-stately';
-import { useNotificationsCountQuery } from '@/hooks/queries/useNotificationsCountQuery';
 import { GenericLoading } from '@/components/GenericLoading';
 import { SomethingWentWrong } from '@/components/SometingWentWrong';
 import { getNotifications } from '@/lib/client_data_fetching/getNotifications';
 
 export function Notifications({ userId }: { userId: string }) {
-  const { data: notificationCount } = useNotificationsCountQuery();
-  const { markAllAsReadMutation } = useNotificationsReadStatusMutations();
-
   const bottomElRef = useRef<HTMLDivElement>(null);
   const isBottomOnScreen = useOnScreen(bottomElRef);
   const { data, error, isPending, isError, fetchNextPage, isFetchingNextPage, hasNextPage, fetchPreviousPage } =
@@ -72,39 +65,10 @@ export function Notifications({ userId }: { userId: string }) {
     return () => clearInterval(interval);
   }, [fetchPreviousPage]);
 
-  const markAllAsRead = useCallback(
-    (key: Key) => {
-      if (key === 'mark-all') {
-        markAllAsReadMutation.mutate();
-      }
-    },
-    [markAllAsReadMutation],
-  );
-
-  const disabledKeys = useMemo(() => {
-    if (notificationCount === undefined || notificationCount === 0) {
-      return ['mark-all'];
-    }
-    return [];
-  }, [notificationCount]);
   const bottomLoaderStyle = useMemo(() => ({ display: data ? 'block' : 'none' }), [data]);
 
   return (
     <div>
-      <div className="flex justify-between">
-        <div className="mb-4 flex items-center gap-2">
-          <h1 className="text-4xl font-bold">Notifications</h1>
-        </div>
-        <DropdownMenuButton
-          key="notifications-option"
-          label="Notifications option"
-          onAction={markAllAsRead}
-          disabledKeys={disabledKeys}>
-          <Section>
-            <Item key="mark-all">Mark all as read</Item>
-          </Section>
-        </DropdownMenuButton>
-      </div>
       <div>
         {isPending ? (
           <GenericLoading>Loading notifications</GenericLoading>

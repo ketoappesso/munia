@@ -9,6 +9,9 @@ import { ButtonLink } from '@/components/ui/ButtonLink';
 import Tabs from './Tabs';
 import CoverPhoto from './CoverPhoto';
 import ProfilePhoto from './ProfilePhoto';
+import HamburgerMenu from '@/svg_components/HamburgerMenu';
+import { ProfileSidebar } from '@/components/ProfileSidebar';
+import { useState, useCallback } from 'react';
 
 export function ProfileHeader({
   isOwnProfile,
@@ -18,6 +21,9 @@ export function ProfileHeader({
   initialProfileData: GetUser;
 }) {
   const { data } = useUserQuery(initialProfileData.id);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), []);
+  
   // If there is no query of the user data yet, use the
   // `initialProfileData` that was fetched on server.
   const profile = data || initialProfileData;
@@ -25,6 +31,15 @@ export function ProfileHeader({
   return (
     <>
       <div className="relative mb-[88px] md:pt-6">
+        {/* Hamburger Menu Button - positioned absolute within the header */}
+        <div className="absolute left-4 top-4 z-40 md:left-6 md:top-6">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-gray-100 dark:bg-gray-900/80 dark:hover:bg-gray-800">
+            <HamburgerMenu className="h-5 w-5 stroke-gray-700 dark:stroke-gray-300" />
+          </button>
+        </div>
         <div className="h-60 overflow-hidden bg-muted/30 drop-shadow-xl md:rounded-3xl">
           <CoverPhoto isOwnProfile={isOwnProfile} photoUrl={profile.coverPhoto} />
         </div>
@@ -63,6 +78,14 @@ export function ProfileHeader({
         </div>
         <Tabs isOwnProfile={isOwnProfile} />
       </div>
+
+      {/* Profile Sidebar */}
+      <ProfileSidebar
+        isOpen={isSidebarOpen}
+        onClose={handleCloseSidebar}
+        isOwnProfile={isOwnProfile}
+        username={profile.username}
+      />
     </>
   );
 }

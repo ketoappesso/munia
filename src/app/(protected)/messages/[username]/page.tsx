@@ -177,9 +177,9 @@ export default function MessagesPage({ params }: { params: { username: string } 
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-950">
       {/* Header stays fixed at top */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+      <div className="shrink-0 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="flex h-16 items-center px-4">
           <ButtonNaked
             onPress={handleBack}
@@ -197,12 +197,13 @@ export default function MessagesPage({ params }: { params: { username: string } 
       </div>
 
       {/* Messages fill the space between header and input */}
-      <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <ChatMessages messages={messages} otherUser={otherUser} />
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Message input fixed at bottom with XiaoHongShu style */}
-      <div className="sticky bottom-0 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+      <div className="shrink-0 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="flex items-end gap-2 p-3">
           <ButtonNaked
             onPress={() => setShowActions(!showActions)}

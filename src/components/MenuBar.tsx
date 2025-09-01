@@ -1,6 +1,6 @@
 'use client';
 
-import { Feather, GridFeedCards, LogOutCircle, NotificationBell, Profile } from '@/svg_components';
+import { Feather, GridFeedCards, NotificationBell, Profile } from '@/svg_components';
 import { useSessionUserData } from '@/hooks/useSessionUserData';
 import { useNotificationsCountQuery } from '@/hooks/queries/useNotificationsCountQuery';
 import Link from 'next/link';
@@ -32,11 +32,6 @@ export function MenuBar() {
           badge: notificationCount,
         },
         { title: 'My Profile', Icon: Profile, route: `/${username}` },
-        {
-          title: 'Logout',
-          Icon: LogOutCircle,
-          route: '/api/auth/signout',
-        },
       ].map((item) => (
         <MenuBarItem key={item.title} {...item}>
           {item.title}
