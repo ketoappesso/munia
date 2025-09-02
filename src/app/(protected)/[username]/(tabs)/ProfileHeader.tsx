@@ -32,7 +32,7 @@ export function ProfileHeader({
     <>
       <div className="relative mb-[88px] md:pt-6">
         {/* Hamburger Menu Button - positioned absolute within the header */}
-        <div className="absolute left-4 top-4 z-40 md:left-6 md:top-6">
+        <div className="absolute right-4 top-4 z-40 md:right-6 md:top-6">
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}

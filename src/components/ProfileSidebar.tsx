@@ -1,10 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, LogOut, Wallet, Edit, Coins } from 'lucide-react';
+import { X, Settings, LogOut, Wallet, Edit, Coins, QrCode, Home, Camera, Smartphone, Gamepad2 } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { useDialogs } from '@/hooks/useDialogs';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
@@ -25,6 +25,48 @@ export function ProfileSidebar({
   const router = useRouter();
   const { confirm } = useDialogs();
   const { data: wallet } = useWalletQuery();
+  const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+
+  // Lock body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      // Cleanup function to restore scroll
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+
+  const handleQRScanner = useCallback(() => {
+    // Close sidebar first
+    onClose();
+    // TODO: Implement QR scanner functionality
+    console.log('Opening QR Scanner...');
+    // You can implement the actual QR scanner here
+    // For now, just log the action
+  }, [onClose]);
+
+  const handleSelfieCapture = useCallback(() => {
+    // Close sidebar first
+    onClose();
+    // TODO: Implement selfie capture functionality
+    console.log('Opening Selfie Camera...');
+    // You can implement the actual camera capture here
+    // For now, just log the action
+  }, [onClose]);
 
   const handleNavigation = (path: string) => {
     onClose();
@@ -61,11 +103,11 @@ export function ProfileSidebar({
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: '-100%' }}
+            initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 z-50 h-full w-80 bg-background shadow-xl"
+            className="fixed right-0 top-0 z-50 h-full w-80 bg-background shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-label="Profile Navigation">
@@ -81,8 +123,8 @@ export function ProfileSidebar({
             </div>
 
             {/* Content */}
-            <div className="flex h-[calc(100%-72px)] flex-col">
-              <div className="flex-1 space-y-2 p-4">
+            <div className="flex h-[calc(100%-72px)] flex-col overflow-hidden">
+              <div className="flex-1 space-y-2 overflow-y-auto p-4">
                 {/* Profile Actions for own profile */}
                 {isOwnProfile && (
                   <>
@@ -91,13 +133,6 @@ export function ProfileSidebar({
                       className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
                       <Edit className="h-5 w-5 text-foreground" />
                       <span className="text-foreground">Edit Profile</span>
-                    </ButtonNaked>
-
-                    <ButtonNaked
-                      onPress={() => handleNavigation('/wallet')}
-                      className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                      <Wallet className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">Wallet</span>
                     </ButtonNaked>
 
                     <ButtonNaked
@@ -114,30 +149,93 @@ export function ProfileSidebar({
 
                 {/* Wallet Section - Same style as NavigationSidebar */}
                 {isOwnProfile && (
-                  <div className="mb-4">
-                    <ButtonNaked
-                      onPress={() => handleNavigation('/wallet')}
-                      className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-4 transition-all hover:from-purple-500/20 hover:to-blue-500/20">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500">
-                          <Wallet className="h-5 w-5 text-white" />
+                  <>
+                    <div className="mb-4">
+                      <ButtonNaked
+                        onPress={() => handleNavigation('/wallet')}
+                        className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-4 transition-all hover:from-purple-500/20 hover:to-blue-500/20">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500">
+                            <Wallet className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">我的钱包</p>
+                            <p className="text-xs text-muted-foreground">点击管理资产</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">我的钱包</p>
-                          <p className="text-xs text-muted-foreground">点击管理资产</p>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1">
+                            <Coins className="h-4 w-4 text-yellow-500" />
+                            <span className="text-lg font-bold text-foreground">
+                              {wallet?.apeBalance?.toFixed(0) || '0'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">APE</p>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-1">
-                          <Coins className="h-4 w-4 text-yellow-500" />
-                          <span className="text-lg font-bold text-foreground">
-                            {wallet?.apeBalance?.toFixed(0) || '0'}
-                          </span>
+                      </ButtonNaked>
+                    </div>
+
+                    {/* My Space Section with Selfie Button */}
+                    <div className="mb-4">
+                      <ButtonNaked
+                        onPress={handleSelfieCapture}
+                        className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-green-500/10 to-teal-500/10 p-4 transition-all hover:from-green-500/20 hover:to-teal-500/20">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-500">
+                            <Home className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">我的空间</p>
+                            <p className="text-xs text-muted-foreground">拍摄自拍</p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">APE</p>
-                      </div>
-                    </ButtonNaked>
-                  </div>
+                        <div className="flex items-center justify-center">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Camera className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                          </div>
+                        </div>
+                      </ButtonNaked>
+                    </div>
+
+                    {/* My Device Section with QR Scanner */}
+                    <div className="mb-4">
+                      <ButtonNaked
+                        onPress={handleQRScanner}
+                        className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 p-4 transition-all hover:from-orange-500/20 hover:to-red-500/20">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500">
+                            <Smartphone className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">我的设备</p>
+                            <p className="text-xs text-muted-foreground">扫描设备码</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <QrCode className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                          </div>
+                        </div>
+                      </ButtonNaked>
+                    </div>
+
+                    {/* My Games Section */}
+                    <div className="mb-4">
+                      <ButtonNaked
+                        onPress={() => handleNavigation('/games')}
+                        className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-pink-500/10 to-purple-500/10 p-4 transition-all hover:from-pink-500/20 hover:to-purple-500/20">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-500">
+                            <Gamepad2 className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">我的游戏</p>
+                            <p className="text-xs text-muted-foreground">进入游戏中心</p>
+                          </div>
+                        </div>
+                      </ButtonNaked>
+                    </div>
+                  </>
                 )}
 
                 {/* Navigation Links */}

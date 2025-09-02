@@ -198,24 +198,33 @@ export default function WalletPage() {
             {/* Plus button for APE */}
             <ButtonNaked
               onPress={() => {
-                setActiveCard(activeCard === 'ape' ? 'none' : 'ape');
-                setActiveTab('deposit');
+                if (activeCard === 'ape') {
+                  setActiveCard('none');
+                  setActiveTab('overview');
+                } else {
+                  setActiveCard('ape');
+                  setActiveTab('deposit');
+                }
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-              <Plus className="h-6 w-6 text-white" />
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+              <Plus className={`h-6 w-6 text-white transition-transform duration-300 ${
+                activeCard === 'ape' ? 'rotate-45' : 'rotate-0'
+              }`} />
             </ButtonNaked>
           </div>
         </div>
       </div>
 
-      {/* Arrow indicator between cards */}
-      <div className="relative h-12">
+      {/* Gap and Arrow indicator between cards */}
+      <div className={`relative transition-all duration-500 ease-in-out ${
+        activeCard !== 'none' ? 'h-20' : 'h-2'
+      }`}>
         {activeCard !== 'none' && (
           <div className="absolute inset-0 flex items-center justify-center">
             {activeCard === 'ape' ? (
-              <ArrowUp className="h-10 w-10 text-purple-500 animate-bounce stroke-[4]" />
+              <ArrowDown className="h-8 w-8 text-purple-500 animate-pulse stroke-[3]" />
             ) : (
-              <ArrowDown className="h-10 w-10 text-purple-500 animate-bounce stroke-[4]" />
+              <ArrowUp className="h-8 w-8 text-purple-500 animate-pulse stroke-[3]" />
             )}
           </div>
         )}
@@ -237,11 +246,18 @@ export default function WalletPage() {
             {/* Plus button for Coffee */}
             <ButtonNaked
               onPress={() => {
-                setActiveCard(activeCard === 'coffee' ? 'none' : 'coffee');
-                setActiveTab('withdraw');
+                if (activeCard === 'coffee') {
+                  setActiveCard('none');
+                  setActiveTab('overview');
+                } else {
+                  setActiveCard('coffee');
+                  setActiveTab('withdraw');
+                }
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-              <Plus className="h-6 w-6 text-white" />
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+              <Plus className={`h-6 w-6 text-white transition-transform duration-300 ${
+                activeCard === 'coffee' ? 'rotate-45' : 'rotate-0'
+              }`} />
             </ButtonNaked>
           </div>
         </div>

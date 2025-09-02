@@ -12,42 +12,37 @@ export function searchUser(search: string):
         | {
             name: {
               contains: string;
-              mode: 'insensitive';
             };
           }
         | {
             name: {
               startsWith: string;
-              mode: 'insensitive';
             };
           }
         | {
             username: {
               startsWith: string;
-              mode: 'insensitive';
             };
           }
       )[];
     }
   | undefined {
+  const searchTerm = search.trim();
   return {
     OR: [
       {
         name: {
-          contains: search.trim(),
-          mode: 'insensitive',
+          contains: searchTerm,
         },
       },
       {
         name: {
-          startsWith: search.trim(),
-          mode: 'insensitive',
+          startsWith: searchTerm,
         },
       },
       {
         username: {
-          startsWith: search.trim(),
-          mode: 'insensitive',
+          startsWith: searchTerm,
         },
       },
     ],

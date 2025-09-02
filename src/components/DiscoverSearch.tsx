@@ -27,7 +27,12 @@ export function DiscoverSearch({ label = 'Search People' }: { label?: string }) 
 
   return (
     <div className="sticky top-4 z-[2] mb-4">
-      <TextInput onChange={handleChange} label={label} Icon={SvgSearch} />
+      <TextInput 
+        onChange={handleChange} 
+        label={label} 
+        Icon={SvgSearch}
+        value={searchParams.get('search') || ''}
+      />
     </div>
   );
 }

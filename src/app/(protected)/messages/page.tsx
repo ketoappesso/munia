@@ -52,25 +52,25 @@ export default function MessagesPage() {
     return (
       <>
         <div className="px-4 pt-4">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex flex-1 items-center">
-              <button
-                type="button"
-                onClick={() => setIsSidebarOpen(true)}
-                className="mr-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
-                <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
-              </button>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex-1" />
+          <div className="flex items-center">
+            <div className="flex rounded-lg bg-gray-200 p-1">
+              {['信息', '提醒'].map((tab) => (
+                <div key={tab} className="rounded-md px-4 py-2 text-sm text-gray-500">
+                  {tab}
+                </div>
+              ))}
             </div>
-            <div className="flex items-center">
-              <div className="flex rounded-lg bg-gray-200 p-1">
-                {['信息', '提醒'].map((tab) => (
-                  <div key={tab} className="rounded-md px-4 py-2 text-sm text-gray-500">
-                    {tab}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex-1" />
+          </div>
+          <div className="flex flex-1 items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="ml-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
+              <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
+            </button>
+          </div>
           </div>
           <div className="py-8 text-center">
             <p>Loading...</p>
@@ -92,13 +92,25 @@ export default function MessagesPage() {
     <>
       <div className="px-4 pt-4">
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex flex-1 items-center">
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen(true)}
-              className="mr-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
-              <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
-            </button>
+          <div className="flex flex-1 justify-start">
+            {activeTab === 'messages' ? (
+              <button
+                type="button"
+                onClick={handleSearchClick}
+                className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
+                <Search className="h-5 w-5 stroke-gray-700" />
+              </button>
+            ) : (
+              <DropdownMenuButton
+                key="notifications-option"
+                label="Notifications option"
+                onAction={markAllAsRead}
+                disabledKeys={disabledKeys}>
+                <Section>
+                  <Item key="mark-all">Mark all as read</Item>
+                </Section>
+              </DropdownMenuButton>
+            )}
           </div>
           <div className="flex items-center">
             <div className="flex rounded-lg bg-gray-200 p-1">
@@ -118,25 +130,13 @@ export default function MessagesPage() {
               ))}
             </div>
           </div>
-          <div className="flex flex-1 justify-end">
-            {activeTab === 'messages' ? (
-              <button
-                type="button"
-                onClick={handleSearchClick}
-                className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
-                <Search className="h-5 w-5 stroke-gray-700" />
-              </button>
-            ) : (
-              <DropdownMenuButton
-                key="notifications-option"
-                label="Notifications option"
-                onAction={markAllAsRead}
-                disabledKeys={disabledKeys}>
-                <Section>
-                  <Item key="mark-all">Mark all as read</Item>
-                </Section>
-              </DropdownMenuButton>
-            )}
+          <div className="flex flex-1 items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="ml-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
+              <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
+            </button>
           </div>
         </div>
 

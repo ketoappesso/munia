@@ -44,46 +44,51 @@ export async function GET(request: Request) {
     return NextResponse.json(toGetUser(singleUser));
   }
 
-  const res: FindUserResult[] | null = await prisma.user.findMany({
-    where: {
-      ...(search && searchUser(search)),
-      ...(gender && { gender }),
-      ...(relationshipStatus && {
-        relationshipStatus,
-      }),
-      ...(followersOf && {
-        following: {
-          some: {
-            followingId: followersOf,
+  try {
+    const res: FindUserResult[] | null = await prisma.user.findMany({
+      where: {
+        ...(search && searchUser(search)),
+        ...(gender && { gender }),
+        ...(relationshipStatus && {
+          relationshipStatus,
+        }),
+        ...(followersOf && {
+          following: {
+            some: {
+              followingId: followersOf,
+            },
           },
-        },
-      }),
-      ...(followingOf && {
-        followers: {
-          some: {
-            followerId: followingOf,
+        }),
+        ...(followingOf && {
+          followers: {
+            some: {
+              followerId: followingOf,
+            },
           },
+        }),
+        id: {
+          not: user?.id,
         },
-      }),
-      id: {
-        not: user?.id,
+        name: {
+          not: null,
+        },
+        username: {
+          not: null,
+        },
       },
-      name: {
-        not: null,
-      },
-      username: {
-        not: null,
-      },
-    },
-    include: includeToUser(user?.id),
-    take: limit,
-    skip: offset,
-  });
+      include: includeToUser(user?.id),
+      take: limit,
+      skip: offset,
+    });
 
-  if (res === null) {
-    return NextResponse.json(null);
+    if (res === null) {
+      return NextResponse.json(null);
+    }
+
+    const users = res.map((singleUser) => toGetUser(singleUser));
+    return NextResponse.json<GetUser[] | null>(users);
+  } catch (error) {
+    console.error('Error in GET /api/users:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  const users = res.map((singleUser) => toGetUser(singleUser));
-  return NextResponse.json<GetUser[] | null>(users);
 }

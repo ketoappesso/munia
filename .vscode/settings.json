@@ -27,5 +27,10 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
   },
-  "tailwindCSS.classAttributes": ["class", "className", "iconClassName"]
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "iconClassName"
+  ],
+  "idf.pythonInstallPath": "/Users/ketoz/miniconda3/bin/python"
 }
