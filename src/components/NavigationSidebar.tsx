@@ -1,10 +1,14 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wallet, Coins } from 'lucide-react';
+import { X, Wallet, Coins, LogOut, Edit, Settings } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
+import { useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
+import { useDialogs } from '@/hooks/useDialogs';
+import { useCallback } from 'react';
 
 interface NavigationSidebarProps {
   isOpen: boolean;
@@ -23,6 +27,22 @@ export function NavigationSidebar({
 }: NavigationSidebarProps) {
   const router = useRouter();
   const { data: wallet } = useWalletQuery();
+  const { data: session } = useSession();
+  const { confirm } = useDialogs();
+
+  const handleLogout = useCallback(() => {
+    // Close sidebar first
+    onClose();
+    
+    // Then show confirm dialog
+    setTimeout(() => {
+      confirm({
+        title: 'Confirm Logout',
+        message: 'Do you really wish to logout?',
+        onConfirm: () => signOut({ callbackUrl: '/' }),
+      });
+    }, 300); // Small delay to allow sidebar animation to complete
+  }, [confirm, onClose]);
 
   const handleNavigation = (path: string) => {
     onClose();
@@ -85,7 +105,8 @@ export function NavigationSidebar({
             </div>
 
             {/* Content */}
-            <div className="space-y-2 p-4">
+            <div className="flex h-[calc(100%-72px)] flex-col">
+              <div className="flex-1 space-y-2 p-4">
               {/* Current Page Tabs */}
               {onTabChange && (
                 <div>
@@ -162,8 +183,43 @@ export function NavigationSidebar({
                   className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
                   <span className="text-foreground">Discover People</span>
                 </ButtonNaked>
+
+                {/* Divider */}
+                <div className="my-4 border-t border-border" />
+
+                {/* Profile Actions */}
+                {session?.user && (
+                  <>
+                    <ButtonNaked
+                      onPress={() => handleNavigation('/edit-profile')}
+                      className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                      <Edit className="h-5 w-5 text-foreground" />
+                      <span className="text-foreground">Edit Profile</span>
+                    </ButtonNaked>
+
+                    <ButtonNaked
+                      onPress={() => handleNavigation('/settings')}
+                      className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                      <Settings className="h-5 w-5 text-foreground" />
+                      <span className="text-foreground">Settings</span>
+                    </ButtonNaked>
+                  </>
+                )}
               </div>
             </div>
+
+            {/* Logout Button */}
+            {session?.user && (
+              <div className="border-t border-border p-4">
+                <ButtonNaked
+                  onPress={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium">Logout</span>
+                </ButtonNaked>
+              </div>
+            )}
+          </div>
           </motion.div>
         </>
       )}

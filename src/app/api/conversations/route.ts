@@ -85,15 +85,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { targetUserId } = await request.json();
+    const { targetUserId, participantId, initialMessage } = await request.json();
+    const targetId = targetUserId || participantId; // Support both parameter names
 
-    if (!targetUserId) {
+    if (!targetId) {
       return NextResponse.json({ error: 'Target user ID is required' }, { status: 400 });
     }
 
     // Ensure the target user exists
     const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
+      where: { id: targetId },
     });
 
     if (!targetUser) {
@@ -101,20 +102,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure participants are different
-    if (user.id === targetUserId) {
+    if (user.id === targetId) {
       return NextResponse.json({ error: 'Cannot create conversation with yourself' }, { status: 400 });
     }
 
     // Generate consistent conversation IDs regardless of order
-    const participantIds = [user.id, targetUserId].sort();
+    const participantIds = [user.id, targetId].sort();
     const conversationId = `${participantIds[0]}_${participantIds[1]}`;
 
     // Check if conversation already exists
     let conversation = await prisma.conversation.findFirst({
       where: {
         OR: [
-          { participant1Id: user.id, participant2Id: targetUserId },
-          { participant1Id: targetUserId, participant2Id: user.id },
+          { participant1Id: user.id, participant2Id: targetId },
+          { participant1Id: targetId, participant2Id: user.id },
         ],
       },
     });
@@ -123,9 +124,27 @@ export async function POST(request: NextRequest) {
       conversation = await prisma.conversation.create({
         data: {
           id: conversationId,
-          participant1Id: user.id,
-          participant2Id: targetUserId,
+          participant1Id: participantIds[0],
+          participant2Id: participantIds[1],
+          lastMessageAt: new Date(),
         },
+      });
+    }
+
+    // Send initial message if provided
+    if (initialMessage) {
+      await prisma.message.create({
+        data: {
+          content: initialMessage,
+          senderId: user.id,
+          conversationId: conversation.id,
+        },
+      });
+
+      // Update conversation's last message timestamp
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { lastMessageAt: new Date() },
       });
     }
 

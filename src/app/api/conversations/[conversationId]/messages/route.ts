@@ -36,6 +36,15 @@ export async function GET(request: NextRequest, { params }: { params: { conversa
         content: true,
         createdAt: true,
         isRead: true,
+        type: true,
+        redPacketAmount: true,
+        redPacketMessage: true,
+        redPacketStatus: true,
+        redPacketClaimedAt: true,
+        // Task completion fields
+        taskPostId: true,
+        taskFinalAmount: true,
+        taskCompletionStatus: true,
         sender: {
           select: {
             id: true,
@@ -100,6 +109,15 @@ export async function POST(request: NextRequest, { params }: { params: { convers
         content: true,
         createdAt: true,
         isRead: true,
+        type: true,
+        redPacketAmount: true,
+        redPacketMessage: true,
+        redPacketStatus: true,
+        redPacketClaimedAt: true,
+        // Task completion fields
+        taskPostId: true,
+        taskFinalAmount: true,
+        taskCompletionStatus: true,
         sender: {
           select: {
             id: true,

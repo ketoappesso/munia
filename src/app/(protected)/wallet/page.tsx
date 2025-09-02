@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Send, Plus, Minus, Copy, Check, Coins } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Send, Plus, Minus, Copy, Check, Coins, Coffee, ArrowUp, ArrowDown } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,6 +15,7 @@ interface WalletInfo {
   username: string;
   walletAddress: string;
   apeBalance: number;
+  appessoBalance?: number; // Appesso Coffee balance
   walletCreatedAt: string;
 }
 
@@ -45,6 +46,7 @@ export default function WalletPage() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'transfer'>('overview');
+  const [activeCard, setActiveCard] = useState<'none' | 'ape' | 'coffee'>('none');
   const [copied, setCopied] = useState(false);
   const [amount, setAmount] = useState('');
   const [recipient, setRecipient] = useState('');
@@ -173,49 +175,78 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Balance Card */}
-      <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white shadow-xl">
-        <div className="mb-2 flex items-center gap-2">
-          <Coins className="h-5 w-5" />
-          <span className="text-sm opacity-90">APE 币余额</span>
-        </div>
-        <div className="mb-4 text-4xl font-bold">
-          {wallet?.apeBalance?.toFixed(2) || '0.00'}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="text-xs opacity-75">钱包地址:</div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono">
-              {wallet?.walletAddress ? `${wallet.walletAddress.slice(0, 6)}...${wallet.walletAddress.slice(-4)}` : ''}
-            </span>
-            <ButtonNaked onPress={handleCopyAddress} className="p-1">
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+      {/* APE Balance Card */}
+      <div className="relative mx-4 mt-6">
+        <div className="relative rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="mb-4 text-4xl font-bold">
+                {wallet?.apeBalance?.toFixed(2) || '0.00'}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs opacity-75">钱包地址:</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono">
+                    {wallet?.walletAddress ? `${wallet.walletAddress.slice(0, 6)}...${wallet.walletAddress.slice(-4)}` : ''}
+                  </span>
+                  <ButtonNaked onPress={handleCopyAddress} className="p-1">
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </ButtonNaked>
+                </div>
+              </div>
+            </div>
+            {/* Plus button for APE */}
+            <ButtonNaked
+              onPress={() => {
+                setActiveCard(activeCard === 'ape' ? 'none' : 'ape');
+                setActiveTab('deposit');
+              }}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+              <Plus className="h-6 w-6 text-white" />
             </ButtonNaked>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="mx-4 mt-6 grid grid-cols-3 gap-3">
-        <ButtonNaked
-          onPress={() => setActiveTab('deposit')}
-          className="flex flex-col items-center gap-2 rounded-xl bg-white p-4 shadow-sm hover:shadow-md dark:bg-gray-800">
-          <Plus className="h-6 w-6 text-green-500" />
-          <span className="text-sm">充值</span>
-        </ButtonNaked>
-        <ButtonNaked
-          onPress={() => setActiveTab('withdraw')}
-          className="flex flex-col items-center gap-2 rounded-xl bg-white p-4 shadow-sm hover:shadow-md dark:bg-gray-800">
-          <Minus className="h-6 w-6 text-red-500" />
-          <span className="text-sm">提现</span>
-        </ButtonNaked>
-        <ButtonNaked
-          onPress={() => setActiveTab('transfer')}
-          className="flex flex-col items-center gap-2 rounded-xl bg-white p-4 shadow-sm hover:shadow-md dark:bg-gray-800">
-          <Send className="h-6 w-6 text-blue-500" />
-          <span className="text-sm">转账</span>
-        </ButtonNaked>
+      {/* Arrow indicator between cards */}
+      <div className="relative h-12">
+        {activeCard !== 'none' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            {activeCard === 'ape' ? (
+              <ArrowUp className="h-10 w-10 text-purple-500 animate-bounce stroke-[4]" />
+            ) : (
+              <ArrowDown className="h-10 w-10 text-purple-500 animate-bounce stroke-[4]" />
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Appesso Coffee Balance Card */}
+      <div className="relative mx-4">
+        <div className="relative rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="mb-4 text-4xl font-bold">
+                {wallet?.appessoBalance?.toFixed(2) || '0.00'}
+              </div>
+              <div className="flex items-center gap-2">
+                <Coffee className="h-4 w-4" />
+                <span className="text-sm opacity-90">Appesso咖啡余额</span>
+              </div>
+            </div>
+            {/* Plus button for Coffee */}
+            <ButtonNaked
+              onPress={() => {
+                setActiveCard(activeCard === 'coffee' ? 'none' : 'coffee');
+                setActiveTab('withdraw');
+              }}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+              <Plus className="h-6 w-6 text-white" />
+            </ButtonNaked>
+          </div>
+        </div>
+      </div>
+
 
       {/* Transaction Form */}
       {activeTab !== 'overview' && (

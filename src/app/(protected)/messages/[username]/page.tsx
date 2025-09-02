@@ -3,12 +3,13 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
-import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon, Gift } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetcher } from '@/lib/fetcher';
 import { useMessaging } from '@/hooks/useMessaging';
 import { ChatMessages } from '@/components/ChatMessages';
 import { useSession } from 'next-auth/react';
+import { RedPacketModal } from '@/components/RedPacketModal';
 
 interface Message {
   id: string;
@@ -41,6 +42,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
 
   const [message, setMessage] = useState('');
   const [showActions, setShowActions] = useState(false);
+  const [showRedPacketModal, setShowRedPacketModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch conversation and other user info
@@ -120,6 +122,94 @@ export default function MessagesPage({ params }: { params: { username: string } 
       }
     }
   }, [conversation?.id, messages, sessionData?.user?.id, queryClient]);
+
+  // Fetch user balance for red packets
+  const { data: userBalance = 0, isLoading: isLoadingBalance } = useQuery<number>({
+    queryKey: ['user', 'balance'],
+    queryFn: async () => {
+      console.log('Fetching user balance...');
+      const res = await fetch('/api/users/balance');
+      if (!res.ok) {
+        const error = await res.text();
+        console.error('Failed to fetch balance:', error);
+        // Try the /api/users/me endpoint as fallback
+        const meRes = await fetch('/api/users/me');
+        if (meRes.ok) {
+          const user = await meRes.json();
+          console.log('Fallback user data:', user);
+          return user.apeBalance || 0;
+        }
+        throw new Error('Failed to fetch balance');
+      }
+      const data = await res.json();
+      console.log('Balance data received:', data);
+      console.log('User balance:', data.balance);
+      return data.balance || 0;
+    },
+    enabled: !!sessionData?.user,
+    refetchInterval: 30000, // Refresh balance every 30 seconds
+  });
+
+  // Debug balance
+  useEffect(() => {
+    console.log('Current user balance:', userBalance);
+    console.log('Balance loading:', isLoadingBalance);
+  }, [userBalance, isLoadingBalance]);
+
+  // Send red packet mutation
+  const sendRedPacketMutation = useMutation({
+    mutationFn: async ({ amount, message }: { amount: number; message?: string }) => {
+      if (!conversation?.id || !otherUser?.id) {
+        console.error('Missing data:', { conversationId: conversation?.id, otherUserId: otherUser?.id });
+        throw new Error('No conversation or recipient');
+      }
+      
+      console.log('Sending red packet:', {
+        recipientId: otherUser.id,
+        amount,
+        message,
+        conversationId: conversation.id,
+      });
+      
+      // Using test endpoint temporarily (bypasses auth issues)
+      const res = await fetch('/api/red-packets/test-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientId: otherUser.id,
+          amount,
+          message,
+          conversationId: conversation.id,
+          senderId: sessionData?.user?.id, // Include sender ID as fallback
+        }),
+      });
+      
+      const responseData = await res.json();
+      console.log('Red packet response:', responseData);
+      
+      if (!res.ok) {
+        console.error('Red packet send failed:', responseData);
+        if (responseData.currentBalance !== undefined) {
+          throw new Error(`${responseData.error}\n当前余额: ${responseData.currentBalance} APE\n需要: ${responseData.requiredAmount} APE`);
+        }
+        throw new Error(responseData.error || 'Failed to send red packet');
+      }
+      
+      return responseData;
+    },
+    onSuccess: (data) => {
+      console.log('Red packet sent successfully:', data);
+      setShowRedPacketModal(false);
+      // Refresh messages and balance
+      queryClient.invalidateQueries({ queryKey: ['messages', conversation?.id] });
+      queryClient.invalidateQueries({ queryKey: ['user', 'balance'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (error: Error) => {
+      console.error('Red packet mutation error:', error);
+      alert(`发送红包失败:\n${error.message}`);
+    },
+  });
 
   // Messaging hook
   const { sendMessage: sendWebSocketMessage, isConnected } = useMessaging({
@@ -278,6 +368,19 @@ export default function MessagesPage({ params }: { params: { username: string } 
         {/* Quick actions (shown when + is clicked) */}
         {showActions && (
           <div className="grid grid-cols-4 gap-4 border-t border-gray-100 p-4 dark:border-gray-800">
+            <button 
+              onClick={() => {
+                console.log('Red packet button clicked');
+                console.log('Current showRedPacketModal:', showRedPacketModal);
+                console.log('Setting showRedPacketModal to true');
+                setShowRedPacketModal(true);
+              }}
+              className="flex flex-col items-center gap-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
+                <Gift className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <span className="text-xs text-gray-600 dark:text-gray-400">红包</span>
+            </button>
             <button className="flex flex-col items-center gap-1">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
                 <ImageIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -293,6 +396,19 @@ export default function MessagesPage({ params }: { params: { username: string } 
           </div>
         )}
       </div>
+      
+      {/* Red Packet Modal */}
+      {showRedPacketModal && otherUser && (
+        <RedPacketModal
+          isOpen={showRedPacketModal}
+          onClose={() => setShowRedPacketModal(false)}
+          onSend={(amount, message) => {
+            sendRedPacketMutation.mutate({ amount, message });
+          }}
+          userBalance={userBalance}
+          recipientName={otherUser.name || otherUser.username}
+        />
+      )}
     </div>
   );
 }

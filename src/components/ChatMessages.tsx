@@ -2,10 +2,12 @@
 
 import { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import Image from 'next/image';
-import { format, isToday, isYesterday, parseISO, zhCN } from 'date-fns';
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { cn } from '@/lib/cn';
 import { ChevronDown } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { RedPacketMessage } from './RedPacketMessage';
+import { TaskCompletionMessage } from './TaskCompletionMessage';
 
 interface Message {
   id: string;
@@ -18,6 +20,15 @@ interface Message {
     name: string;
     profilePhoto: string;
   };
+  type?: string;
+  redPacketAmount?: number;
+  redPacketMessage?: string;
+  redPacketStatus?: string;
+  redPacketClaimedAt?: string;
+  // Task completion fields
+  taskPostId?: number;
+  taskFinalAmount?: number;
+  taskCompletionStatus?: string;
 }
 
 interface ChatMessagesProps {
@@ -52,7 +63,7 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
     if (isYesterday(date)) {
       return `昨天 ${format(date, 'HH:mm')}`;
     }
-    return format(date, 'MM/dd HH:mm', { locale: zhCN });
+    return format(date, 'MM/dd HH:mm');
   };
 
   const shouldShowTimestamp = (currentMsg: Message, prevMsg: Message | null) => {
@@ -136,18 +147,96 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                     </div>
                   )}
 
-                  <div
-                    className={cn(
-                      'relative max-w-[70%] rounded-2xl px-4 py-2',
-                      isOwnMessage
-                        ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
-                        : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
-                    )}>
-                    <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
-                    {!message.isRead && isOwnMessage && (
-                      <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
-                    )}
-                  </div>
+                  {message.type === 'RED_PACKET' ? (
+                    <RedPacketMessage
+                      amount={message.redPacketAmount || 0}
+                      message={message.redPacketMessage}
+                      senderName={message.sender.name || message.sender.username}
+                      isOwn={isOwnMessage}
+                      isOpened={message.redPacketStatus === 'CLAIMED'}
+                      // Commission red packets are auto-claimed, so no open handler
+                      onOpen={undefined}
+                    />
+                  ) : message.type === 'TASK_COMPLETION_REQUEST' ? (
+                    <TaskCompletionMessage
+                      postId={message.taskPostId || 0}
+                      amount={message.taskFinalAmount || 0}
+                      isTaskOwner={!isOwnMessage} // Task owner sees this when acceptor sends the message
+                      acceptorName={message.sender.name || message.sender.username}
+                      status={message.taskCompletionStatus as any || 'pending'}
+                      onComplete={async () => {
+                        try {
+                          const res = await fetch(`/api/posts/${message.taskPostId}/handle-completion`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'complete', messageId: message.id }),
+                          });
+                          if (res.ok) {
+                            window.location.reload(); // Refresh to show updated status
+                          } else {
+                            const error = await res.json();
+                            alert(error.error || 'Failed to complete task');
+                          }
+                        } catch (err) {
+                          console.error('Error completing task:', err);
+                          alert('Failed to complete task');
+                        }
+                      }}
+                      onReject={async () => {
+                        try {
+                          const res = await fetch(`/api/posts/${message.taskPostId}/handle-completion`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'reject', messageId: message.id }),
+                          });
+                          if (res.ok) {
+                            window.location.reload(); // Refresh to show updated status
+                          } else {
+                            const error = await res.json();
+                            alert(error.error || 'Failed to reject task');
+                          }
+                        } catch (err) {
+                          console.error('Error rejecting task:', err);
+                          alert('Failed to reject task');
+                        }
+                      }}
+                      onFail={async () => {
+                        try {
+                          const res = await fetch(`/api/posts/${message.taskPostId}/handle-completion`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'fail', messageId: message.id }),
+                          });
+                          if (res.ok) {
+                            window.location.reload(); // Refresh to show updated status
+                          } else {
+                            const error = await res.json();
+                            alert(error.error || 'Failed to mark task as failed');
+                          }
+                        } catch (err) {
+                          console.error('Error failing task:', err);
+                          alert('Failed to mark task as failed');
+                        }
+                      }}
+                    />
+                  ) : message.type === 'SYSTEM' ? (
+                    <div className="max-w-[70%] rounded-lg bg-blue-50 px-3 py-2 text-center">
+                      <p className="text-sm text-blue-800">{message.content}</p>
+                    </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        'relative max-w-[70%] rounded-2xl px-4 py-2',
+                        isOwnMessage
+                          ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                          : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+                      )}>
+                      <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
+                      {!message.isRead && isOwnMessage && (
+                        <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );

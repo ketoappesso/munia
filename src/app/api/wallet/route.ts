@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
+import { createPospalClient } from '@/lib/pospal/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,6 +41,7 @@ export async function GET(request: NextRequest) {
           walletAddress: true,
           apeBalance: true,
           walletCreatedAt: true,
+          phoneNumber: true,
         },
       });
 
@@ -55,10 +57,43 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      return NextResponse.json(updatedUser);
+      // Fetch Appesso balance
+      let appessoBalance = 0;
+      try {
+        if (updatedUser.phoneNumber) {
+          const pospalClient = createPospalClient(); // Main store only
+          appessoBalance = await pospalClient.getCustomerBalance(updatedUser.phoneNumber);
+        }
+      } catch (error) {
+        console.log('Failed to fetch Appesso balance:', error);
+      }
+
+      return NextResponse.json({
+        ...updatedUser,
+        appessoBalance,
+      });
     }
 
-    return NextResponse.json(walletInfo);
+    // Fetch Appesso balance for existing wallet
+    let appessoBalance = 0;
+    try {
+      const userPhone = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { phoneNumber: true },
+      });
+      
+      if (userPhone?.phoneNumber) {
+        const pospalClient = createPospalClient(); // Main store only
+        appessoBalance = await pospalClient.getCustomerBalance(userPhone.phoneNumber);
+      }
+    } catch (error) {
+      console.log('Failed to fetch Appesso balance:', error);
+    }
+
+    return NextResponse.json({
+      ...walletInfo,
+      appessoBalance,
+    });
   } catch (error) {
     console.error('Error fetching wallet:', error);
     return NextResponse.json({ error: 'Failed to fetch wallet information' }, { status: 500 });

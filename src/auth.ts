@@ -76,14 +76,33 @@ export const {
   },
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
+      // When user logs in, attach user data to token
       if (user) {
         token.id = user.id;
         token.name = user.name || user.username || user.phoneNumber;
+        token.username = user.username;
       }
+      
+      // Handle session updates (e.g., when user logs out and logs in with different account)
+      if (trigger === 'update') {
+        // Clear any cached data
+        return { ...token };
+      }
+      
+      // Validate token has required fields
+      if (!token.sub) {
+        return null;
+      }
+      
       return token;
     },
     session({ token, user, ...rest }) {
+      // Validate token before creating session
+      if (!token || !token.sub) {
+        return null;
+      }
+      
       return {
         /**
          * We need to explicitly return the `id` here to make it available to the client
@@ -94,8 +113,9 @@ export const {
          * custom hook instead.
          */
         user: {
-          id: token.sub!,
+          id: token.sub,
           name: token.name as string,
+          username: token.username as string,
         },
         expires: rest.session.expires,
       };

@@ -10,7 +10,7 @@ interface ModalProps extends AriaModalOverlayProps {
 
 export function Modal({ state, children, ...rest }: ModalProps) {
   const ref = useRef(null);
-  const { modalProps, underlayProps } = useModalOverlay(rest, state, ref);
+  const { modalProps, underlayProps } = useModalOverlay({ ...rest, isOpen: state.isOpen, onClose: state.close }, state, ref);
   const variants = useMemo(
     () => ({
       initial: { backdropFilter: 'blur(0)', opacity: 0 },
@@ -22,7 +22,7 @@ export function Modal({ state, children, ...rest }: ModalProps) {
 
   return (
     <Overlay>
-      <div {...underlayProps} className="fixed inset-0 z-30 h-screen w-screen">
+      <div {...underlayProps} className="fixed inset-0 z-[100] h-screen w-screen bg-black/50">
         <motion.div variants={variants} initial="initial" animate="animate" exit="exit" className="h-full w-full">
           <div {...modalProps} ref={ref} className="h-full w-full">
             {children}

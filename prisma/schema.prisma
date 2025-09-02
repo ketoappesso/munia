@@ -107,9 +107,17 @@ model Post {
   comments    Comment[]
   isTask      Boolean       @default(false)
   rewardAmount Float        @default(0)
-  taskStatus  String?       // OPEN, IN_PROGRESS, COMPLETED
-  completedBy String?       // UserId who completed the task
-  completedAt DateTime?
+  taskStatus  String?       // OPEN, IN_PROGRESS, COMPLETION_REQUESTED, COMPLETED, REJECTED
+  completedBy String?       // UserId who accepted the task
+  completedAt DateTime?     // When task was accepted
+  
+  // Commission payment tracking
+  initialPaymentAmount Float?    // 50% paid on acceptance
+  initialPaymentAt DateTime?     // When initial payment was made
+  finalPaymentAmount Float?      // Remaining 50% 
+  finalPaymentAt DateTime?       // When final payment was made
+  completionRequestedAt DateTime? // When acceptor requested completion
+  completionConfirmedAt DateTime? // When owner confirmed completion
 }
 
 model PostLike {
@@ -233,8 +241,21 @@ model Message {
   createdAt      DateTime     @default(now())
   isRead         Boolean      @default(false)
   
+  // Red packet fields
+  type           String       @default("TEXT") // TEXT, RED_PACKET, SYSTEM, TASK_COMPLETION_REQUEST
+  redPacketAmount Float?
+  redPacketMessage String?
+  redPacketStatus String?     // PENDING, CLAIMED
+  redPacketClaimedAt DateTime?
+  
+  // Task completion fields
+  taskPostId     Int?
+  taskFinalAmount Float?
+  taskCompletionStatus String? // pending, completed, rejected, failed
+  
   @@index([conversationId, createdAt])
   @@index([senderId])
+  @@index([type])
 }
 
 model WalletTransaction {

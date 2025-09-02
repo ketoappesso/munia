@@ -68,23 +68,70 @@ export async function serverWritePost({ formData, type, postId }: Props) {
     const savedFiles = await savePostFiles(filesArr);
 
     if (type === 'create') {
-      const res = await prisma.post.create({
-        data: {
-          content: str,
-          isTask: isTask || undefined,
-          rewardAmount: isTask ? rewardAmount : 0,
-          ...(files !== undefined && {
-            visualMedia: {
-              create: savedFiles.map((savedFile) => ({
-                type: savedFile.type,
-                fileName: savedFile.fileName,
-                user: { connect: { id: userId } },
-              })),
+      // If creating a task, check user balance and deduct commission immediately
+      if (isTask && rewardAmount > 0) {
+        const userBalance = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { apeBalance: true },
+        });
+        
+        if (!userBalance || userBalance.apeBalance < rewardAmount) {
+          return NextResponse.json({ 
+            error: `余额不足。需要 ${rewardAmount} APE，当前余额：${userBalance?.apeBalance || 0} APE` 
+          }, { status: 400 });
+        }
+      }
+      
+      // Use transaction to ensure atomicity
+      const res = await prisma.$transaction(async (tx) => {
+        // Create the post
+        const post = await tx.post.create({
+          data: {
+            content: str,
+            isTask: isTask || undefined,
+            rewardAmount: isTask ? rewardAmount : 0,
+            taskStatus: isTask ? 'OPEN' : undefined,
+            ...(files !== undefined && {
+              visualMedia: {
+                create: savedFiles.map((savedFile) => ({
+                  type: savedFile.type,
+                  fileName: savedFile.fileName,
+                  user: { connect: { id: userId } },
+                })),
+              },
+            }),
+            userId,
+          },
+          select: selectPost(userId),
+        });
+        
+        // If it's a task, deduct the commission from user's balance immediately
+        if (isTask && rewardAmount > 0) {
+          // Deduct from user balance
+          await tx.user.update({
+            where: { id: userId },
+            data: {
+              apeBalance: {
+                decrement: rewardAmount,
+              },
             },
-          }),
-          userId,
-        },
-        select: selectPost(userId),
+          });
+          
+          // Create wallet transaction record
+          await tx.walletTransaction.create({
+            data: {
+              type: 'TASK_POST',
+              amount: rewardAmount,
+              status: 'COMPLETED',
+              description: `发布悬赏任务 - ${str?.substring(0, 50)}`,
+              fromUserId: userId,
+              toUserId: userId, // Initially held by system
+              completedAt: new Date(),
+            },
+          });
+        }
+        
+        return post;
       });
 
       // Log the 'POST_MENTION' activity if applicable

@@ -1,12 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Settings, LogOut, Wallet, Edit } from 'lucide-react';
+import { X, Settings, LogOut, Wallet, Edit, Coins } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { signOut } from 'next-auth/react';
 import { useDialogs } from '@/hooks/useDialogs';
+import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
 
 interface ProfileSidebarProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function ProfileSidebar({
 }: ProfileSidebarProps) {
   const router = useRouter();
   const { confirm } = useDialogs();
+  const { data: wallet } = useWalletQuery();
 
   const handleNavigation = (path: string) => {
     onClose();
@@ -79,9 +81,9 @@ export function ProfileSidebar({
             </div>
 
             {/* Content */}
-            <div className="flex h-[calc(100%-72px)] flex-col p-4">
-              {/* Profile Actions */}
-              <div className="flex-1 space-y-2">
+            <div className="flex h-[calc(100%-72px)] flex-col">
+              <div className="flex-1 space-y-2 p-4">
+                {/* Profile Actions for own profile */}
                 {isOwnProfile && (
                   <>
                     <ButtonNaked
@@ -104,36 +106,67 @@ export function ProfileSidebar({
                       <Settings className="h-5 w-5 text-foreground" />
                       <span className="text-foreground">Settings</span>
                     </ButtonNaked>
+
+                    {/* Divider */}
+                    <div className="my-4 border-t border-border" />
                   </>
                 )}
 
+                {/* Wallet Section - Same style as NavigationSidebar */}
+                {isOwnProfile && (
+                  <div className="mb-4">
+                    <ButtonNaked
+                      onPress={() => handleNavigation('/wallet')}
+                      className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-4 transition-all hover:from-purple-500/20 hover:to-blue-500/20">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500">
+                          <Wallet className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">我的钱包</p>
+                          <p className="text-xs text-muted-foreground">点击管理资产</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center gap-1">
+                          <Coins className="h-4 w-4 text-yellow-500" />
+                          <span className="text-lg font-bold text-foreground">
+                            {wallet?.apeBalance?.toFixed(0) || '0'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">APE</p>
+                      </div>
+                    </ButtonNaked>
+                  </div>
+                )}
+
                 {/* Navigation Links */}
-                <div className="mt-6">
+                <div>
                   <h3 className="mb-3 text-sm font-medium text-muted-foreground">Navigation</h3>
                   
                   <ButtonNaked
                     onPress={() => handleNavigation('/feed')}
-                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
                     <span className="text-foreground">Feed</span>
                   </ButtonNaked>
 
                   <ButtonNaked
                     onPress={() => handleNavigation('/messages')}
-                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
                     <span className="text-foreground">Messages</span>
                   </ButtonNaked>
 
                   <ButtonNaked
                     onPress={() => handleNavigation('/discover')}
-                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">Discover</span>
+                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <span className="text-foreground">Discover People</span>
                   </ButtonNaked>
                 </div>
               </div>
 
               {/* Logout Button - Only show for own profile */}
               {isOwnProfile && (
-                <div className="border-t border-border pt-4">
+                <div className="border-t border-border p-4">
                   <ButtonNaked
                     onPress={handleLogout}
                     className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20">
