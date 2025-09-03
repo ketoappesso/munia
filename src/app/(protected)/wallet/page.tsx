@@ -45,7 +45,7 @@ export default function WalletPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'transfer'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw' | 'transfer' | 'to_appesso' | 'from_appesso'>('overview');
   const [activeCard, setActiveCard] = useState<'none' | 'ape' | 'coffee'>('none');
   const [copied, setCopied] = useState(false);
   const [amount, setAmount] = useState('');
@@ -96,6 +96,31 @@ export default function WalletPage() {
       setRecipient('');
       setDescription('');
       setActiveTab('overview');
+      setActiveCard('none');
+    },
+  });
+
+  // Transfer mutation for Munia-Appesso transfers
+  const transferMutation = useMutation({
+    mutationFn: async (data: { direction: 'TO_APPESSO' | 'FROM_APPESSO'; amount: number; description?: string }) => {
+      const response = await fetch('/api/wallet/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Transfer failed');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      setAmount('');
+      setDescription('');
+      setActiveTab('overview');
+      setActiveCard('none');
     },
   });
 
@@ -128,6 +153,31 @@ export default function WalletPage() {
       amount: amountNum,
       toUsername: type === 'TRANSFER' ? recipient : undefined,
       description: description || undefined,
+    });
+  };
+
+  const handleAppessoTransfer = (direction: 'TO_APPESSO' | 'FROM_APPESSO') => {
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      alert('请输入有效金额');
+      return;
+    }
+
+    // Check if user has enough balance
+    if (direction === 'TO_APPESSO' && wallet && wallet.apeBalance < amountNum) {
+      alert('APE余额不足');
+      return;
+    }
+
+    if (direction === 'FROM_APPESSO' && wallet && (wallet.appessoBalance || 0) < amountNum) {
+      alert('Appesso余额不足');
+      return;
+    }
+
+    transferMutation.mutate({
+      direction,
+      amount: amountNum,
+      description: description || (direction === 'TO_APPESSO' ? '转账到Appesso咖啡账户' : '从Appesso咖啡账户转入'),
     });
   };
 
@@ -180,6 +230,10 @@ export default function WalletPage() {
         <div className="relative rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex-1">
+              <div className="mb-2 flex items-center gap-2">
+                <Coins className="h-6 w-6" />
+                <span className="text-lg font-semibold">APE 余额</span>
+              </div>
               <div className="mb-4 text-4xl font-bold">
                 {wallet?.apeBalance?.toFixed(2) || '0.00'}
               </div>
@@ -203,10 +257,14 @@ export default function WalletPage() {
                   setActiveTab('overview');
                 } else {
                   setActiveCard('ape');
-                  setActiveTab('deposit');
+                  setActiveTab('from_appesso');
                 }
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 ${
+                activeCard === 'ape' 
+                  ? 'bg-white/40 scale-110' 
+                  : 'bg-white/20 hover:bg-white/30'
+              }`}>
               <Plus className={`h-6 w-6 text-white transition-transform duration-300 ${
                 activeCard === 'ape' ? 'rotate-45' : 'rotate-0'
               }`} />
@@ -222,9 +280,15 @@ export default function WalletPage() {
         {activeCard !== 'none' && (
           <div className="absolute inset-0 flex items-center justify-center">
             {activeCard === 'ape' ? (
-              <ArrowDown className="h-8 w-8 text-purple-500 animate-pulse stroke-[3]" />
+              // APE card clicked - arrow points UP (money flowing up/in)
+              <div className="animate-bounce">
+                <ArrowUp className="h-10 w-10 text-blue-600 drop-shadow-lg stroke-[2.5]" />
+              </div>
             ) : (
-              <ArrowUp className="h-8 w-8 text-purple-500 animate-pulse stroke-[3]" />
+              // Appesso card clicked - arrow points DOWN (money flowing down/out)
+              <div className="animate-bounce">
+                <ArrowDown className="h-10 w-10 text-blue-600 drop-shadow-lg stroke-[2.5]" />
+              </div>
             )}
           </div>
         )}
@@ -235,12 +299,15 @@ export default function WalletPage() {
         <div className="relative rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 p-6 text-white shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex-1">
+              <div className="mb-2 flex items-center gap-2">
+                <Coffee className="h-6 w-6" />
+                <span className="text-lg font-semibold">Appesso 咖啡</span>
+              </div>
               <div className="mb-4 text-4xl font-bold">
                 {wallet?.appessoBalance?.toFixed(2) || '0.00'}
               </div>
-              <div className="flex items-center gap-2">
-                <Coffee className="h-4 w-4" />
-                <span className="text-sm opacity-90">Appesso咖啡余额</span>
+              <div className="flex items-center gap-2 text-sm opacity-90">
+                <span>咖啡余额</span>
               </div>
             </div>
             {/* Plus button for Coffee */}
@@ -251,10 +318,14 @@ export default function WalletPage() {
                   setActiveTab('overview');
                 } else {
                   setActiveCard('coffee');
-                  setActiveTab('withdraw');
+                  setActiveTab('to_appesso');
                 }
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300">
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 ${
+                activeCard === 'coffee' 
+                  ? 'bg-white/40 scale-110' 
+                  : 'bg-white/20 hover:bg-white/30'
+              }`}>
               <Plus className={`h-6 w-6 text-white transition-transform duration-300 ${
                 activeCard === 'coffee' ? 'rotate-45' : 'rotate-0'
               }`} />
@@ -272,6 +343,8 @@ export default function WalletPage() {
               {activeTab === 'deposit' && '充值 APE 币'}
               {activeTab === 'withdraw' && '提现 APE 币'}
               {activeTab === 'transfer' && '转账 APE 币'}
+              {activeTab === 'to_appesso' && 'APE → Appesso 转账'}
+              {activeTab === 'from_appesso' && 'Appesso → APE 转账'}
             </h2>
             <ButtonNaked
               onPress={() => setActiveTab('overview')}
@@ -317,15 +390,23 @@ export default function WalletPage() {
             </div>
 
             <Button
-              onPress={() => handleTransaction(activeTab.toUpperCase() as 'DEPOSIT' | 'WITHDRAW' | 'TRANSFER')}
-              isDisabled={transactionMutation.isPending}
+              onPress={() => {
+                if (activeTab === 'to_appesso') {
+                  handleAppessoTransfer('TO_APPESSO');
+                } else if (activeTab === 'from_appesso') {
+                  handleAppessoTransfer('FROM_APPESSO');
+                } else {
+                  handleTransaction(activeTab.toUpperCase() as 'DEPOSIT' | 'WITHDRAW' | 'TRANSFER');
+                }
+              }}
+              isDisabled={transactionMutation.isPending || transferMutation.isPending}
               className="w-full">
-              {transactionMutation.isPending ? '处理中...' : '确认'}
+              {(transactionMutation.isPending || transferMutation.isPending) ? '处理中...' : '确认'}
             </Button>
 
-            {transactionMutation.isError && (
+            {(transactionMutation.isError || transferMutation.isError) && (
               <p className="text-sm text-red-500">
-                {transactionMutation.error?.message || '交易失败'}
+                {transactionMutation.error?.message || transferMutation.error?.message || '交易失败'}
               </p>
             )}
           </div>

@@ -12,9 +12,11 @@ import { DropdownMenuButton } from '@/components/ui/DropdownMenuButton';
 import { Section, Item } from 'react-stately';
 import { useNotificationsCountQuery } from '@/hooks/queries/useNotificationsCountQuery';
 import { useNotificationsReadStatusMutations } from '@/hooks/mutations/useNotificationsReadStatusMutations';
+import { useRouter } from 'next/navigation';
 
 export default function MessagesPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'messages' | 'notifications'>('messages');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,9 +30,8 @@ export default function MessagesPage() {
   }, []);
   
   const handleSearchClick = useCallback(() => {
-    // TODO: Implement search functionality
-    console.log('Search messages');
-  }, []);
+    router.push('/messages/search');
+  }, [router]);
   
   const markAllAsRead = useCallback(
     (key: Key) => {

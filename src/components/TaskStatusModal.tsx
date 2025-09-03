@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useOverlayTriggerState } from 'react-stately';
 import { Modal } from './Modal';
 import Button from './ui/Button';
-import { Trophy, Clock, User, Calendar, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Trophy, Clock, User, Calendar, CheckCircle, XCircle, DollarSign, X } from 'lucide-react';
 import { GetPost } from '@/types/definitions';
 import { ProfilePhoto } from './ui/ProfilePhoto';
 import { formatDistanceToNow } from 'date-fns';
@@ -106,9 +106,21 @@ export function TaskStatusModal({
   return (
     <Modal state={state}>
       <div className="flex h-full w-full items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl relative">
+          {/* Close Button */}
+          <button
+            onClick={() => {
+              state.close();
+              onClose();
+            }}
+            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+            aria-label="关闭"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
           {/* Header */}
-          <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3 pr-10">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-blue-500">
               <Trophy className="h-6 w-6 text-white" />
             </div>
@@ -235,23 +247,25 @@ export function TaskStatusModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="space-y-3">
             {canRequestCompletion && (
-              <Button
-                onPress={() => {
-                  if (confirm('确认申请任务完成？发布者将有7天时间确认。')) {
-                    requestCompletionMutation.mutate();
-                  }
-                }}
-                loading={requestCompletionMutation.isPending}
-                className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white">
-                <DollarSign className="h-4 w-4 mr-1" />
-                申请完成（获取尾款）
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  onPress={() => {
+                    if (confirm('确认申请任务完成？发布者将有7天时间确认。')) {
+                      requestCompletionMutation.mutate();
+                    }
+                  }}
+                  loading={requestCompletionMutation.isPending}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white">
+                  <DollarSign className="h-4 w-4 mr-1" />
+                  申请完成（获取尾款）
+                </Button>
+              </div>
             )}
             
             {canConfirmCompletion && (
-              <>
+              <div className="flex gap-3">
                 <Button
                   onPress={() => {
                     if (confirm('确认任务已完成？尾款将立即发放给揭榜者。')) {
@@ -275,20 +289,19 @@ export function TaskStatusModal({
                   <XCircle className="h-4 w-4 mr-1" />
                   拒绝
                 </Button>
-              </>
+              </div>
             )}
             
-            {!canRequestCompletion && !canConfirmCompletion && (
-              <Button
-                mode="secondary"
-                onPress={() => {
-                  state.close();
-                  onClose();
-                }}
-                className="w-full">
-                关闭
-              </Button>
-            )}
+            {/* Always show close button */}
+            <Button
+              mode="secondary"
+              onPress={() => {
+                state.close();
+                onClose();
+              }}
+              className="w-full border-gray-300 text-gray-700">
+              关闭
+            </Button>
           </div>
         </div>
       </div>

@@ -1,0 +1,575 @@
+
+> munia@0.1.0 dev
+> next dev -p 3002
+
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3002
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · scrollRestoration
+
+ ✓ Starting...
+ ✓ Ready in 2.4s
+ ○ Compiling /api/conversations ...
+ ✓ Compiled /api/conversations in 1159ms (830 modules)
+ GET /api/wallet/transactions 200 in 1390ms
+ GET /api/conversations 200 in 1389ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 22ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 19ms
+ GET /api/wallet/transactions 200 in 19ms
+ ✓ Compiled /api/posts in 331ms (921 modules)
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 647ms
+ GET /api/conversations 200 in 28ms
+ GET /api/wallet/transactions 200 in 20ms
+ GET /api/conversations 200 in 15ms
+ GET /api/conversations 200 in 17ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 22ms
+ GET /api/conversations 200 in 18ms
+ GET /api/wallet/transactions 200 in 20ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 18ms
+ GET /api/conversations 200 in 18ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 16ms
+ GET /api/conversations 200 in 17ms
+ GET /api/wallet/transactions 200 in 13ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 14ms
+ GET /api/conversations 200 in 16ms
+ GET /api/conversations 200 in 17ms
+ GET /api/wallet/transactions 200 in 14ms
+ GET /api/conversations 200 in 8ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 15ms
+ GET /api/wallet/transactions 200 in 17ms
+ GET /api/conversations 200 in 16ms
+ ✓ Compiled /api/wallet/transfer in 152ms (928 modules)
+ POST /api/wallet/transfer 401 in 192ms
+ GET /api/conversations 200 in 19ms
+ GET /api/wallet/transactions 200 in 17ms
+ GET /api/conversations 200 in 14ms
+ GET /api/conversations 200 in 14ms
+ GET /api/wallet/transactions 200 in 13ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 21ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 15ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 15ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 12ms
+ GET /api/wallet/transactions 200 in 15ms
+ GET /api/conversations 200 in 12ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 14ms
+ GET /api/conversations 200 in 17ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 15ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 17ms
+ GET /api/conversations 200 in 15ms
+ GET /api/wallet/transactions 200 in 15ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 15ms
+ GET /api/wallet/transactions 200 in 15ms
+ GET /api/conversations 200 in 13ms
+ GET /api/conversations 200 in 15ms
+ GET /api/wallet/transactions 200 in 19ms
+ GET /api/conversations 200 in 13ms
+ GET /api/wallet/transactions 200 in 13ms
+ GET /api/conversations 200 in 15ms
+ GET /api/conversations 200 in 16ms
+ GET /api/wallet/transactions 200 in 15ms
+ GET /api/conversations 200 in 17ms
+ GET /api/conversations 200 in 24ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 20ms
+ GET /api/wallet/transactions 200 in 26ms
+ GET /api/conversations 200 in 32ms
+ ✓ Compiled /api/wallet in 197ms (928 modules)
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 490ms
+ GET /api/conversations 200 in 22ms
+ ✓ Compiled /api/auth/[...nextauth] in 94ms (930 modules)
+ GET /api/auth/csrf 200 in 433ms
+ POST /api/auth/signout 200 in 7ms
+ GET /api/auth/session 200 in 9ms
+ GET /api/auth/session 200 in 31ms
+ GET /api/auth/session 200 in 103ms
+ GET /api/auth/session 200 in 79ms
+ GET /api/auth/session 200 in 71ms
+ ✓ Compiled /src/middleware in 465ms (234 modules)
+ GET /api/auth/session 200 in 107ms
+ ○ Compiling / ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled /login in 7.3s (3334 modules)
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 7271ms
+ GET /api/posts?limit=3&cursor=17&sort-direction=desc 200 in 1611ms
+ GET /api/auth/session 200 in 7516ms
+ GET /login 200 in 3190ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 285ms
+ GET /api/auth/session 200 in 14ms
+ GET /login?from=%2F.well-known%2Fappspecific%2Fcom.chrome.devtools.json 200 in 35ms
+ GET /api/auth/session 200 in 8ms
+ GET /api/auth/session 200 in 17ms
+ GET /api/auth/session 200 in 6ms
+ GET /api/auth/session 200 in 5ms
+ GET /api/auth/session 200 in 9ms
+ GET /api/auth/session 200 in 6ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 4ms
+ GET /api/auth/session 200 in 4ms
+ GET /api/auth/providers 200 in 43ms
+ GET /api/auth/csrf 200 in 10ms
+Credentials received: { phoneNumber: '18874748888', password: '123456', smsCode: undefined }
+Looking for user with phone: 18874748888
+User found: {
+  id: 'cmf01hgh60000os9y0zq5bxj2',
+  username: '18874748888',
+  email: null,
+  name: 'appesso',
+  gender: 'MALE',
+  birthDate: null,
+  phoneNumber: '18874748888',
+  address: null,
+  bio: 'My Body, My Tempel',
+  website: 'xyuan.chat',
+  relationshipStatus: null,
+  emailVerified: null,
+  image: null,
+  profilePhoto: null,
+  coverPhoto: null,
+  passwordHash: '$2b$12$qW5U/jzcSAgEXAmx/CLpXOKhIucuRu06oCEKXQESRd8OuG4mWulSu',
+  walletAddress: '0x636d66303168676836303030306f733979307a71',
+  apeBalance: 27.35,
+  walletCreatedAt: 2025-09-01T12:42:50.022Z
+}
+Password validation result: true
+ POST /api/auth/callback/credentials? 200 in 325ms
+ GET /api/auth/session 200 in 6ms
+ ○ Compiling /feed ...
+ ✓ Compiled /feed in 2.1s (5311 modules)
+ GET /feed 200 in 2299ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 544ms (5314 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 619ms
+ ○ Compiling /api/users/[userId] ...
+ ✓ Compiled /api/users/[userId] in 686ms (3187 modules)
+ GET /api/posts?limit=3&cursor=0&sort-direction=desc 200 in 923ms
+ GET /api/auth/session 200 in 927ms
+ GET /api/conversations 200 in 973ms
+ GET /api/posts?limit=3&cursor=0&sort-direction=desc 200 in 59ms
+ GET /api/auth/session 200 in 19ms
+ GET /api/posts?limit=3&cursor=0&sort-direction=desc 200 in 16ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 20ms
+ GET /api/auth/session 200 in 27ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 34ms
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 1164ms
+ GET /api/conversations 200 in 53ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 8ms
+ GET /api/conversations 200 in 19ms
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 74ms
+ GET /api/users/cmf19h5950009i32fuivfvy8j 200 in 405ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 1449ms
+ GET /api/conversations 200 in 34ms
+ GET /images/default-avatar.jpg 404 in 66ms
+ ⨯ The requested resource isn't a valid image for /images/default-avatar.jpg received text/html; charset=utf-8
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 114ms
+ ✓ Compiled /api/users/[userId]/notifications/count in 219ms (3190 modules)
+ GET /api/conversations 200 in 508ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2/notifications/count 200 in 800ms
+ GET /api/conversations 200 in 26ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 43ms
+ GET /api/conversations 200 in 45ms
+ ○ Compiling /wallet ...
+ ✓ Compiled /wallet in 771ms (5360 modules)
+ GET /api/wallet/transactions 200 in 72ms
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 229ms
+ GET /api/conversations 200 in 43ms
+ GET /api/conversations 200 in 28ms
+ GET /api/wallet/transactions 200 in 37ms
+ GET /api/conversations 200 in 37ms
+ GET /api/wallet/transactions 200 in 50ms
+ GET /api/conversations 200 in 42ms
+ GET /api/conversations 200 in 24ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 25ms
+ GET /api/conversations 200 in 25ms
+ GET /api/wallet/transactions 200 in 29ms
+ GET /api/conversations 200 in 40ms
+ ✓ Compiled /api/wallet/transfer in 400ms (3206 modules)
+Error processing transfer: PrismaClientValidationError: 
+Invalid `prisma.walletTransaction.create()` invocation:
+
+{
+  data: {
+    type: "TRANSFER",
+    amount: 12.35,
+    status: "PENDING",
+    description: "第二次",
+    toUserId: "cmf01hgh60000os9y0zq5bxj2",
+    ~~~~~~~~
+    metadata: {
+      direction: "FROM_APPESSO",
+      customerUid: "1553000770706847752",
+      phoneNumber: "18874748888"
+    },
+?   id?: String,
+?   txHash?: String | Null,
+?   createdAt?: DateTime,
+?   completedAt?: DateTime | Null,
+?   fromUser?: UserCreateNestedOneWithoutSentTransactionsInput,
+?   toUser?: UserCreateNestedOneWithoutReceivedTransactionsInput
+  }
+}
+
+Unknown argument `toUserId`. Did you mean `toUser`? Available options are listed in green.
+    at Ur (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:115:5803)
+    at zr.handleRequestError (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:8007)
+    at zr.handleAndLogRequestError (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:7697)
+    at zr.request (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:7307)
+    at async eval (webpack-internal:///(rsc)/./src/app/api/wallet/transfer/route.ts:168:37)
+    at async Proxy._transactionWithCallback (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:126:8951)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/wallet/transfer/route.ts:166:28)
+    at async /Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55038
+    at async ek.execute (/Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:45808)
+    at async ek.handle (/Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:56292)
+    at async doRender (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1377:42)
+    at async cacheEntry.responseCache.get.routeKind (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1599:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1507:28)
+    at async DevServer.renderPageComponent (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1931:24)
+    at async DevServer.renderToResponseImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1969:32)
+    at async DevServer.pipeImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:920:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:816:17)
+    at async /Users/ketoz/Documents/munia/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/ketoz/Documents/munia/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:353:24)
+    at async requestHandlerImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  clientVersion: '5.0.0'
+}
+Error details: {
+  name: 'PrismaClientValidationError',
+  message: '\n' +
+    'Invalid `prisma.walletTransaction.create()` invocation:\n' +
+    '\n' +
+    '{\n' +
+    '  data: {\n' +
+    '    type: "TRANSFER",\n' +
+    '    amount: 12.35,\n' +
+    '    status: "PENDING",\n' +
+    '    description: "第二次",\n' +
+    '    toUserId: "cmf01hgh60000os9y0zq5bxj2",\n' +
+    '    ~~~~~~~~\n' +
+    '    metadata: {\n' +
+    '      direction: "FROM_APPESSO",\n' +
+    '      customerUid: "1553000770706847752",\n' +
+    '      phoneNumber: "18874748888"\n' +
+    '    },\n' +
+    '?   id?: String,\n' +
+    '?   txHash?: String | Null,\n' +
+    '?   createdAt?: DateTime,\n' +
+    '?   completedAt?: DateTime | Null,\n' +
+    '?   fromUser?: UserCreateNestedOneWithoutSentTransactionsInput,\n' +
+    '?   toUser?: UserCreateNestedOneWithoutReceivedTransactionsInput\n' +
+    '  }\n' +
+    '}\n' +
+    '\n' +
+    'Unknown argument `toUserId`. Did you mean `toUser`? Available options are listed in green.',
+  stack: 'PrismaClientValidationError: \n' +
+    'Invalid `prisma.walletTransaction.create()` invocation:\n' +
+    '\n' +
+    '{\n' +
+    '  data: {\n' +
+    '    type: "TRANSFER",\n' +
+    '    amount: 12.35,\n' +
+    '    status: "PENDING",\n' +
+    '    description: "第二次",\n' +
+    '    toUserId: "cmf01hgh60000os9y0zq5bxj2",\n' +
+    '    ~~~~~~~~\n' +
+    '    metadata: {\n' +
+    '      direction: "FROM_APPESSO",\n' +
+    '      customerUid: "1553000770706847752",\n' +
+    '      phoneNumber: "18874748888"\n' +
+    '    },\n' +
+    '?   id?: String,\n' +
+    '?   txHash?: String | Null,\n' +
+    '?   createdAt?: DateTime,\n' +
+    '?   completedAt?: DateTime | Null,\n' +
+    '?   fromUser?: UserCreateNestedOneWithoutSentTransactionsInput,\n' +
+    '?   toUser?: UserCreateNestedOneWithoutReceivedTransactionsInput\n' +
+    '  }\n' +
+    '}\n' +
+    '\n' +
+    'Unknown argument `toUserId`. Did you mean `toUser`? Available options are listed in green.\n' +
+    '    at Ur (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:115:5803)\n' +
+    '    at zr.handleRequestError (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:8007)\n' +
+    '    at zr.handleAndLogRequestError (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:7697)\n' +
+    '    at zr.request (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:122:7307)\n' +
+    '    at async eval (webpack-internal:///(rsc)/./src/app/api/wallet/transfer/route.ts:168:37)\n' +
+    '    at async Proxy._transactionWithCallback (/Users/ketoz/Documents/munia/node_modules/@prisma/client/runtime/library.js:126:8951)\n' +
+    '    at async POST (webpack-internal:///(rsc)/./src/app/api/wallet/transfer/route.ts:166:28)\n' +
+    '    at async /Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55038\n' +
+    '    at async ek.execute (/Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:45808)\n' +
+    '    at async ek.handle (/Users/ketoz/Documents/munia/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:56292)\n' +
+    '    at async doRender (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1377:42)\n' +
+    '    at async cacheEntry.responseCache.get.routeKind (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1599:28)\n' +
+    '    at async DevServer.renderToResponseWithComponentsImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1507:28)\n' +
+    '    at async DevServer.renderPageComponent (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1931:24)\n' +
+    '    at async DevServer.renderToResponseImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:1969:32)\n' +
+    '    at async DevServer.pipeImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:920:25)\n' +
+    '    at async NextNodeServer.handleCatchallRenderRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/next-server.js:272:17)\n' +
+    '    at async DevServer.handleRequestImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/base-server.js:816:17)\n' +
+    '    at async /Users/ketoz/Documents/munia/node_modules/next/dist/server/dev/next-dev-server.js:339:20\n' +
+    '    at async Span.traceAsyncFn (/Users/ketoz/Documents/munia/node_modules/next/dist/trace/trace.js:154:20)\n' +
+    '    at async DevServer.handleRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/dev/next-dev-server.js:336:24)\n' +
+    '    at async invokeRender (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:174:21)\n' +
+    '    at async handleRequest (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:353:24)\n' +
+    '    at async requestHandlerImpl (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/router-server.js:377:13)\n' +
+    '    at async Server.requestListener (/Users/ketoz/Documents/munia/node_modules/next/dist/server/lib/start-server.js:141:13)'
+}
+ POST /api/wallet/transfer 500 in 576ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 40ms
+ GET /api/wallet/transactions 200 in 41ms
+ GET /api/conversations 200 in 10ms
+ GET /api/conversations 200 in 29ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 25ms
+ GET /api/conversations 200 in 68ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 29ms
+ GET /api/wallet/transactions 200 in 43ms
+ GET /api/conversations 200 in 23ms
+ GET /api/conversations 200 in 26ms
+ GET /api/wallet/transactions 200 in 30ms
+ GET /api/conversations 200 in 28ms
+ GET /api/conversations 200 in 93ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 33ms
+ GET /api/wallet/transactions 200 in 17ms
+ GET /api/conversations 200 in 23ms
+ GET /api/conversations 200 in 46ms
+ GET /api/wallet/transactions 200 in 23ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 25ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 25ms
+ GET /api/conversations 200 in 22ms
+ GET /api/conversations 200 in 42ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 27ms
+ GET /api/conversations 200 in 27ms
+ GET /api/wallet/transactions 200 in 46ms
+ GET /api/conversations 200 in 26ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 10ms
+ GET /api/wallet/transactions 200 in 26ms
+ GET /api/conversations 200 in 8ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 26ms
+ GET /api/conversations 200 in 22ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 33ms
+ GET /api/conversations 200 in 8ms
+ GET /api/wallet/transactions 200 in 27ms
+ GET /api/conversations 200 in 17ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 20ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 19ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 24ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 25ms
+ GET /api/wallet/transactions 200 in 13ms
+ GET /api/conversations 200 in 20ms
+ GET /api/conversations 200 in 32ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 26ms
+ GET /api/wallet/transactions 200 in 18ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 19ms
+ GET /api/conversations 200 in 23ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 31ms
+ GET /api/wallet/transactions 200 in 23ms
+ GET /api/conversations 200 in 24ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 23ms
+ GET /api/conversations 200 in 31ms
+ ✓ Compiled in 1091ms (5335 modules)
+ GET /wallet?_rsc=1pnrz 200 in 110ms
+ GET /api/conversations 200 in 32ms
+ GET /api/wallet/transactions 200 in 24ms
+ GET /api/conversations 200 in 15ms
+ GET /api/wallet/transactions 200 in 38ms
+ GET /api/conversations 200 in 21ms
+ GET /api/conversations 200 in 29ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 26ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 19ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 23ms
+ GET /api/conversations 200 in 14ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 20ms
+ GET /api/conversations 200 in 20ms
+ GET /api/wallet/transactions 200 in 16ms
+ GET /api/conversations 200 in 19ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 35ms
+ GET /api/wallet/transactions 200 in 29ms
+ GET /api/conversations 200 in 23ms
+ GET /wallet 200 in 170ms
+ ✓ Compiled /_not-found in 466ms (5324 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 622ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 687ms (3195 modules)
+ ✓ Compiled (3221 modules)
+ GET /favicon.ico 200 in 1352ms
+ GET /api/auth/session 200 in 1308ms
+ GET /api/wallet/transactions 200 in 1266ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 1319ms
+ GET /api/conversations 200 in 1347ms
+ GET /api/auth/session 200 in 10ms
+ GET /api/auth/session 200 in 9ms
+ GET /api/auth/session 200 in 6ms
+ GET /api/auth/session 200 in 7ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 8ms
+ GET /api/auth/session 200 in 9ms
+ GET /api/auth/session 200 in 9ms
+Found balance for 18874748888: 212.35 (main: 212.35, subsidy: 0)
+ GET /api/wallet 200 in 1546ms
+ GET /api/conversations 200 in 48ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 59ms
+ GET /api/wallet/transactions 200 in 31ms
+ GET /api/conversations 200 in 37ms
+ GET /api/conversations 200 in 27ms
+ GET /api/wallet/transactions 200 in 30ms
+ ✓ Compiled /api/wallet/transfer in 462ms (3223 modules)
+ GET /wallet?_rsc=x5o34 200 in 24ms
+Balance updated for customer 1553000770706847752: -12.35 (reason: Transfer to Munia wallet by 18874748888)
+ POST /api/wallet/transfer 200 in 732ms
+ GET /api/wallet/transactions 200 in 36ms
+ GET /api/conversations 200 in 12ms
+Found balance for 18874748888: 200 (main: 200, subsidy: 0)
+ GET /api/wallet 200 in 86ms
+ GET /api/conversations 200 in 33ms
+ GET /api/wallet/transactions 200 in 24ms
+ GET /api/conversations 200 in 29ms
+ GET /api/conversations 200 in 31ms
+ GET /api/wallet/transactions 200 in 29ms
+ GET /api/conversations 200 in 23ms
+ GET /api/wallet/transactions 200 in 30ms
+ GET /api/conversations 200 in 29ms
+ GET /api/conversations 200 in 22ms
+ GET /api/wallet/transactions 200 in 27ms
+ GET /api/conversations 200 in 23ms
+ GET /api/conversations 200 in 28ms
+ GET /api/wallet/transactions 200 in 36ms
+ GET /api/conversations 200 in 29ms
+ GET /api/wallet/transactions 200 in 30ms
+ GET /api/conversations 200 in 28ms
+ GET /api/conversations 200 in 28ms
+ GET /api/wallet/transactions 200 in 30ms
+ GET /api/conversations 200 in 29ms
+ GET /api/conversations 200 in 30ms
+ GET /api/wallet/transactions 200 in 28ms
+ GET /api/conversations 200 in 28ms
+ GET /api/wallet/transactions 200 in 33ms
+ GET /api/conversations 200 in 46ms
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 60ms
+ GET /api/wallet/transactions 200 in 122ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 122ms
+ GET /api/conversations 200 in 128ms
+Found balance for 18874748888: 200 (main: 200, subsidy: 0)
+ GET /api/wallet 200 in 334ms
+ GET /api/conversations 200 in 17ms
+Found balance for 18874748888: 200 (main: 200, subsidy: 0)
+ GET /api/wallet 200 in 98ms
+ ○ Compiling /api/posts/[postId] ...
+ ✓ Compiled /api/posts/[postId] in 811ms (3192 modules)
+ GET /api/users/cmf19h5950009i32fuivfvy8j 200 in 1276ms
+ GET /api/conversations 200 in 957ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 1280ms
+Found balance for 18874748888: 200 (main: 200, subsidy: 0)
+ GET /api/wallet 200 in 293ms
+ ○ Compiling /api/users/[userId]/notifications/count ...
+ GET /api/posts/17 200 in 2518ms
+ GET /api/posts/19 200 in 2530ms
+ GET /api/posts/18 200 in 2522ms
+ ✓ Compiled /api/users/[userId]/notifications/count in 1205ms (3195 modules)
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 1642ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2/notifications/count 200 in 1668ms
+ GET /api/conversations 200 in 834ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 42ms
+ GET /api/conversations 200 in 42ms
+ ○ Compiling /api/users/[userId] ...
+ ✓ Compiled /api/users/[userId] in 2.7s (3073 modules)
+ ✓ Compiled (3104 modules)
+ GET /api/auth/session 200 in 3935ms
+ GET /api/wallet/transactions 200 in 3873ms
+ GET /api/users/cmf01hgh60000os9y0zq5bxj2 200 in 3876ms
+ GET /api/conversations 200 in 3881ms
+ GET /api/auth/session 200 in 54ms
+ GET /api/auth/session 200 in 7ms
+ GET /api/auth/session 200 in 63ms
+ GET /api/auth/session 200 in 12ms
+ GET /api/auth/session 200 in 13ms
+ GET /api/auth/session 200 in 20ms
+ GET /api/auth/session 200 in 11ms
+Found balance for 18874748888: 200 (main: 200, subsidy: 0)
+ GET /api/wallet 200 in 4084ms
+ GET /api/auth/session 200 in 28ms
+ GET /api/conversations 200 in 30ms
+ GET /api/wallet/transactions 200 in 56ms
+ GET /api/conversations 200 in 26ms
+ GET /api/conversations 200 in 25ms
+ GET /api/wallet/transactions 200 in 29ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 29ms
+ GET /api/conversations 200 in 15ms
+ GET /api/conversations 200 in 21ms
+ GET /api/wallet/transactions 200 in 21ms
+ GET /api/conversations 200 in 21ms
+ GET /api/conversations 200 in 46ms
+ GET /api/wallet/transactions 200 in 10ms
+ GET /api/conversations 200 in 19ms
+ GET /api/wallet/transactions 200 in 24ms
+ GET /api/conversations 200 in 19ms
+ ✓ Compiled /api/posts in 466ms (3193 modules)
+ GET /api/posts?limit=100&cursor=19&sort-direction=asc 200 in 567ms
+ GET /api/conversations 200 in 30ms
+ GET /api/wallet/transactions 200 in 12ms
+ GET /api/conversations 200 in 19ms
+ GET /api/conversations 200 in 26ms
+ GET /api/wallet/transactions 200 in 26ms
+ GET /api/conversations 200 in 23ms
+ GET /api/wallet/transactions 200 in 11ms
+ GET /api/conversations 200 in 17ms
+ GET /api/conversations 200 in 19ms
+ GET /api/wallet/transactions 200 in 18ms
