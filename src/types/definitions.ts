@@ -58,6 +58,7 @@ export interface FindPostResult {
   taskStatus: string | null;
   completedBy: string | null;
   completedAt: Date | null;
+  audioUrl: string | null;
   /**
    * Use `postLikes` to store the <PostLike>'s id of the user to the Post.
    * If there is a <PostLike> id, that means the user requesting has
@@ -88,6 +89,7 @@ export interface GetPost {
   taskStatus: string | null;
   completedBy: string | null;
   completedAt: Date | null;
+  audioUrl: string | null;
   /**
    * The `isLiked` is used to check whether the authenticated user requesting
    * the post has liked it or not.

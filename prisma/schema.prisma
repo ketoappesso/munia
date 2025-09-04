@@ -37,45 +37,50 @@ model Session {
 
 model User {
   // Do not change the `id` field, it must be permanent and immutable.
-  id                 String              @id @default(cuid())
+  id                          String         @id @default(cuid())
   // The `username` can be updated anytime by the user.
   // It will acquire the `id` as its default value.
-  username           String?             @unique
-  email              String?             @unique
-  name               String?
-  gender             String?
-  birthDate          DateTime?
-  phoneNumber        String?             @unique
-  address            String?
-  bio                String?
-  website            String?
-  relationshipStatus String?
-  emailVerified      DateTime?
-  image              String?
-  accounts           Account[]
-  sessions           Session[]
-  profilePhoto       String?
-  coverPhoto         String?
-  post               Post[]
-  visualMedia        VisualMedia[]
-  postLikes          PostLike[]
-  comments           Comment[]
-  commentLikes       CommentLike[]
-  followers          Follow[]            @relation("following")
-  following          Follow[]            @relation("follower")
-  activities         Activity[]          @relation("activity")
-  notifications      Activity[]          @relation("notification")
-  passwordHash       String?             // For phone+password authentication
+  username                    String?        @unique
+  email                       String?        @unique
+  name                        String?
+  gender                      String?
+  birthDate                   DateTime?
+  phoneNumber                 String?        @unique
+  address                     String?
+  bio                         String?
+  website                     String?
+  relationshipStatus          String?
+  emailVerified               DateTime?
+  image                       String?
+  accounts                    Account[]
+  sessions                    Session[]
+  profilePhoto                String?
+  coverPhoto                  String?
+  post                        Post[]
+  visualMedia                 VisualMedia[]
+  postLikes                   PostLike[]
+  comments                    Comment[]
+  commentLikes                CommentLike[]
+  followers                   Follow[]       @relation("following")
+  following                   Follow[]       @relation("follower")
+  activities                  Activity[]     @relation("activity")
+  notifications               Activity[]     @relation("notification")
+  passwordHash                String? // For phone+password authentication
   conversationsAsParticipant1 Conversation[] @relation("ConversationParticipant1")
   conversationsAsParticipant2 Conversation[] @relation("ConversationParticipant2")
-  messages           Message[]
-  
+  messages                    Message[]
+
   // Wallet fields
-  walletAddress      String?             @unique
-  apeBalance         Float               @default(0)
-  walletCreatedAt    DateTime?
-  sentTransactions   WalletTransaction[] @relation("sender")
+  walletAddress        String?             @unique
+  apeBalance           Float               @default(0)
+  walletCreatedAt      DateTime?
+  sentTransactions     WalletTransaction[] @relation("sender")
   receivedTransactions WalletTransaction[] @relation("receiver")
+
+  // TTS fields for featured users
+  featured     Boolean @default(false)
+  ttsModelId   String?
+  ttsVoiceId   String?
 }
 
 model VerificationToken {
@@ -97,27 +102,30 @@ model Follow {
 }
 
 model Post {
-  id          Int           @id @default(autoincrement())
-  content     String?
-  createdAt   DateTime      @default(now())
-  visualMedia VisualMedia[]
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
-  postLikes   PostLike[]
-  comments    Comment[]
-  isTask      Boolean       @default(false)
-  rewardAmount Float        @default(0)
-  taskStatus  String?       // OPEN, IN_PROGRESS, COMPLETION_REQUESTED, COMPLETED, REJECTED
-  completedBy String?       // UserId who accepted the task
-  completedAt DateTime?     // When task was accepted
-  
+  id           Int           @id @default(autoincrement())
+  content      String?
+  createdAt    DateTime      @default(now())
+  visualMedia  VisualMedia[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  postLikes    PostLike[]
+  comments     Comment[]
+  isTask       Boolean       @default(false)
+  rewardAmount Float         @default(0)
+  taskStatus   String? // OPEN, IN_PROGRESS, COMPLETION_REQUESTED, COMPLETED, REJECTED
+  completedBy  String? // UserId who accepted the task
+  completedAt  DateTime? // When task was accepted
+
   // Commission payment tracking
-  initialPaymentAmount Float?    // 50% paid on acceptance
-  initialPaymentAt DateTime?     // When initial payment was made
-  finalPaymentAmount Float?      // Remaining 50% 
-  finalPaymentAt DateTime?       // When final payment was made
+  initialPaymentAmount  Float? // 50% paid on acceptance
+  initialPaymentAt      DateTime? // When initial payment was made
+  finalPaymentAmount    Float? // Remaining 50%
+  finalPaymentAt        DateTime? // When final payment was made
   completionRequestedAt DateTime? // When acceptor requested completion
   completionConfirmedAt DateTime? // When owner confirmed completion
+
+  // TTS audio field
+  audioUrl String?
 }
 
 model PostLike {
@@ -163,13 +171,13 @@ model CommentLike {
 }
 
 model VisualMedia {
-  id         Int             @id @default(autoincrement())
-  type       String @default("PHOTO")
+  id         Int      @id @default(autoincrement())
+  type       String   @default("PHOTO")
   fileName   String
-  uploadedAt DateTime        @default(now())
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uploadedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  post       Post            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId     Int
 }
 
@@ -184,17 +192,17 @@ model VisualMedia {
 // * If the activity type is 'COMMENT_MENTION', the `sourceId` must be the `id` of the Comment and
 // its `targetId` must be the `id` of the Post that was commented on.
 model Activity {
-  id                   Int          @id @default(autoincrement())
-  createdAt            DateTime     @default(now())
+  id                   Int      @id @default(autoincrement())
+  createdAt            DateTime @default(now())
   type                 String
   sourceId             Int
   targetId             Int?
-  sourceUser           User         @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
+  sourceUser           User     @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
   sourceUserId         String
-  targetUser           User         @relation("notification", fields: [targetUserId], references: [id], onDelete: Cascade)
+  targetUser           User     @relation("notification", fields: [targetUserId], references: [id], onDelete: Cascade)
   targetUserId         String
-  isNotificationActive Boolean      @default(true)
-  isNotificationRead   Boolean      @default(false)
+  isNotificationActive Boolean  @default(true)
+  isNotificationRead   Boolean  @default(false)
 }
 
 model ActivityType {
@@ -218,15 +226,15 @@ model RelationshipStatus {
 }
 
 model Conversation {
-  id            String    @id // Format: userId1_userId2 (sorted)
-  participant1  User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  id             String    @id // Format: userId1_userId2 (sorted)
+  participant1   User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
   participant1Id String
-  participant2  User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  participant2   User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
   participant2Id String
-  messages      Message[]
-  createdAt     DateTime  @default(now())
-  lastMessageAt DateTime  @default(now())
-  
+  messages       Message[]
+  createdAt      DateTime  @default(now())
+  lastMessageAt  DateTime  @default(now())
+
   @@unique([participant1Id, participant2Id])
   @@index([lastMessageAt])
 }
@@ -240,41 +248,41 @@ model Message {
   senderId       String
   createdAt      DateTime     @default(now())
   isRead         Boolean      @default(false)
-  
+
   // Red packet fields
-  type           String       @default("TEXT") // TEXT, RED_PACKET, SYSTEM, TASK_COMPLETION_REQUEST
-  redPacketAmount Float?
-  redPacketMessage String?
-  redPacketStatus String?     // PENDING, CLAIMED
+  type               String    @default("TEXT") // TEXT, RED_PACKET, SYSTEM, TASK_COMPLETION_REQUEST
+  redPacketAmount    Float?
+  redPacketMessage   String?
+  redPacketStatus    String? // PENDING, CLAIMED
   redPacketClaimedAt DateTime?
-  
+
   // Task completion fields
-  taskPostId     Int?
-  taskFinalAmount Float?
+  taskPostId           Int?
+  taskFinalAmount      Float?
   taskCompletionStatus String? // pending, completed, rejected, failed
-  
+
   @@index([conversationId, createdAt])
   @@index([senderId])
   @@index([type])
 }
 
 model WalletTransaction {
-  id             String   @id @default(cuid())
-  type           String   // DEPOSIT, WITHDRAW, TRANSFER, REWARD
-  amount         Float
-  status         String   @default("PENDING") // PENDING, COMPLETED, FAILED
-  description    String?
-  
-  fromUser       User?    @relation("sender", fields: [fromUserId], references: [id], onDelete: SetNull)
-  fromUserId     String?
-  
-  toUser         User?    @relation("receiver", fields: [toUserId], references: [id], onDelete: SetNull)
-  toUserId       String?
-  
-  txHash         String?  @unique // Blockchain transaction hash
-  createdAt      DateTime @default(now())
-  completedAt    DateTime?
-  
+  id          String  @id @default(cuid())
+  type        String // DEPOSIT, WITHDRAW, TRANSFER, REWARD
+  amount      Float
+  status      String  @default("PENDING") // PENDING, COMPLETED, FAILED
+  description String?
+
+  fromUser   User?   @relation("sender", fields: [fromUserId], references: [id], onDelete: SetNull)
+  fromUserId String?
+
+  toUser   User?   @relation("receiver", fields: [toUserId], references: [id], onDelete: SetNull)
+  toUserId String?
+
+  txHash      String?   @unique // Blockchain transaction hash
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
   @@index([fromUserId])
   @@index([toUserId])
   @@index([createdAt])

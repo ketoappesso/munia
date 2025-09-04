@@ -9,6 +9,7 @@ export const selectPost = (userId: string | undefined) => ({
   taskStatus: true,
   completedBy: true,
   completedAt: true,
+  audioUrl: true,
   ...includeUserSummary(),
   visualMedia: true,
   /**

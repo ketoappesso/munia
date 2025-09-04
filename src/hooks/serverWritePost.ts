@@ -13,6 +13,8 @@ import { mentionsActivityLogger } from '@/lib/mentionsActivityLogger';
 import { deleteObject } from '@/lib/s3/deleteObject';
 import { savePostFiles } from '@/lib/s3/savePostFiles';
 import { verifyAccessToPost } from '@/app/api/posts/[postId]/verifyAccessToPost';
+import { generateTtsAudio } from '@/lib/tts';
+import { uploadAudio } from '@/lib/tos';
 
 // If `type` is `edit`, then the `postId` is required
 type Props =
@@ -144,6 +146,49 @@ export async function serverWritePost({ formData, type, postId }: Props) {
         },
         isUpdate: false,
       });
+
+      // Check if user has featured status and TTS configuration for audio generation
+      console.log('[serverWritePost] Checking user TTS configuration for userId:', userId);
+      const userTtsConfig = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { featured: true, ttsModelId: true, ttsVoiceId: true },
+      });
+      console.log('[serverWritePost] User TTS config:', userTtsConfig);
+      
+      if (userTtsConfig?.featured && userTtsConfig.ttsModelId && userTtsConfig.ttsVoiceId && str) {
+        try {
+          console.log('[serverWritePost] User is featured with TTS config, starting audio generation');
+          console.log('[serverWritePost] Post content for TTS:', str.substring(0, 100) + '...');
+          console.log('[serverWritePost] Using voice ID:', userTtsConfig.ttsVoiceId);
+          
+          // Generate TTS audio
+          const tempFilePath = await generateTtsAudio(str, userTtsConfig.ttsVoiceId);
+          console.log('[serverWritePost] TTS audio generated successfully at:', tempFilePath);
+          
+          // Upload audio to TOS
+          const audioUrl = await uploadAudio(tempFilePath);
+          console.log('[serverWritePost] Audio uploaded to TOS successfully:', audioUrl);
+          
+          // Update post with audio URL
+          const updatedPost = await prisma.post.update({
+            where: { id: res.id },
+            data: { audioUrl },
+          });
+          console.log('[serverWritePost] Post updated with audio URL successfully. Post ID:', res.id);
+          console.log('[serverWritePost] Updated post audioUrl field:', updatedPost.audioUrl);
+          
+        } catch (audioError) {
+          // Don't fail the post creation if audio generation fails
+          console.error('[serverWritePost] Audio generation/upload failed:', audioError);
+          console.error('[serverWritePost] Audio error stack:', (audioError as Error).stack);
+        }
+      } else {
+        console.log('[serverWritePost] Skipping TTS audio generation. Reasons:');
+        console.log('  - User featured:', userTtsConfig?.featured);
+        console.log('  - TTS Model ID:', userTtsConfig?.ttsModelId);
+        console.log('  - TTS Voice ID:', userTtsConfig?.ttsVoiceId);
+        console.log('  - Content available:', !!str);
+      }
 
       return NextResponse.json<GetPost>(await toGetPost(res));
     }
