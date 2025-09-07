@@ -7,6 +7,7 @@ import { ShouldAnimateContextProvider } from '@/contexts/ShouldAnimateContext';
 import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import { ToastContextProvider } from '@/contexts/ToastContext';
 import { VisualMediaModalContextProvider } from '@/contexts/VisualMediaModalContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import React from 'react';
@@ -15,22 +16,24 @@ import { OfflineQueueProcessor } from './OfflineQueueProcessor';
 export function Providers({ children, session }: { children: React.ReactNode; session: Session | null }) {
   return (
     <ThemeContextProvider>
-      <ToastContextProvider>
-        <ReactQueryProvider>
-          <SessionProvider session={session}>
-            <DialogsContextProvider>
-              <VisualMediaModalContextProvider>
-                <CreatePostModalContextProvider>
-                  <ShouldAnimateContextProvider>
-                    <OfflineQueueProcessor />
-                    {children}
-                  </ShouldAnimateContextProvider>
-                </CreatePostModalContextProvider>
-              </VisualMediaModalContextProvider>
-            </DialogsContextProvider>
-          </SessionProvider>
-        </ReactQueryProvider>
-      </ToastContextProvider>
+      <LanguageProvider>
+        <ToastContextProvider>
+          <ReactQueryProvider>
+            <SessionProvider session={session}>
+              <DialogsContextProvider>
+                <VisualMediaModalContextProvider>
+                  <CreatePostModalContextProvider>
+                    <ShouldAnimateContextProvider>
+                      <OfflineQueueProcessor />
+                      {children}
+                    </ShouldAnimateContextProvider>
+                  </CreatePostModalContextProvider>
+                </VisualMediaModalContextProvider>
+              </DialogsContextProvider>
+            </SessionProvider>
+          </ReactQueryProvider>
+        </ToastContextProvider>
+      </LanguageProvider>
     </ThemeContextProvider>
   );
 }

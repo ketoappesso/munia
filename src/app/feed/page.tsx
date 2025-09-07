@@ -8,10 +8,13 @@ import { useCallback, useState } from 'react';
 import ActionsPlus from '@/svg_components/ActionsPlus';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
 import { NavigationSidebar } from '@/components/NavigationSidebar';
+import { BottomNavigation } from '@/components/BottomNavigation';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Page() {
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'following' | 'discover' | 'tasks'>('discover');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -24,12 +27,12 @@ export default function Page() {
   if (status === 'loading') {
     return (
       <>
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-4 pb-20">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex-1" />
           <div className="flex items-center">
             <div className="flex rounded-lg bg-gray-200 p-1">
-              {['关注', '发现', '任务'].map((tab) => (
+              {[t('nav.following'), t('nav.discover'), t('nav.tasks')].map((tab) => (
                 <div key={tab} className="rounded-md px-4 py-2 text-sm text-gray-500">
                   {tab}
                 </div>
@@ -46,7 +49,7 @@ export default function Page() {
           </div>
         </div>
         <div className="py-8 text-center">
-          <p>Loading...</p>
+          <p>{t('common.loading')}</p>
         </div>
       </div>
         
@@ -57,13 +60,15 @@ export default function Page() {
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
         />
+        
+        <BottomNavigation />
       </>
     );
   }
 
   return (
     <>
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-4 pb-20">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex flex-1 justify-start">
             <Link
@@ -75,9 +80,9 @@ export default function Page() {
           <div className="flex items-center">
             <div className="flex rounded-lg bg-gray-200 p-1">
               {[
-                { id: 'following', label: '关注' },
-                { id: 'discover', label: '发现' },
-                { id: 'tasks', label: '任务' },
+                { id: 'following', label: t('nav.following') },
+                { id: 'discover', label: t('nav.discover') },
+                { id: 'tasks', label: t('nav.tasks') },
               ].map((tab) => (
                 <button
                   type="button"
@@ -123,6 +128,8 @@ export default function Page() {
         activeTab={activeTab}
         onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
       />
+
+      <BottomNavigation />
     </>
   );
 }

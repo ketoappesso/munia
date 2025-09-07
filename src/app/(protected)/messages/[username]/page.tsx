@@ -43,7 +43,10 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const [message, setMessage] = useState('');
   const [showActions, setShowActions] = useState(false);
   const [showRedPacketModal, setShowRedPacketModal] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch conversation and other user info
   const { data: otherUser } = useQuery({
@@ -124,30 +127,37 @@ export default function MessagesPage({ params }: { params: { username: string } 
   }, [conversation?.id, messages, sessionData?.user?.id, queryClient]);
 
   // Fetch user balance for red packets
-  const { data: userBalance = 0, isLoading: isLoadingBalance } = useQuery<number>({
+  const { data: userBalance = 0, isLoading: isLoadingBalance, refetch: refetchBalance } = useQuery<number>({
     queryKey: ['user', 'balance'],
     queryFn: async () => {
       console.log('Fetching user balance...');
-      const res = await fetch('/api/users/balance');
-      if (!res.ok) {
-        const error = await res.text();
-        console.error('Failed to fetch balance:', error);
-        // Try the /api/users/me endpoint as fallback
-        const meRes = await fetch('/api/users/me');
-        if (meRes.ok) {
-          const user = await meRes.json();
-          console.log('Fallback user data:', user);
-          return user.apeBalance || 0;
+      try {
+        const res = await fetch('/api/users/balance');
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Balance data received:', data);
+          console.log('User balance:', data.balance);
+          return data.balance || 0;
         }
-        throw new Error('Failed to fetch balance');
+      } catch (error) {
+        console.error('Failed to fetch from /api/users/balance:', error);
       }
-      const data = await res.json();
-      console.log('Balance data received:', data);
-      console.log('User balance:', data.balance);
-      return data.balance || 0;
+      
+      // Try the /api/users/me endpoint as fallback
+      console.log('Trying fallback /api/users/me...');
+      const meRes = await fetch('/api/users/me');
+      if (meRes.ok) {
+        const user = await meRes.json();
+        console.log('Fallback user data:', user);
+        return user.apeBalance || 0;
+      }
+      
+      console.error('Failed to fetch balance from both endpoints');
+      return 0;
     },
     enabled: !!sessionData?.user,
     refetchInterval: 30000, // Refresh balance every 30 seconds
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
 
   // Debug balance
@@ -273,6 +283,67 @@ export default function MessagesPage({ params }: { params: { username: string } 
     [handleSendMessage],
   );
 
+  const handleImageUpload = useCallback(async (file: File) => {
+    if (!conversation?.id || uploadingImage) return;
+    
+    setUploadingImage(true);
+    
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('conversationId', conversation.id);
+      
+      // Upload image
+      const uploadResponse = await fetch('/api/messages/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const { imageUrl } = await uploadResponse.json();
+      
+      // Send image as message
+      const success = await sendWebSocketMessage(`[image]${imageUrl}[/image]`);
+      
+      if (success) {
+        // Refresh messages
+        queryClient.invalidateQueries({ queryKey: ['messages', conversation.id] });
+        setShowActions(false);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  }, [conversation?.id, uploadingImage, sendWebSocketMessage, queryClient]);
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image size must be less than 10MB');
+        return;
+      }
+      
+      handleImageUpload(file);
+    }
+    
+    // Reset input
+    e.target.value = '';
+  }, [handleImageUpload]);
+
   if (!otherUser) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -355,10 +426,16 @@ export default function MessagesPage({ params }: { params: { username: string } 
             </ButtonNaked>
           ) : (
             <div className="flex gap-1">
-              <ButtonNaked className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
+              <ButtonNaked 
+                onPress={() => cameraInputRef.current?.click()}
+                isDisabled={uploadingImage}
+                className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
                 <Camera className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </ButtonNaked>
-              <ButtonNaked className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
+              <ButtonNaked 
+                onPress={() => imageInputRef.current?.click()}
+                isDisabled={uploadingImage}
+                className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
                 <ImageIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </ButtonNaked>
             </div>
@@ -373,6 +450,8 @@ export default function MessagesPage({ params }: { params: { username: string } 
                 console.log('Red packet button clicked');
                 console.log('Current showRedPacketModal:', showRedPacketModal);
                 console.log('Setting showRedPacketModal to true');
+                // Refresh balance before showing modal
+                refetchBalance();
                 setShowRedPacketModal(true);
               }}
               className="flex flex-col items-center gap-1">
@@ -381,13 +460,19 @@ export default function MessagesPage({ params }: { params: { username: string } 
               </div>
               <span className="text-xs text-gray-600 dark:text-gray-400">红包</span>
             </button>
-            <button className="flex flex-col items-center gap-1">
+            <button 
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="flex flex-col items-center gap-1">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20">
                 <ImageIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <span className="text-xs text-gray-600 dark:text-gray-400">相册</span>
             </button>
-            <button className="flex flex-col items-center gap-1">
+            <button 
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="flex flex-col items-center gap-1">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
                 <Camera className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
@@ -409,6 +494,25 @@ export default function MessagesPage({ params }: { params: { username: string } 
           recipientName={otherUser.name || otherUser.username}
         />
       )}
+      
+      {/* Hidden file inputs */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageSelect}
+        className="hidden"
+        aria-label="选择图片"
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleImageSelect}
+        className="hidden"
+        aria-label="拍摄照片"
+      />
     </div>
   );
 }

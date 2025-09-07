@@ -8,6 +8,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 import { useDialogs } from '@/hooks/useDialogs';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProfileSidebarProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export function ProfileSidebar({
   const router = useRouter();
   const { confirm } = useDialogs();
   const { data: wallet } = useWalletQuery();
+  const { t } = useLanguage();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
 
   // Lock body scroll when sidebar is open
@@ -80,8 +82,8 @@ export function ProfileSidebar({
     // Then show confirm dialog
     setTimeout(() => {
       confirm({
-        title: 'Confirm Logout',
-        message: 'Do you really wish to logout?',
+        title: t('nav.confirmLogout'),
+        message: t('nav.confirmLogoutMessage'),
         onConfirm: () => signOut({ callbackUrl: '/' }),
       });
     }, 300); // Small delay to allow sidebar animation to complete
@@ -113,7 +115,7 @@ export function ProfileSidebar({
             aria-label="Profile Navigation">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border p-4">
-              <h2 className="text-xl font-semibold text-foreground">Menu</h2>
+              <h2 className="text-xl font-semibold text-foreground">{t('nav.navigation')}</h2>
               <ButtonNaked
                 onPress={onClose}
                 className="rounded-full p-1 hover:bg-foreground/5"
@@ -132,14 +134,14 @@ export function ProfileSidebar({
                       onPress={() => handleNavigation('/edit-profile')}
                       className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
                       <Edit className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">Edit Profile</span>
+                      <span className="text-foreground">{t('nav.editProfile')}</span>
                     </ButtonNaked>
 
                     <ButtonNaked
                       onPress={() => handleNavigation('/settings')}
                       className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
                       <Settings className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">Settings</span>
+                      <span className="text-foreground">{t('nav.settings')}</span>
                     </ButtonNaked>
 
                     {/* Divider */}
@@ -159,8 +161,8 @@ export function ProfileSidebar({
                             <Wallet className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">我的钱包</p>
-                            <p className="text-xs text-muted-foreground">点击管理资产</p>
+                            <p className="text-sm font-medium text-foreground">{t('nav.myWallet')}</p>
+                            <p className="text-xs text-muted-foreground">{t('nav.clickToManage')}</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -185,8 +187,8 @@ export function ProfileSidebar({
                             <Home className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">我的空间</p>
-                            <p className="text-xs text-muted-foreground">拍摄自拍</p>
+                            <p className="text-sm font-medium text-foreground">{t('nav.mySpace')}</p>
+                            <p className="text-xs text-muted-foreground">{t('nav.takeSelfie')}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-center">
@@ -207,8 +209,8 @@ export function ProfileSidebar({
                             <Smartphone className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">我的设备</p>
-                            <p className="text-xs text-muted-foreground">扫描设备码</p>
+                            <p className="text-sm font-medium text-foreground">{t('nav.myDevice')}</p>
+                            <p className="text-xs text-muted-foreground">{t('nav.scanDeviceCode')}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-center">
@@ -229,8 +231,8 @@ export function ProfileSidebar({
                             <Gamepad2 className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-foreground">我的游戏</p>
-                            <p className="text-xs text-muted-foreground">进入游戏中心</p>
+                            <p className="text-sm font-medium text-foreground">{t('nav.myGames')}</p>
+                            <p className="text-xs text-muted-foreground">{t('nav.enterGameCenter')}</p>
                           </div>
                         </div>
                       </ButtonNaked>
@@ -240,24 +242,24 @@ export function ProfileSidebar({
 
                 {/* Navigation Links */}
                 <div>
-                  <h3 className="mb-3 text-sm font-medium text-muted-foreground">Navigation</h3>
+                  <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('nav.navigation')}</h3>
                   
                   <ButtonNaked
                     onPress={() => handleNavigation('/feed')}
                     className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">Feed</span>
+                    <span className="text-foreground">{t('nav.feed')}</span>
                   </ButtonNaked>
 
                   <ButtonNaked
                     onPress={() => handleNavigation('/messages')}
                     className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">Messages</span>
+                    <span className="text-foreground">{t('nav.messages')}</span>
                   </ButtonNaked>
 
                   <ButtonNaked
                     onPress={() => handleNavigation('/discover')}
                     className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">Discover People</span>
+                    <span className="text-foreground">{t('nav.discoverPeople')}</span>
                   </ButtonNaked>
                 </div>
               </div>
@@ -269,7 +271,7 @@ export function ProfileSidebar({
                     onPress={handleLogout}
                     className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20">
                     <LogOut className="h-5 w-5" />
-                    <span className="font-medium">Logout</span>
+                    <span className="font-medium">{t('nav.logout')}</span>
                   </ButtonNaked>
                 </div>
               )}

@@ -9,6 +9,8 @@ import { useSession } from 'next-auth/react';
 import { signOut } from 'next-auth/react';
 import { useDialogs } from '@/hooks/useDialogs';
 import { useCallback, useState, useEffect } from 'react';
+import { SettingsDrawer } from './SettingsDrawer';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NavigationSidebarProps {
   isOpen: boolean;
@@ -29,7 +31,9 @@ export function NavigationSidebar({
   const { data: wallet } = useWalletQuery();
   const { data: session } = useSession();
   const { confirm } = useDialogs();
+  const { t } = useLanguage();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Lock body scroll when sidebar is open
   useEffect(() => {
@@ -79,8 +83,8 @@ export function NavigationSidebar({
     // Then show confirm dialog
     setTimeout(() => {
       confirm({
-        title: 'Confirm Logout',
-        message: 'Do you really wish to logout?',
+        title: t('nav.confirmLogout'),
+        message: t('nav.confirmLogoutMessage'),
         onConfirm: () => signOut({ callbackUrl: '/' }),
       });
     }, 300); // Small delay to allow sidebar animation to complete
@@ -99,19 +103,20 @@ export function NavigationSidebar({
   };
 
   const feedTabs = [
-    { id: 'following', label: '关注', description: 'View posts from people you follow' },
-    { id: 'discover', label: '发现', description: 'Explore new posts and people' },
-    { id: 'tasks', label: '任务', description: 'View and manage your tasks' },
+    { id: 'following', label: t('nav.following'), description: t('nav.followingDesc') },
+    { id: 'discover', label: t('nav.discover'), description: t('nav.discoverDesc') },
+    { id: 'tasks', label: t('nav.tasks'), description: t('nav.tasksDesc') },
   ];
 
   const messageTabs = [
-    { id: 'messages', label: '信息', description: 'View your messages' },
-    { id: 'notifications', label: '提醒', description: 'View your notifications' },
+    { id: 'messages', label: t('nav.messages'), description: t('nav.messagesDesc') },
+    { id: 'notifications', label: t('nav.notifications'), description: t('nav.notificationsDesc') },
   ];
 
   const currentTabs = currentPage === 'feed' ? feedTabs : messageTabs;
 
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <>
@@ -137,7 +142,7 @@ export function NavigationSidebar({
             aria-label="Navigation">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border p-4">
-              <h2 className="text-xl font-semibold text-foreground">Navigation</h2>
+              <h2 className="text-xl font-semibold text-foreground">{t('nav.navigation')}</h2>
               <ButtonNaked
                 onPress={onClose}
                 className="rounded-full p-1 hover:bg-foreground/5"
@@ -153,7 +158,7 @@ export function NavigationSidebar({
               {onTabChange && (
                 <div>
                   <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-                    {currentPage === 'feed' ? 'Feed Tabs' : 'Message Tabs'}
+                    {currentPage === 'feed' ? t('nav.feedTabs') : t('nav.messageTabs')}
                   </h3>
                   {currentTabs.map((tab) => (
                     <ButtonNaked
@@ -184,8 +189,8 @@ export function NavigationSidebar({
                       <Wallet className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">我的钱包</p>
-                      <p className="text-xs text-muted-foreground">点击管理资产</p>
+                      <p className="text-sm font-medium text-foreground">{t('nav.myWallet')}</p>
+                      <p className="text-xs text-muted-foreground">{t('nav.clickToManage')}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -210,8 +215,8 @@ export function NavigationSidebar({
                       <Home className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">我的空间</p>
-                      <p className="text-xs text-muted-foreground">拍摄自拍</p>
+                      <p className="text-sm font-medium text-foreground">{t('nav.mySpace')}</p>
+                      <p className="text-xs text-muted-foreground">{t('nav.takeSelfie')}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-center">
@@ -232,8 +237,8 @@ export function NavigationSidebar({
                       <Smartphone className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">我的设备</p>
-                      <p className="text-xs text-muted-foreground">扫描设备码</p>
+                      <p className="text-sm font-medium text-foreground">{t('nav.myDevice')}</p>
+                      <p className="text-xs text-muted-foreground">{t('nav.scanDeviceCode')}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-center">
@@ -254,8 +259,8 @@ export function NavigationSidebar({
                       <Gamepad2 className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">我的游戏</p>
-                      <p className="text-xs text-muted-foreground">进入游戏中心</p>
+                      <p className="text-sm font-medium text-foreground">{t('nav.myGames')}</p>
+                      <p className="text-xs text-muted-foreground">{t('nav.enterGameCenter')}</p>
                     </div>
                   </div>
                 </ButtonNaked>
@@ -263,14 +268,14 @@ export function NavigationSidebar({
 
               {/* Navigation Links */}
               <div>
-                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Pages</h3>
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('nav.pages')}</h3>
                 
                 <ButtonNaked
                   onPress={() => handleNavigation('/feed')}
                   className={`mb-2 flex w-full items-center rounded-lg p-3 transition-colors ${
                     currentPage === 'feed' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
                   }`}>
-                  <span className="text-foreground">Feed</span>
+                  <span className="text-foreground">{t('nav.feed')}</span>
                 </ButtonNaked>
 
                 <ButtonNaked
@@ -278,13 +283,13 @@ export function NavigationSidebar({
                   className={`mb-2 flex w-full items-center rounded-lg p-3 transition-colors ${
                     currentPage === 'messages' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
                   }`}>
-                  <span className="text-foreground">Messages</span>
+                  <span className="text-foreground">{t('nav.messages')}</span>
                 </ButtonNaked>
 
                 <ButtonNaked
                   onPress={() => handleNavigation('/discover')}
                   className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                  <span className="text-foreground">Discover People</span>
+                  <span className="text-foreground">{t('nav.discoverPeople')}</span>
                 </ButtonNaked>
 
                 {/* Divider */}
@@ -297,14 +302,17 @@ export function NavigationSidebar({
                       onPress={() => handleNavigation('/edit-profile')}
                       className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
                       <Edit className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">Edit Profile</span>
+                      <span className="text-foreground">{t('nav.editProfile')}</span>
                     </ButtonNaked>
 
                     <ButtonNaked
-                      onPress={() => handleNavigation('/settings')}
+                      onPress={() => {
+                        onClose();
+                        setTimeout(() => setIsSettingsOpen(true), 300);
+                      }}
                       className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
                       <Settings className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">Settings</span>
+                      <span className="text-foreground">{t('nav.settings')}</span>
                     </ButtonNaked>
                   </>
                 )}
@@ -318,7 +326,7 @@ export function NavigationSidebar({
                   onPress={handleLogout}
                   className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20">
                   <LogOut className="h-5 w-5" />
-                  <span className="font-medium">Logout</span>
+                  <span className="font-medium">{t('nav.logout')}</span>
                 </ButtonNaked>
               </div>
             )}
@@ -327,5 +335,12 @@ export function NavigationSidebar({
         </>
       )}
     </AnimatePresence>
+
+    {/* Settings Drawer */}
+    <SettingsDrawer
+      isOpen={isSettingsOpen}
+      onClose={() => setIsSettingsOpen(false)}
+    />
+    </>
   );
 }

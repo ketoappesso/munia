@@ -104,7 +104,13 @@ export function MessagesList() {
             </div>
 
             {conversation.lastMessage && (
-              <p className="mt-1 truncate text-sm text-gray-600">{conversation.lastMessage.content}</p>
+              <p className="mt-1 truncate text-sm text-gray-600">
+                {conversation.lastMessage.content.includes('[image]') && conversation.lastMessage.content.includes('[/image]') 
+                  ? '📷 图片' 
+                  : conversation.lastMessage.content.includes('[redpacket]') && conversation.lastMessage.content.includes('[/redpacket]')
+                  ? '🧧 红包'
+                  : conversation.lastMessage.content}
+              </p>
             )}
 
             {conversation.unreadCount > 0 && (

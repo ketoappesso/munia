@@ -5,10 +5,12 @@ import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import zhCN from 'date-fns/locale/zh-CN';
+import enUS from 'date-fns/locale/en-US';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SearchResult {
   id: string;
@@ -34,6 +36,7 @@ interface SearchResult {
 export default function SearchPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -81,7 +84,7 @@ export default function SearchPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <Search className="mx-auto mb-4 h-8 w-8 text-gray-300 animate-pulse" />
-          <p className="text-gray-500">加载中...</p>
+          <p className="text-gray-500">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -100,19 +103,19 @@ export default function SearchPage() {
             >
               <ArrowLeft className="h-5 w-5 text-gray-700" />
             </button>
-            <h1 className="text-lg font-semibold">搜索消息</h1>
+            <h1 className="text-lg font-semibold">{t('message.searchMessages')}</h1>
           </div>
         </div>
         
         <div className="px-4 py-12 text-center">
           <Search className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-          <h2 className="text-lg font-medium text-gray-900 mb-2">请先登录</h2>
-          <p className="text-gray-500 mb-4">登录后即可搜索您的聊天记录</p>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">{t('message.pleaseLogin')}</h2>
+          <p className="text-gray-500 mb-4">{t('message.loginToSearch')}</p>
           <button
             onClick={() => router.push('/login')}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            前往登录
+            {t('message.goToLogin')}
           </button>
         </div>
       </div>
@@ -154,7 +157,7 @@ export default function SearchPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索消息内容..."
+                placeholder={t('message.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 autoFocus
               />
@@ -168,8 +171,8 @@ export default function SearchPage() {
         {!searchQuery.trim() && (
           <div className="py-12 text-center text-gray-500">
             <Search className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-            <p>输入关键词搜索聊天记录</p>
-            <p className="mt-2 text-sm">搜索所有对话中的消息内容</p>
+            <p>{t('message.enterKeyword')}</p>
+            <p className="mt-2 text-sm">{t('message.searchAllConversations')}</p>
           </div>
         )}
 
@@ -192,12 +195,12 @@ export default function SearchPage() {
           <div className="py-8 text-center">
             <div className="text-red-500 mb-2">
               <Search className="mx-auto mb-2 h-8 w-8 text-red-300" />
-              <p className="font-medium">搜索失败</p>
+              <p className="font-medium">{t('message.searchFailed')}</p>
             </div>
             <p className="text-sm text-gray-600">
               {error?.message?.includes('log in') 
-                ? '请先登录后再搜索消息' 
-                : error?.message || '请稍后重试'}
+                ? t('message.loginRequired') 
+                : error?.message || t('message.tryLater')}
             </p>
           </div>
         )}
@@ -205,15 +208,15 @@ export default function SearchPage() {
         {searchQuery.trim() && !isLoading && !error && searchResults.length === 0 && (
           <div className="py-12 text-center text-gray-500">
             <MessageCircle className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-            <p>未找到相关聊天记录</p>
-            <p className="mt-2 text-sm">尝试使用不同的关键词</p>
+            <p>{t('message.noResults')}</p>
+            <p className="mt-2 text-sm">{t('message.tryDifferentKeywords')}</p>
           </div>
         )}
 
         {searchQuery.trim() && !isLoading && !error && searchResults.length > 0 && (
           <div className="space-y-4">
             <p className="text-sm text-gray-600 mb-4">
-              找到 {searchResults.length} 条相关消息
+              {t('message.foundMessages').replace('{count}', searchResults.length.toString())}
             </p>
             
             {searchResults.map((result) => (
@@ -239,7 +242,7 @@ export default function SearchPage() {
                       <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
                         {formatDistanceToNow(new Date(result.createdAt), {
                           addSuffix: true,
-                          locale: zhCN,
+                          locale: language === 'zh' ? zhCN : enUS,
                         })}
                       </span>
                     </div>

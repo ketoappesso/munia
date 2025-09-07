@@ -224,18 +224,52 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                       <p className="text-sm text-blue-800">{message.content}</p>
                     </div>
                   ) : (
-                    <div
-                      className={cn(
-                        'relative max-w-[70%] rounded-2xl px-4 py-2',
-                        isOwnMessage
-                          ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
-                          : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
-                      )}>
-                      <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
-                      {!message.isRead && isOwnMessage && (
-                        <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
-                      )}
-                    </div>
+                    (() => {
+                      // Check if message contains an image
+                      const imageMatch = message.content.match(/\[image\](.*?)\[\/image\]/);
+                      
+                      if (imageMatch && imageMatch[1]) {
+                        // Render image message
+                        return (
+                          <div className={cn(
+                            'relative max-w-[70%] overflow-hidden rounded-2xl',
+                            isOwnMessage ? 'ml-auto' : 'mr-auto'
+                          )}>
+                            <Image
+                              src={imageMatch[1]}
+                              alt="Shared image"
+                              width={300}
+                              height={300}
+                              className="max-h-[300px] w-auto object-contain"
+                              onClick={() => {
+                                // Open image in new tab for full view
+                                window.open(imageMatch[1], '_blank');
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            />
+                            {!message.isRead && isOwnMessage && (
+                              <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
+                            )}
+                          </div>
+                        );
+                      }
+                      
+                      // Render text message
+                      return (
+                        <div
+                          className={cn(
+                            'relative max-w-[70%] rounded-2xl px-4 py-2',
+                            isOwnMessage
+                              ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                              : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+                          )}>
+                          <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
+                          {!message.isRead && isOwnMessage && (
+                            <div className="absolute -bottom-4 right-0 text-xs text-gray-400">未读</div>
+                          )}
+                        </div>
+                      );
+                    })()
                   )}
                 </div>
               </div>

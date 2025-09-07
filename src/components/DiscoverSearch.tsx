@@ -4,8 +4,10 @@ import { TextInput } from '@/components/ui/TextInput';
 import SvgSearch from '@/svg_components/Search';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-export function DiscoverSearch({ label = 'Search People' }: { label?: string }) {
+export function DiscoverSearch({ label }: { label?: string }) {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -29,7 +31,7 @@ export function DiscoverSearch({ label = 'Search People' }: { label?: string }) 
     <div className="sticky top-4 z-[2] mb-4">
       <TextInput 
         onChange={handleChange} 
-        label={label} 
+        label={label || t('nav.searchPeople')} 
         Icon={SvgSearch}
         value={searchParams.get('search') || ''}
       />
