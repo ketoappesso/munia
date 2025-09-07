@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Send, Plus, Minus, Copy, Check, Coins, Coffee, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Send, Plus, Minus, Copy, Check, Coins, Coffee, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { walletCache } from '@/lib/walletCache';
 import Button from '@/components/ui/Button';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface WalletInfo {
   id: string;
@@ -51,16 +52,35 @@ export default function WalletPage() {
   const [amount, setAmount] = useState('');
   const [recipient, setRecipient] = useState('');
   const [description, setDescription] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [cachedAppessoBalance, setCachedAppessoBalance] = useState<number>(0);
 
-  // Fetch wallet info
-  const { data: wallet, isLoading: walletLoading } = useQuery<WalletInfo>({
+  // Load cached data on mount
+  useEffect(() => {
+    const cached = walletCache.get();
+    if (cached) {
+      setCachedAppessoBalance(cached.subsidy);
+      setLastUpdated(cached.lastUpdated);
+    }
+  }, []);
+
+  // Fetch wallet info (APE balance with automatic refetch)
+  const { data: wallet, isLoading: walletLoading, refetch: refetchWallet } = useQuery<WalletInfo>({
     queryKey: ['wallet'],
     queryFn: async () => {
       const response = await fetch('/api/wallet');
       if (!response.ok) throw new Error('Failed to fetch wallet');
-      return response.json();
+      const data = await response.json();
+      // Save APE balance to cache (we'll handle Appesso separately)
+      if (data.apeBalance !== undefined) {
+        walletCache.set(data.apeBalance, cachedAppessoBalance);
+      }
+      return data;
     },
     enabled: !!session?.user,
+    refetchInterval: 3 * 60 * 60 * 1000, // Auto refresh every 3 hours for APE balance
+    refetchOnWindowFocus: true, // Refresh on window focus for APE balance
   });
 
   // Fetch transactions
@@ -133,6 +153,33 @@ export default function WalletPage() {
       navigator.clipboard.writeText(wallet.walletAddress);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleRefreshAppesso = async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      // Call the Appesso API to get the balance
+      const response = await fetch('/api/wallet/appesso-balance', {
+        method: 'GET',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const newBalance = data.balance || 0;
+        
+        // Update cache and state
+        setCachedAppessoBalance(newBalance);
+        const now = new Date().toISOString();
+        setLastUpdated(now);
+        walletCache.set(wallet?.apeBalance || 0, newBalance);
+      }
+    } catch (error) {
+      console.error('Failed to refresh Appesso balance:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -303,11 +350,20 @@ export default function WalletPage() {
                 <Coffee className="h-6 w-6" />
                 <span className="text-lg font-semibold">Appesso 咖啡</span>
               </div>
-              <div className="mb-4 text-4xl font-bold">
-                {wallet?.appessoBalance?.toFixed(2) || '0.00'}
+              <div className="mb-4 flex items-center gap-3">
+                <div className="text-4xl font-bold">
+                  {cachedAppessoBalance.toFixed(2)}
+                </div>
+                {/* Refresh button */}
+                <ButtonNaked
+                  onPress={handleRefreshAppesso}
+                  isDisabled={isRefreshing}
+                  className="group flex h-8 w-8 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+                  <RefreshCw className={`h-4 w-4 text-white ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                </ButtonNaked>
               </div>
               <div className="flex items-center gap-2 text-sm opacity-90">
-                <span>咖啡余额</span>
+                <span>{lastUpdated ? walletCache.formatLastUpdated(lastUpdated) : '从未更新'}</span>
               </div>
             </div>
             {/* Plus button for Coffee */}

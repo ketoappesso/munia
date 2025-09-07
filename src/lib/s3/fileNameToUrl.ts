@@ -8,5 +8,17 @@ import 'server-only';
  */
 export function fileNameToUrl(fileName: string | null) {
   if (!fileName) return null;
-  return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+  
+  const isS3Configured = process.env.S3_BUCKET_NAME && 
+                          process.env.AWS_REGION && 
+                          process.env.AWS_ACCESS_KEY_ID && 
+                          process.env.AWS_SECRET_ACCESS_KEY;
+  
+  if (isS3Configured) {
+    // Return S3 URL for production
+    return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+  } else {
+    // Return local URL for development
+    return `/uploads/${fileName}`;
+  }
 }

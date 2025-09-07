@@ -9,7 +9,7 @@ export const selectPost = (userId: string | undefined) => ({
   taskStatus: true,
   completedBy: true,
   completedAt: true,
-  audioUrl: true,
+  // audioUrl: true,  // Removed - field doesn't exist in schema yet
   ...includeUserSummary(),
   visualMedia: true,
   /**

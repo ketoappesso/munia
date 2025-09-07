@@ -13,8 +13,8 @@ import { mentionsActivityLogger } from '@/lib/mentionsActivityLogger';
 import { deleteObject } from '@/lib/s3/deleteObject';
 import { savePostFiles } from '@/lib/s3/savePostFiles';
 import { verifyAccessToPost } from '@/app/api/posts/[postId]/verifyAccessToPost';
-import { generateTtsAudio } from '@/lib/tts';
-import { uploadAudio } from '@/lib/tos';
+// import { generateTtsAudio } from '@/lib/tts';
+// import { uploadAudio } from '@/lib/tos';
 
 // If `type` is `edit`, then the `postId` is required
 type Props =
@@ -147,6 +147,9 @@ export async function serverWritePost({ formData, type, postId }: Props) {
         isUpdate: false,
       });
 
+      // TTS audio generation temporarily disabled - needs proper configuration
+      // Uncomment when TTS and storage are properly configured
+      /*
       // Check if user has featured status and TTS configuration for audio generation
       console.log('[serverWritePost] Checking user TTS configuration for userId:', userId);
       const userTtsConfig = await prisma.user.findUnique({
@@ -189,6 +192,7 @@ export async function serverWritePost({ formData, type, postId }: Props) {
         console.log('  - TTS Voice ID:', userTtsConfig?.ttsVoiceId);
         console.log('  - Content available:', !!str);
       }
+      */
 
       return NextResponse.json<GetPost>(await toGetPost(res));
     }
