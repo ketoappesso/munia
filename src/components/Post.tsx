@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo, useEffect, useState } from 'react';
+import { memo, useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/cn';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
@@ -14,7 +14,7 @@ import { usePostLikesMutations } from '@/hooks/mutations/usePostLikesMutations';
 import { useFollowsMutations } from '@/hooks/mutations/useFollowsMutations';
 import { useUserQuery } from '@/hooks/queries/useUserQuery';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Trophy, CheckCircle } from 'lucide-react';
+import { MessageCircle, Trophy, CheckCircle, Volume2, VolumeX } from 'lucide-react';
 import { AcceptTaskModal } from './AcceptTaskModal';
 import { TaskStatusModal } from './TaskStatusModal';
 import { MyTaskModal } from './MyTaskModal';
@@ -24,6 +24,7 @@ import { PostVisualMediaContainer } from './PostVisualMediaContainer';
 import ProfileBlock from './ProfileBlock';
 import { HighlightedMentionsAndHashTags } from './HighlightedMentionsAndHashTags';
 import { PostOptions } from './PostOptions';
+import { useTTS } from '@/hooks/useTTS';
 
 export const Post = memo(
   ({
@@ -41,8 +42,12 @@ export const Post = memo(
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showMyTaskModal, setShowMyTaskModal] = useState(false);
     const [isAcceptingTask, setIsAcceptingTask] = useState(false);
+    const [displayedText, setDisplayedText] = useState<string>('');
+    const [showText, setShowText] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
     const router = useRouter();
 
+    // Fetch post data first
     const { data, isPending, isError } = useQuery<GetPost>({
       queryKey: ['posts', postId],
       queryFn: async () => {
@@ -53,6 +58,42 @@ export const Post = memo(
         return (await res.json()) as GetPost;
       },
       staleTime: 60000 * 10,
+    });
+    
+    // Check if this post has been played before from localStorage
+    useEffect(() => {
+      const playedPosts = localStorage.getItem('tts-played-posts');
+      if (playedPosts) {
+        const playedPostIds = JSON.parse(playedPosts) as number[];
+        if (playedPostIds.includes(postId)) {
+          // Post has been played before, show text immediately
+          setShowText(true);
+          setIsCompleted(true);
+          if (data?.content) {
+            setDisplayedText(data.content);
+          }
+        }
+      }
+    }, [postId, data?.content]);
+    
+    const { speak, stop, isPlaying, isSupported } = useTTS({
+      rate: 1.0,
+      onStart: () => {
+        setShowText(true);
+        setDisplayedText('');
+      },
+      onEnd: () => {
+        setIsCompleted(true);
+        setDisplayedText(data?.content || '');
+        
+        // Save to localStorage that this post has been played
+        const playedPosts = localStorage.getItem('tts-played-posts');
+        const playedPostIds = playedPosts ? JSON.parse(playedPosts) as number[] : [];
+        if (!playedPostIds.includes(postId)) {
+          playedPostIds.push(postId);
+          localStorage.setItem('tts-played-posts', JSON.stringify(playedPostIds));
+        }
+      }
     });
 
     const likePost = useCallback(() => likeMutation.mutate(), [likeMutation]);
@@ -74,6 +115,35 @@ export const Post = memo(
     const handleCommentsToggle = useCallback(() => {
       toggleComments(postId);
     }, [postId, toggleComments]);
+    
+    const handleTTSToggle = useCallback(() => {
+      if (!data?.content) return;
+      
+      if (isPlaying) {
+        stop();
+        // If not completed, hide text again
+        if (!isCompleted) {
+          setShowText(false);
+          setDisplayedText('');
+        }
+      } else {
+        // Start playback with better synchronization
+        const textLength = data.content.length;
+        speak(data.content, (charIndex) => {
+          setDisplayedText(data.content.slice(0, charIndex + 1));
+        }, textLength);
+      }
+    }, [data?.content, isPlaying, stop, speak, isCompleted]);
+    
+    // Calculate estimated duration
+    const getEstimatedDuration = useCallback(() => {
+      if (!data?.content) return '0:00';
+      // Chinese speech rate is approximately 3 characters per second at normal speed
+      const seconds = Math.ceil(data.content.length / 3);
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, [data?.content]);
     const variants = useMemo(
       () => ({
         animate: {
@@ -311,9 +381,72 @@ export const Post = memo(
           </div>
         )}
         {content && (
-          <p className="mb-4 mt-3 text-lg text-muted-foreground">
-            <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
-          </p>
+          <div className="flex items-start gap-3 mb-4 mt-3">
+            {/* Timer box on the left - only show before playback starts */}
+            {!showText && !isCompleted && isSupported && (
+              <div className="flex items-center px-2 py-1 rounded border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+                <span className="text-xs text-gray-500 font-mono">
+                  {getEstimatedDuration()}
+                </span>
+              </div>
+            )}
+            <div className="flex-1">
+              {!showText && !isCompleted ? (
+                // Initially hide text - show nothing or a subtle placeholder
+                <div className="text-lg text-muted-foreground opacity-0">
+                  <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
+                </div>
+              ) : isPlaying || (showText && !isCompleted) ? (
+                // Show typewriter effect during playback with fade-in effect (no cursor)
+                <div className="text-lg text-muted-foreground">
+                  <span className="inline">
+                    {displayedText.split('').map((char, index) => (
+                      <span
+                        key={index}
+                        className="inline-block animate-fadeIn"
+                        style={{
+                          animationDelay: `${index * 0.01}s`,
+                          opacity: 0,
+                          animationFillMode: 'forwards'
+                        }}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              ) : (
+                // Show full text after completion
+                <p className="text-lg text-muted-foreground">
+                  <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
+                </p>
+              )}
+            </div>
+            {isSupported && (
+              <button
+                onClick={handleTTSToggle}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-lg border transition-all",
+                  isPlaying 
+                    ? "border-gray-300 bg-gray-100 text-gray-700" 
+                    : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                )}
+                title={isPlaying ? "停止播放" : "语音播放"}
+              >
+                {isPlaying ? (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </button>
+            )}
+          </div>
         )}
         {visualMedia.length > 0 && (
           <div className="mb-4 mt-5 overflow-hidden rounded-2xl">
