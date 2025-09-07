@@ -1,6 +1,7 @@
 /**
  * GET /api/posts/tasks
- * - Returns task posts for authenticated users
+ * - Returns task posts (public endpoint)
+ * - Authentication optional - used only for like status
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
@@ -11,8 +12,8 @@ import { GetPost } from '@/types/definitions';
 
 export async function GET(request: NextRequest) {
   try {
+    // Tasks are public - get user if available for like status
     const [user] = await getServerUser();
-    if (!user) return NextResponse.json({}, { status: 401 });
 
     const { searchParams } = new URL(request.url);
     const cursor = parseInt(searchParams.get('cursor') || '0', 10);
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
         isTask: true,
         // Show all task posts
       },
-      select: selectPost(user.id),
+      select: selectPost(user?.id), // Use optional user id
       orderBy: {
         id: sortDirection as 'asc' | 'desc',
       },
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
     const posts: GetPost[] = await Promise.all(rawPosts.map((post) => toGetPost(post)));
     return NextResponse.json(posts);
   } catch (error) {
+    console.error('[GET /api/posts/tasks] Error:', error);
     return NextResponse.json({ error: 'Failed to load task posts' }, { status: 500 });
   }
 }
