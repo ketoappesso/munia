@@ -19,41 +19,100 @@ export default {
         phoneNumber: { label: 'Phone Number', type: 'text' },
         password: { label: 'Password', type: 'password' },
         smsCode: { label: 'SMS Code', type: 'text' },
+        mode: { label: 'Mode', type: 'text' }, // 'login' or 'register'
       },
       async authorize(credentials) {
         if (!credentials) return null;
 
-        const { phoneNumber, password, smsCode } = credentials;
+        const { phoneNumber, password, smsCode, mode } = credentials;
 
         // Only run on server-side
         if (typeof window !== 'undefined') return null;
 
-        console.log('Credentials received:', { phoneNumber, password, smsCode });
+        console.log('Credentials received:', { phoneNumber, mode, hasSmsCode: !!smsCode, hasPassword: !!password });
+
+        // Clean phone number
+        const cleanPhone = phoneNumber?.toString().replace(/\D/g, '');
+        if (!cleanPhone) return null;
 
         // Initialize PrismaClient only when needed (server-side)
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient();
 
-        if (phoneNumber && password) {
-          // Phone + password authentication (for registration/login)
-          console.log('Looking for user with phone:', phoneNumber);
-          const user = await prisma.user.findFirst({
-            where: { phoneNumber },
+        // Import SMS verification helper
+        const { verifySmsCode } = await import('@/lib/auth/smsVerification');
+
+        // Handle SMS code verification
+        if (smsCode) {
+          console.log('Verifying SMS code for phone:', cleanPhone);
+          
+          // Verify the SMS code
+          const isValidCode = verifySmsCode(cleanPhone, smsCode);
+          if (!isValidCode) {
+            console.log('Invalid SMS code');
+            return null;
+          }
+
+          // Get or create user
+          let user = await prisma.user.findUnique({
+            where: { phoneNumber: cleanPhone },
           });
 
-          console.log('User found:', user);
+          if (!user && mode === 'register') {
+            // Create new user with SMS verification
+            console.log('Creating new user via SMS verification');
+            user = await prisma.user.create({
+              data: {
+                phoneNumber: cleanPhone,
+                username: cleanPhone, // Use phone as default username
+                phoneVerified: true,
+              },
+            });
+          }
 
-          if (!user) {
-            // Create new user if not found (registration)
-            console.log('Creating new user with phone:', phoneNumber);
+          if (user) {
+            // Update phone verification status
+            if (!user.phoneVerified) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { phoneVerified: true },
+              });
+            }
+
+            return {
+              id: user.id,
+              name: user.name || user.username || user.phoneNumber,
+              username: user.username,
+              phoneNumber: user.phoneNumber,
+            };
+          }
+
+          return null;
+        }
+
+        // Handle password authentication
+        if (password) {
+          console.log('Password authentication for phone:', cleanPhone);
+          
+          const user = await prisma.user.findUnique({
+            where: { phoneNumber: cleanPhone },
+          });
+
+          if (mode === 'register') {
+            // Registration with password
+            if (user) {
+              console.log('Phone number already registered');
+              return null; // Phone already exists
+            }
 
             try {
               const hashedPassword = await bcrypt.hash(password, 12);
               const newUser = await prisma.user.create({
                 data: {
-                  phoneNumber,
+                  phoneNumber: cleanPhone,
                   passwordHash: hashedPassword,
-                  username: phoneNumber, // Use phone number as default username
+                  username: cleanPhone, // Use phone as default username
+                  phoneVerified: false, // Will be verified via SMS in registration flow
                 },
               });
               console.log('New user created successfully:', newUser.id);
@@ -64,45 +123,34 @@ export default {
                 phoneNumber: newUser.phoneNumber,
               };
             } catch (error) {
-              console.error('Error creating user in database:', error);
-
-              // Check for duplicate constraint violation
-              if (String(error).includes('unique') || String(error).includes('duplicate')) {
-                console.log('Duplicate phone number detected');
-                return null;
-              }
-
+              console.error('Error creating user:', error);
               return null;
             }
-          }
-
-          // Verify password for existing user (login)
-          if (user.passwordHash) {
-            const isValid = await bcrypt.compare(password, user.passwordHash);
-            console.log('Password validation result:', isValid);
-            if (isValid) {
-              return {
-                id: user.id,
-                name: user.name || user.username || user.phoneNumber,
-                username: user.username,
-                phoneNumber: user.phoneNumber,
-              };
+          } else {
+            // Login with password
+            if (!user) {
+              console.log('User not found');
+              return null;
             }
+
+            if (user.passwordHash) {
+              const isValid = await bcrypt.compare(password, user.passwordHash);
+              console.log('Password validation result:', isValid);
+              if (isValid) {
+                return {
+                  id: user.id,
+                  name: user.name || user.username || user.phoneNumber,
+                  username: user.username,
+                  phoneNumber: user.phoneNumber,
+                };
+              }
+            }
+            console.log('Invalid password');
+            return null;
           }
-          console.log('Password validation failed or no password hash');
-          return null;
         }
 
-        if (phoneNumber && smsCode) {
-          // SMS verification (for login)
-          // Implement SMS code verification logic
-          const user = await prisma.user.findUnique({
-            where: { phoneNumber },
-          });
-          return user;
-        }
-
-        console.log('No valid credentials provided');
+        console.log('No valid authentication method provided');
         return null;
       },
     }),
@@ -120,6 +168,7 @@ export default {
       const isOnUnprotectedPage =
         pathname === '/' || // The root page '/' is also an unprotected page
         pathname === '/feed' || // Feed page is now public
+        pathname.match(/^\/[^\/]+$/) || // User profiles like /username are public
         unProtectedPages.some((page) => pathname.startsWith(page));
       const isProtectedPage = !isOnUnprotectedPage;
 

@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
-import { formatDistanceToNow, zhCN } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import zhCN from 'date-fns/locale/zh-CN';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ArrowLeft, MessageCircle } from 'lucide-react';

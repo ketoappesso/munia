@@ -1,22 +1,38 @@
 import Link from 'next/link';
-import { UserAuthForm } from '../UserAuthForm';
+import { PhoneAuthForm } from '../PhoneAuthForm';
 
 export const metadata = {
-  title: 'Munia | Register',
+  title: 'Munia | 注册',
 };
 
 export default function Page() {
   return (
-    <>
-      <h1 className="mb-5 text-5xl font-bold">Sign Up</h1>
-      <p className="mb-4 text-lg text-muted-foreground">Enter your email to create an account</p>
-      <UserAuthForm mode="register" />
-      <p className="text-lg text-muted-foreground">Alreay have an account?</p>
-      <p className="cursor-pointer text-lg font-semibold text-primary-accent hover:opacity-90">
-        <Link href="/login" prefetch>
-          Login
-        </Link>
-      </p>
-    </>
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* Logo and Title */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">创建账户</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            加入 Munia 社区
+          </p>
+        </div>
+
+        {/* Phone Auth Form */}
+        <PhoneAuthForm mode="register" />
+
+        {/* Login Link */}
+        <div className="text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            已有账户？
+            <Link 
+              href="/login" 
+              className="ml-1 font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            >
+              立即登录
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ import { walletCache } from '@/lib/walletCache';
 import Button from '@/components/ui/Button';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale/zh-CN';
+import zhCN from 'date-fns/locale/zh-CN';
 
 interface WalletInfo {
   id: string;
