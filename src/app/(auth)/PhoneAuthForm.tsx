@@ -92,11 +92,12 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
       });
 
       if (signInResult?.error) {
+        console.log('Auth error:', signInResult.error, 'Mode:', mode);
         if (mode === 'register') {
           showToast({ 
             type: 'error', 
             title: '注册失败', 
-            message: '该手机号可能已被注册' 
+            message: '注册失败，请检查输入信息或稍后重试' 
           });
         } else {
           showToast({ 
@@ -313,8 +314,9 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
             </div>
           )}
 
-          {/* SMS Verification for Register */}
-          {mode === 'register' && (
+          {/* SMS Verification for Register - DISABLED FOR TESTING PHASE */}
+          {/* Uncomment this section when SMS verification is needed */}
+          {/* {mode === 'register' && (
             <>
               <div className="flex gap-2">
                 <div className="flex-1">
@@ -342,7 +344,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
                 </div>
               </div>
             </>
-          )}
+          )} */}
 
           {/* Password Submit Button */}
           <Button

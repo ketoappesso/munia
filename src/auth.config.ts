@@ -29,7 +29,14 @@ export default {
         // Only run on server-side
         if (typeof window !== 'undefined') return null;
 
-        console.log('Credentials received:', { phoneNumber, mode, hasSmsCode: !!smsCode, hasPassword: !!password });
+        console.log('Credentials received:', { 
+          phoneNumber, 
+          mode, 
+          modeType: typeof mode,
+          modeValue: mode,
+          hasSmsCode: !!smsCode, 
+          hasPassword: !!password 
+        });
 
         // Clean phone number
         const cleanPhone = phoneNumber?.toString().replace(/\D/g, '');
@@ -65,19 +72,14 @@ export default {
               data: {
                 phoneNumber: cleanPhone,
                 username: cleanPhone, // Use phone as default username
-                phoneVerified: true,
+                // Note: phoneVerified field doesn't exist in the schema
               },
             });
           }
 
           if (user) {
-            // Update phone verification status
-            if (!user.phoneVerified) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { phoneVerified: true },
-              });
-            }
+            // Note: phoneVerified field doesn't exist in the schema
+            // In production, you might want to track verification in a separate table
 
             return {
               id: user.id,
@@ -92,7 +94,7 @@ export default {
 
         // Handle password authentication
         if (password) {
-          console.log('Password authentication for phone:', cleanPhone);
+          console.log('Password authentication for phone:', cleanPhone, 'Mode:', mode);
           
           const user = await prisma.user.findUnique({
             where: { phoneNumber: cleanPhone },
@@ -100,11 +102,13 @@ export default {
 
           if (mode === 'register') {
             // Registration with password
+            console.log('Registration attempt for phone:', cleanPhone);
             if (user) {
-              console.log('Phone number already registered');
+              console.log('Phone number already registered:', user.id);
               return null; // Phone already exists
             }
 
+            console.log('Creating new user for phone:', cleanPhone);
             try {
               const hashedPassword = await bcrypt.hash(password, 12);
               const newUser = await prisma.user.create({
@@ -112,10 +116,10 @@ export default {
                   phoneNumber: cleanPhone,
                   passwordHash: hashedPassword,
                   username: cleanPhone, // Use phone as default username
-                  phoneVerified: false, // Will be verified via SMS in registration flow
+                  // Note: phoneVerified field doesn't exist in the schema
                 },
               });
-              console.log('New user created successfully:', newUser.id);
+              console.log('New user created successfully:', newUser.id, newUser.phoneNumber);
               return {
                 id: newUser.id,
                 name: newUser.name || newUser.username || newUser.phoneNumber,
@@ -128,8 +132,9 @@ export default {
             }
           } else {
             // Login with password
+            console.log('Login attempt for phone:', cleanPhone);
             if (!user) {
-              console.log('User not found');
+              console.log('User not found for login');
               return null;
             }
 
