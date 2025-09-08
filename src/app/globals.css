@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Typewriter fade-in animation for TTS */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
 @layer base {
   :root {
     --background: 254 253 255;

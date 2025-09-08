@@ -115,8 +115,7 @@ export const Post = memo(
       voice: authorVoice,
       speed: 1.0,
       onStart: () => {
-        setShowText(true);
-        setDisplayedText('');
+        // Already handled in handleTTSToggle
       },
       onEnd: () => {
         setIsCompleted(true);
@@ -163,9 +162,15 @@ export const Post = memo(
           pause();
         }
       } else {
-        // Start playback with better synchronization
+        // Reset text state for fresh playback
+        setShowText(true);
+        setDisplayedText('');
+        setIsCompleted(false);
+        
+        // Start playback with character-by-character reveal
         const textLength = data.content.length;
         speak(data.content, (charIndex) => {
+          // Update displayed text character by character
           setDisplayedText(data.content.slice(0, charIndex + 1));
         }, textLength);
       }
@@ -443,22 +448,25 @@ export const Post = memo(
                   <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
                 </div>
               ) : isPlaying || (showText && !isCompleted) ? (
-                // Show typewriter effect during playback with fade-in effect (no cursor)
+                // Show typewriter effect during playback with smooth fade-in
                 <div className="text-lg text-muted-foreground">
                   <span className="inline">
-                    {displayedText.split('').map((char, index) => (
-                      <span
-                        key={index}
-                        className="inline-block animate-fadeIn"
-                        style={{
-                          animationDelay: `${index * 0.01}s`,
-                          opacity: 0,
-                          animationFillMode: 'forwards'
-                        }}
-                      >
-                        {char}
-                      </span>
-                    ))}
+                    {content.split('').map((char, index) => {
+                      const isVisible = index < displayedText.length;
+                      return (
+                        <span
+                          key={index}
+                          className={`inline-block transition-all duration-300 ${
+                            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+                          }`}
+                          style={{
+                            transitionDelay: isVisible ? '0ms' : '0ms',
+                          }}
+                        >
+                          {char}
+                        </span>
+                      );
+                    })}
                   </span>
                 </div>
               ) : (

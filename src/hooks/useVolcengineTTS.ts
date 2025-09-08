@@ -97,6 +97,30 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
       // Set up event handlers
       audio.onloadedmetadata = () => {
         setIsLoading(false);
+        console.log('Audio metadata loaded, duration:', audio.duration);
+        
+        // Start progress tracking when metadata is loaded (we have duration)
+        if (onCharacter && textLength && audio.duration > 0) {
+          const duration = audio.duration * 1000; // Convert to milliseconds
+          const startTime = Date.now();
+          
+          progressIntervalRef.current = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentChar = Math.floor(progress * textLength);
+            
+            setProgress(progress);
+            onCharacter(currentChar);
+            options.onProgress?.(progress);
+            
+            if (progress >= 1) {
+              if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current);
+                progressIntervalRef.current = null;
+              }
+            }
+          }, 50); // Update every 50ms for smooth animation
+        }
       };
 
       audio.onplay = () => {
@@ -104,8 +128,8 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         setIsPaused(false);
         options.onStart?.();
         
-        // Start progress tracking for typewriter effect
-        if (onCharacter && textLength) {
+        // Fallback: if duration wasn't available in onloadedmetadata, try again
+        if (onCharacter && textLength && !progressIntervalRef.current && audio.duration > 0) {
           const duration = audio.duration * 1000; // Convert to milliseconds
           const startTime = Date.now();
           
@@ -166,6 +190,31 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
       // Start playback
       await audio.play();
+      
+      // Additional fallback: Use estimated duration if audio duration is still not available
+      if (onCharacter && textLength && !progressIntervalRef.current) {
+        console.log('Using estimated duration for typewriter effect');
+        // Estimate: 3 characters per second for Chinese
+        const estimatedDuration = (textLength / 3) * 1000; // milliseconds
+        const startTime = Date.now();
+        
+        progressIntervalRef.current = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / estimatedDuration, 1);
+          const currentChar = Math.floor(progress * textLength);
+          
+          setProgress(progress);
+          onCharacter(currentChar);
+          options.onProgress?.(progress);
+          
+          if (progress >= 1) {
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+              progressIntervalRef.current = null;
+            }
+          }
+        }, 50); // Update every 50ms for smooth animation
+      }
 
     } catch (err) {
       console.error('TTS error:', err);
