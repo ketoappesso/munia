@@ -142,7 +142,17 @@ export const translations = {
       saveChanges: "保存更改",
       saved: "已保存",
       chinese: "中文",
-      english: "English"
+      english: "English",
+      voiceSettings: "语音设置",
+      voiceSelection: "选择语音",
+      customVoice: "专属语音",
+      femaleVoice: "女声",
+      maleVoice: "男声",
+      childVoice: "童声",
+      newsVoice: "新闻播音",
+      storytellingVoice: "故事讲述",
+      previewVoice: "试听语音",
+      usingCustomVoice: "使用专属语音"
     },
     wallet: {
       balance: "余额",
@@ -441,7 +451,17 @@ export const translations = {
       saveChanges: "Save Changes",
       saved: "Saved",
       chinese: "中文",
-      english: "English"
+      english: "English",
+      voiceSettings: "Voice Settings",
+      voiceSelection: "Voice Selection",
+      customVoice: "Custom Voice",
+      femaleVoice: "Female Voice",
+      maleVoice: "Male Voice",
+      childVoice: "Child Voice",
+      newsVoice: "News Voice",
+      storytellingVoice: "Storytelling Voice",
+      previewVoice: "Preview Voice",
+      usingCustomVoice: "Using Custom Voice"
     },
     wallet: {
       balance: "Balance",

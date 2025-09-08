@@ -5,6 +5,10 @@ export const includeUserSummary = () => ({
       username: true,
       name: true,
       profilePhoto: true,
+      phoneNumber: true,
+      ttsVoiceId: true,
+      ttsModelId: true,
+      featured: true,
     },
   },
 });

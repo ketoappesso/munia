@@ -24,7 +24,10 @@ import { PostVisualMediaContainer } from './PostVisualMediaContainer';
 import ProfileBlock from './ProfileBlock';
 import { HighlightedMentionsAndHashTags } from './HighlightedMentionsAndHashTags';
 import { PostOptions } from './PostOptions';
-import { useTTS } from '@/hooks/useTTS';
+import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
+import { AudioPlayer } from './AudioPlayer';
+import { getVoiceForUser } from '@/lib/volcengine/voiceMapping';
+import { useTTSContext } from '@/contexts/TTSContext';
 
 export const Post = memo(
   ({
@@ -57,7 +60,7 @@ export const Post = memo(
         }
         return (await res.json()) as GetPost;
       },
-      staleTime: 60000 * 10,
+      staleTime: 60000 * 5, // 5 minutes cache
     });
     
     // Check if this post has been played before from localStorage
@@ -76,8 +79,41 @@ export const Post = memo(
       }
     }, [postId, data?.content]);
     
-    const { speak, stop, isPlaying, isSupported } = useTTS({
-      rate: 1.0,
+    // Get the appropriate voice for the post author
+    const { selectedVoice } = useTTSContext();
+    const authorVoice = useMemo(() => {
+      if (data?.user) {
+        // First check if this user has a custom voice mapping
+        const voice = getVoiceForUser(
+          data.user.phoneNumber,
+          null, // Don't use the stored ttsVoiceId initially
+          selectedVoice
+        );
+        console.log('Post author voice selection:', {
+          phoneNumber: data.user.phoneNumber,
+          ttsVoiceId: data.user.ttsVoiceId,
+          mappedVoice: voice,
+          usingCustom: voice.startsWith('S_'),
+        });
+        return voice;
+      }
+      return selectedVoice;
+    }, [data?.user, selectedVoice]);
+    
+    const { 
+      speak, 
+      stop, 
+      pause,
+      resume,
+      isPlaying, 
+      isPaused,
+      isLoading,
+      isSupported,
+      progress,
+      isFallback,
+    } = useVolcengineTTS({
+      voice: authorVoice,
+      speed: 1.0,
       onStart: () => {
         setShowText(true);
         setDisplayedText('');
@@ -93,7 +129,8 @@ export const Post = memo(
           playedPostIds.push(postId);
           localStorage.setItem('tts-played-posts', JSON.stringify(playedPostIds));
         }
-      }
+      },
+      fallbackToBrowser: true, // Use browser TTS if Volcengine fails
     });
 
     const likePost = useCallback(() => likeMutation.mutate(), [likeMutation]);
@@ -120,11 +157,10 @@ export const Post = memo(
       if (!data?.content) return;
       
       if (isPlaying) {
-        stop();
-        // If not completed, hide text again
-        if (!isCompleted) {
-          setShowText(false);
-          setDisplayedText('');
+        if (isPaused) {
+          resume();
+        } else {
+          pause();
         }
       } else {
         // Start playback with better synchronization
@@ -133,7 +169,16 @@ export const Post = memo(
           setDisplayedText(data.content.slice(0, charIndex + 1));
         }, textLength);
       }
-    }, [data?.content, isPlaying, stop, speak, isCompleted]);
+    }, [data?.content, isPlaying, isPaused, pause, resume, speak]);
+    
+    const handleTTSStop = useCallback(() => {
+      stop();
+      // If not completed, hide text again
+      if (!isCompleted) {
+        setShowText(false);
+        setDisplayedText('');
+      }
+    }, [stop, isCompleted]);
     
     // Calculate estimated duration
     const getEstimatedDuration = useCallback(() => {
@@ -158,6 +203,7 @@ export const Post = memo(
       [],
     );
 
+    // All hooks have been called above this point - safe to do early returns
     if (isPending) return <p>Loading...</p>;
     if (isError) return <p>Error loading post.</p>;
     if (!data) return <p>This post no longer exists.</p>;
@@ -423,28 +469,19 @@ export const Post = memo(
               )}
             </div>
             {isSupported && (
-              <button
-                onClick={handleTTSToggle}
-                className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-lg border transition-all",
-                  isPlaying 
-                    ? "border-gray-300 bg-gray-100 text-gray-700" 
-                    : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
-                )}
-                title={isPlaying ? "停止播放" : "语音播放"}
-              >
-                {isPlaying ? (
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="6" y="4" width="4" height="16" rx="1" />
-                    <rect x="14" y="4" width="4" height="16" rx="1" />
-                  </svg>
-                ) : (
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                )}
-              </button>
+              <AudioPlayer
+                isPlaying={isPlaying}
+                isPaused={isPaused}
+                isLoading={isLoading}
+                progress={progress}
+                duration={data?.content ? Math.ceil(data.content.length / 3) : undefined}
+                onPlay={handleTTSToggle}
+                onPause={handleTTSToggle}
+                onStop={handleTTSStop}
+                showTimer={true}
+                size="md"
+                isFallback={isFallback}
+              />
             )}
           </div>
         )}

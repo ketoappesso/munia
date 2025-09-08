@@ -8,6 +8,7 @@ import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import { ToastContextProvider } from '@/contexts/ToastContext';
 import { VisualMediaModalContextProvider } from '@/contexts/VisualMediaModalContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { TTSContextProvider } from '@/contexts/TTSContext';
 import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import React from 'react';
@@ -20,16 +21,18 @@ export function Providers({ children, session }: { children: React.ReactNode; se
         <ToastContextProvider>
           <ReactQueryProvider>
             <SessionProvider session={session}>
-              <DialogsContextProvider>
-                <VisualMediaModalContextProvider>
-                  <CreatePostModalContextProvider>
-                    <ShouldAnimateContextProvider>
-                      <OfflineQueueProcessor />
-                      {children}
-                    </ShouldAnimateContextProvider>
-                  </CreatePostModalContextProvider>
-                </VisualMediaModalContextProvider>
-              </DialogsContextProvider>
+              <TTSContextProvider>
+                <DialogsContextProvider>
+                  <VisualMediaModalContextProvider>
+                    <CreatePostModalContextProvider>
+                      <ShouldAnimateContextProvider>
+                        <OfflineQueueProcessor />
+                        {children}
+                      </ShouldAnimateContextProvider>
+                    </CreatePostModalContextProvider>
+                  </VisualMediaModalContextProvider>
+                </DialogsContextProvider>
+              </TTSContextProvider>
             </SessionProvider>
           </ReactQueryProvider>
         </ToastContextProvider>

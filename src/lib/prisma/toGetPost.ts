@@ -34,6 +34,11 @@ export async function toGetPost(findPostResult: FindPostResult): Promise<GetPost
       name: rest.user.name || rest.user.username || '用户',
       // Convert the `profilePhoto` file name to a full S3 URL
       profilePhoto: fileNameToUrl(rest.user.profilePhoto),
+      // Include TTS-related fields for voice selection
+      phoneNumber: rest.user.phoneNumber,
+      ttsVoiceId: rest.user.ttsVoiceId,
+      ttsModelId: rest.user.ttsModelId,
+      featured: rest.user.featured,
     },
     visualMedia,
     content: str,

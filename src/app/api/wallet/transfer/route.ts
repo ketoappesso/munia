@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET endpoint to check transfer eligibility
+// GET endpoint to check transfer eligibility (uses cached balance)
 export async function GET(request: NextRequest) {
   try {
     const [user] = await getServerUser();
@@ -254,12 +254,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user information
+    // Get user information including cached Appesso balance
     const userInfo = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
         phoneNumber: true,
         apeBalance: true,
+        appessoBalance: true,
+        appessoBalanceUpdatedAt: true,
       },
     });
 
@@ -275,30 +277,67 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Check if Appesso account exists
-    const pospalClient = createPospalClient();
-    const customer = await pospalClient.queryCustomerByPhone(userInfo.phoneNumber);
-
-    if (!customer) {
+    // Use cached balance if available for eligibility check
+    // This avoids unnecessary Pospal API calls
+    if (userInfo.appessoBalance !== null) {
       return NextResponse.json({
-        eligible: false,
-        reason: 'Appesso account not found',
+        eligible: true,
         apeBalance: userInfo.apeBalance,
+        appessoBalance: userInfo.appessoBalance,
+        cached: true,
+        lastUpdated: userInfo.appessoBalanceUpdatedAt,
+        customerInfo: {
+          phoneNumber: userInfo.phoneNumber,
+        },
       });
     }
 
-    const appessoBalance = customer.balance + (customer.extInfo?.subsidyAmount || 0);
+    // Only call Pospal API if no cached balance exists
+    // This should be rare as the appesso-balance endpoint will cache it
+    try {
+      const pospalClient = createPospalClient();
+      const customer = await pospalClient.queryCustomerByPhone(userInfo.phoneNumber);
 
-    return NextResponse.json({
-      eligible: true,
-      apeBalance: userInfo.apeBalance,
-      appessoBalance,
-      customerInfo: {
-        name: customer.name,
-        memberNumber: customer.number,
-        phoneNumber: customer.phone,
-      },
-    });
+      if (!customer) {
+        return NextResponse.json({
+          eligible: false,
+          reason: 'Appesso account not found',
+          apeBalance: userInfo.apeBalance,
+        });
+      }
+
+      const appessoBalance = customer.balance + (customer.extInfo?.subsidyAmount || 0);
+      
+      // Cache the balance for future use
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          appessoBalance,
+          appessoBalanceUpdatedAt: new Date(),
+        },
+      });
+
+      return NextResponse.json({
+        eligible: true,
+        apeBalance: userInfo.apeBalance,
+        appessoBalance,
+        cached: false,
+        customerInfo: {
+          name: customer.name,
+          memberNumber: customer.number,
+          phoneNumber: customer.phone,
+        },
+      });
+    } catch (pospalError) {
+      console.error('Pospal API error in transfer eligibility check:', pospalError);
+      
+      // Return error but don't block the UI
+      return NextResponse.json({
+        eligible: false,
+        reason: 'Unable to verify Appesso account. Please try again later.',
+        apeBalance: userInfo.apeBalance,
+      });
+    }
 
   } catch (error) {
     console.error('Error checking transfer eligibility:', error);

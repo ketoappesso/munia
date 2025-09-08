@@ -11,6 +11,10 @@ export interface UserSummaryAfterSetUp {
   username: string;
   name: string;
   profilePhoto: string | null;
+  phoneNumber?: string | null;
+  ttsVoiceId?: string | null;
+  ttsModelId?: string | null;
+  featured?: boolean;
 }
 
 interface UserAfterSetUp extends User {

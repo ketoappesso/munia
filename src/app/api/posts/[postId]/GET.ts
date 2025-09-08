@@ -24,5 +24,15 @@ export async function GET(request: Request, { params }: { params: { postId: stri
   });
 
   if (res === null) return NextResponse.json(null);
+  
+  // Debug: Log the user data being returned
+  console.log('API Post User Data:', {
+    postId: params.postId,
+    userId: res.user?.id,
+    username: res.user?.username,
+    phoneNumber: res.user?.phoneNumber,
+    ttsVoiceId: res.user?.ttsVoiceId,
+  });
+  
   return NextResponse.json<GetPost>(await toGetPost(res));
 }

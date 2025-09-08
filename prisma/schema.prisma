@@ -81,6 +81,10 @@ model User {
   featured     Boolean @default(false)
   ttsModelId   String?
   ttsVoiceId   String?
+
+  // Pospal balance caching fields
+  appessoBalance          Float?    // Cached Appesso balance
+  appessoBalanceUpdatedAt DateTime? // When the balance was last fetched from Pospal
 }
 
 model VerificationToken {

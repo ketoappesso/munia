@@ -16,7 +16,8 @@ interface WalletInfo {
   username: string;
   walletAddress: string;
   apeBalance: number;
-  appessoBalance?: number; // Appesso Coffee balance
+  appessoBalance?: number; // Appesso Coffee balance (from database cache)
+  appessoBalanceUpdatedAt?: string; // When the balance was last fetched
   walletCreatedAt: string;
 }
 
@@ -56,16 +57,22 @@ export default function WalletPage() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [cachedAppessoBalance, setCachedAppessoBalance] = useState<number>(0);
 
-  // Load cached data on mount
+  // Load cached data on mount and from wallet API response
   useEffect(() => {
+    // First try localStorage cache
     const cached = walletCache.get();
     if (cached) {
       setCachedAppessoBalance(cached.subsidy);
       setLastUpdated(cached.lastUpdated);
     }
-  }, []);
+    
+    // If wallet data is available from API with cached Appesso balance, use it
+    if (wallet?.appessoBalance) {
+      setCachedAppessoBalance(wallet.appessoBalance);
+    }
+  }, [wallet]);
 
-  // Fetch wallet info (APE balance with automatic refetch)
+  // Fetch wallet info (APE balance - no automatic refetch for Pospal)
   const { data: wallet, isLoading: walletLoading, refetch: refetchWallet } = useQuery<WalletInfo>({
     queryKey: ['wallet'],
     queryFn: async () => {
@@ -79,8 +86,8 @@ export default function WalletPage() {
       return data;
     },
     enabled: !!session?.user,
-    refetchInterval: 3 * 60 * 60 * 1000, // Auto refresh every 3 hours for APE balance
-    refetchOnWindowFocus: true, // Refresh on window focus for APE balance
+    // Removed automatic polling - wallet data will be fetched on-demand only
+    refetchOnWindowFocus: false, // Disable auto-refresh to minimize Pospal calls
   });
 
   // Fetch transactions
@@ -92,7 +99,7 @@ export default function WalletPage() {
       return response.json();
     },
     enabled: !!session?.user,
-    refetchInterval: 5000,
+    // Removed automatic polling - transactions will be fetched on-demand only
   });
 
   // Transaction mutation
@@ -161,8 +168,8 @@ export default function WalletPage() {
     
     setIsRefreshing(true);
     try {
-      // Call the Appesso API to get the balance
-      const response = await fetch('/api/wallet/appesso-balance', {
+      // Call the Appesso API with refresh=true to force fetch from Pospal
+      const response = await fetch('/api/wallet/appesso-balance?refresh=true', {
         method: 'GET',
       });
       
@@ -175,6 +182,9 @@ export default function WalletPage() {
         const now = new Date().toISOString();
         setLastUpdated(now);
         walletCache.set(wallet?.apeBalance || 0, newBalance);
+        
+        // Also update the wallet query to reflect new balance
+        await refetchWallet();
       }
     } catch (error) {
       console.error('Failed to refresh Appesso balance:', error);

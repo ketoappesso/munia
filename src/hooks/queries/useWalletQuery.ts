@@ -22,6 +22,6 @@ export function useWalletQuery() {
       return response.json();
     },
     enabled: !!session?.user,
-    refetchInterval: 10000, // Refresh every 10 seconds
+    // Removed automatic polling - wallet data will be fetched on-demand only
   });
 }

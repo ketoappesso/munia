@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's wallet information
+    // Get user's wallet information including cached Appesso balance
     const walletInfo = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
         walletAddress: true,
         apeBalance: true,
         walletCreatedAt: true,
+        appessoBalance: true,
+        appessoBalanceUpdatedAt: true,
       },
     });
 
@@ -57,42 +59,18 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      // Fetch Appesso balance
-      let appessoBalance = 0;
-      try {
-        if (updatedUser.phoneNumber) {
-          const pospalClient = createPospalClient(); // Main store only
-          appessoBalance = await pospalClient.getCustomerBalance(updatedUser.phoneNumber);
-        }
-      } catch (error) {
-        console.log('Failed to fetch Appesso balance:', error);
-      }
-
+      // Don't fetch Appesso balance on wallet creation to minimize API calls
       return NextResponse.json({
         ...updatedUser,
-        appessoBalance,
+        appessoBalance: 0, // Return 0 for new wallets, user can manually refresh
       });
     }
 
-    // Fetch Appesso balance for existing wallet
-    let appessoBalance = 0;
-    try {
-      const userPhone = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { phoneNumber: true },
-      });
-      
-      if (userPhone?.phoneNumber) {
-        const pospalClient = createPospalClient(); // Main store only
-        appessoBalance = await pospalClient.getCustomerBalance(userPhone.phoneNumber);
-      }
-    } catch (error) {
-      console.log('Failed to fetch Appesso balance:', error);
-    }
-
+    // Return cached Appesso balance if available
+    // User can manually refresh via the appesso-balance endpoint
     return NextResponse.json({
       ...walletInfo,
-      appessoBalance,
+      appessoBalance: walletInfo.appessoBalance || 0, // Return cached balance or 0
     });
   } catch (error) {
     console.error('Error fetching wallet:', error);

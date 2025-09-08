@@ -4,10 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/hooks/useTheme';
 import { ThemeSwitch } from '@/components/ui/ThemeSwitch';
 import { LogoutButton } from '@/components/LogoutButton';
-import { X, Wallet, Globe } from 'lucide-react';
+import { X, Wallet, Globe, Volume2 } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTTSContext } from '@/contexts/TTSContext';
+import { STANDARD_VOICES, getVoiceDisplayName, isCustomVoice } from '@/lib/volcengine/voiceMapping';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -18,10 +23,47 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   const { theme } = useTheme();
   const router = useRouter();
   const { t, language, setLanguage } = useLanguage();
+  const { data: session } = useSession();
+  const { selectedVoice, setSelectedVoice, availableVoices } = useTTSContext();
+  const [userHasCustomVoice, setUserHasCustomVoice] = useState(false);
+  const [userCustomVoiceId, setUserCustomVoiceId] = useState<string | null>(null);
+
+  // TTS for voice preview
+  const { speak, stop, isPlaying } = useVolcengineTTS({
+    voice: selectedVoice as any, // Type assertion needed for voice compatibility
+    speed: 1.0,
+  });
+
+  // Check if user has custom voice
+  useEffect(() => {
+    if (session?.user?.id) {
+      // Fetch user data to check for custom voice
+      fetch(`/api/user/${session.user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ttsVoiceId && isCustomVoice(data.ttsVoiceId)) {
+            setUserHasCustomVoice(true);
+            setUserCustomVoiceId(data.ttsVoiceId);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [session?.user?.id]);
 
   const handleWalletClick = () => {
     onClose();
     router.push('/wallet');
+  };
+
+  const handleVoicePreview = () => {
+    if (isPlaying) {
+      stop();
+    } else {
+      const previewText = language === 'zh' 
+        ? '你好，这是语音预览测试。' 
+        : 'Hello, this is a voice preview test.';
+      speak(previewText);
+    }
   };
 
   return (
@@ -86,6 +128,55 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
                     <option value="zh">{t('settings.chinese')}</option>
                     <option value="en">{t('settings.english')}</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Voice Settings Section */}
+              <div>
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.voiceSettings')}</h3>
+                
+                {/* Voice Selection */}
+                <div className="mb-3 rounded-lg bg-muted/50 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Volume2 className="mr-2 h-4 w-4 stroke-foreground" />
+                      <span className="text-foreground">{t('settings.voiceSelection')}</span>
+                    </div>
+                    {userHasCustomVoice ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-primary">{t('settings.customVoice')}</span>
+                        <ButtonNaked
+                          onPress={handleVoicePreview}
+                          className="rounded-md px-2 py-1 text-sm hover:bg-muted/70">
+                          {isPlaying ? t('settings.stopPreview') : t('settings.preview')}
+                        </ButtonNaked>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={selectedVoice}
+                          onChange={(e) => setSelectedVoice(e.target.value)}
+                          className="rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                          {Object.entries(availableVoices).map(([key, voice]) => (
+                            <option key={voice.id} value={voice.id}>
+                              {language === 'zh' ? voice.nameZh : voice.name}
+                            </option>
+                          ))}
+                        </select>
+                        <ButtonNaked
+                          onPress={handleVoicePreview}
+                          className="rounded-md px-2 py-1 text-sm hover:bg-muted/70">
+                          {isPlaying ? t('settings.stopPreview') : t('settings.preview')}
+                        </ButtonNaked>
+                      </div>
+                    )}
+                  </div>
+                  {userHasCustomVoice && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t('settings.customVoiceDescription')}
+                    </p>
+                  )}
                 </div>
               </div>
 
