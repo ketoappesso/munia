@@ -57,21 +57,6 @@ export default function WalletPage() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [cachedAppessoBalance, setCachedAppessoBalance] = useState<number>(0);
 
-  // Load cached data on mount and from wallet API response
-  useEffect(() => {
-    // First try localStorage cache
-    const cached = walletCache.get();
-    if (cached) {
-      setCachedAppessoBalance(cached.subsidy);
-      setLastUpdated(cached.lastUpdated);
-    }
-    
-    // If wallet data is available from API with cached Appesso balance, use it
-    if (wallet?.appessoBalance) {
-      setCachedAppessoBalance(wallet.appessoBalance);
-    }
-  }, [wallet]);
-
   // Fetch wallet info (APE balance - no automatic refetch for Pospal)
   const { data: wallet, isLoading: walletLoading, refetch: refetchWallet } = useQuery<WalletInfo>({
     queryKey: ['wallet'],
@@ -89,6 +74,21 @@ export default function WalletPage() {
     // Removed automatic polling - wallet data will be fetched on-demand only
     refetchOnWindowFocus: false, // Disable auto-refresh to minimize Pospal calls
   });
+
+  // Load cached data on mount and from wallet API response
+  useEffect(() => {
+    // First try localStorage cache
+    const cached = walletCache.get();
+    if (cached) {
+      setCachedAppessoBalance(cached.subsidy);
+      setLastUpdated(cached.lastUpdated);
+    }
+    
+    // If wallet data is available from API with cached Appesso balance, use it
+    if (wallet?.appessoBalance) {
+      setCachedAppessoBalance(wallet.appessoBalance);
+    }
+  }, [wallet]);
 
   // Fetch transactions
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
