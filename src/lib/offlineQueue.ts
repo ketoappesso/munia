@@ -21,7 +21,7 @@ export interface OfflineQueueManager {
 }
 
 class IndexedDBOfflineQueue implements OfflineQueueManager {
-  private dbName = 'munia-offline-queue';
+  private dbName = 'appesso-offline-queue';
 
   private storeName = 'posts';
 

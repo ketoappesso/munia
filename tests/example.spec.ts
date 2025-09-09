@@ -4,7 +4,7 @@ test('homepage has title and links to login page', async ({ page }) => {
   await page.goto('/');
 
   // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Munia/);
+  await expect(page).toHaveTitle(/Appesso/);
 
   // Check if login link exists
   const loginLink = page.getByRole('link', { name: /Login/i });

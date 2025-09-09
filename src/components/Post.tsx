@@ -26,8 +26,8 @@ import { HighlightedMentionsAndHashTags } from './HighlightedMentionsAndHashTags
 import { PostOptions } from './PostOptions';
 import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
 import { AudioPlayer } from './AudioPlayer';
-import { getVoiceForUser } from '@/lib/volcengine/voiceMapping';
-import { useTTSContext } from '@/contexts/TTSContext';
+import PunkButton from './PunkButton';
+import { usePunk } from '@/contexts/PunkContext';
 
 export const Post = memo(
   ({
@@ -49,6 +49,9 @@ export const Post = memo(
     const [showText, setShowText] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const router = useRouter();
+    
+    // Punk context
+    const { setPunkedVoice, clearPunkedVoice, punkedByUserId, isPunkedActive } = usePunk();
 
     // Fetch post data first
     const { data, isPending, isError } = useQuery<GetPost>({
@@ -63,13 +66,17 @@ export const Post = memo(
       staleTime: 60000 * 5, // 5 minutes cache
     });
     
-    // Check if this post has been played before from localStorage
+    // Check if this post has been played before from localStorage (user-specific or guest)
     useEffect(() => {
-      const playedPosts = localStorage.getItem('tts-played-posts');
+      // Use session user ID if logged in, otherwise use 'guest' for non-authenticated users
+      const userId = session?.user?.id || 'guest';
+      const userPlayedKey = `tts-played-posts-${userId}`;
+      
+      const playedPosts = localStorage.getItem(userPlayedKey);
       if (playedPosts) {
         const playedPostIds = JSON.parse(playedPosts) as number[];
         if (playedPostIds.includes(postId)) {
-          // Post has been played before, show text immediately
+          // Post has been played before by this user/guest, show text immediately
           setShowText(true);
           setIsCompleted(true);
           if (data?.content) {
@@ -77,28 +84,29 @@ export const Post = memo(
           }
         }
       }
-    }, [postId, data?.content]);
+    }, [postId, data?.content, session?.user?.id]);
     
     // Get the appropriate voice for the post author
-    const { selectedVoice } = useTTSContext();
+    // Two-tier system: 1) Custom voice if punked user 2) Browser TTS
     const authorVoice = useMemo(() => {
-      if (data?.user) {
-        // First check if this user has a custom voice mapping
-        const voice = getVoiceForUser(
-          data.user.phoneNumber,
-          null, // Don't use the stored ttsVoiceId initially
-          selectedVoice
-        );
+      if (data?.user && data.user.punked && data.user.ttsVoiceId?.startsWith('S_')) {
+        // User is punked and has custom voice
         console.log('Post author voice selection:', {
           phoneNumber: data.user.phoneNumber,
           ttsVoiceId: data.user.ttsVoiceId,
-          mappedVoice: voice,
-          usingCustom: voice.startsWith('S_'),
+          isPunked: true,
+          usingCustom: true,
         });
-        return voice;
+        return data.user.ttsVoiceId;
       }
-      return selectedVoice;
-    }, [data?.user, selectedVoice]);
+      // No custom voice - will fallback to browser TTS
+      console.log('Post author voice selection:', {
+        phoneNumber: data?.user?.phoneNumber,
+        isPunked: data?.user?.punked || false,
+        usingBrowserTTS: true,
+      });
+      return null; // Will trigger browser TTS fallback
+    }, [data?.user]);
     
     const { 
       speak, 
@@ -113,7 +121,7 @@ export const Post = memo(
       isFallback,
     } = useVolcengineTTS({
       voice: authorVoice,
-      speed: 1.0,
+      speed: 1.1,
       onStart: () => {
         // Already handled in handleTTSToggle
       },
@@ -121,16 +129,29 @@ export const Post = memo(
         setIsCompleted(true);
         setDisplayedText(data?.content || '');
         
-        // Save to localStorage that this post has been played
-        const playedPosts = localStorage.getItem('tts-played-posts');
+        // Save to localStorage that this post has been played (user-specific or guest)
+        const userId = session?.user?.id || 'guest';
+        const userPlayedKey = `tts-played-posts-${userId}`;
+        const playedPosts = localStorage.getItem(userPlayedKey);
         const playedPostIds = playedPosts ? JSON.parse(playedPosts) as number[] : [];
         if (!playedPostIds.includes(postId)) {
           playedPostIds.push(postId);
-          localStorage.setItem('tts-played-posts', JSON.stringify(playedPostIds));
+          localStorage.setItem(userPlayedKey, JSON.stringify(playedPostIds));
         }
       },
       fallbackToBrowser: true, // Use browser TTS if Volcengine fails
     });
+
+    // Clean up TTS when component unmounts (removed aggressive cleanup)
+    useEffect(() => {
+      return () => {
+        // Only log unmounting, don't stop TTS to avoid interruption
+        // The audio will continue playing even after unmount
+        if (isPlaying) {
+          console.log('Post component unmounting but keeping TTS playing for post:', postId);
+        }
+      };
+    }, [isPlaying, postId]);
 
     const likePost = useCallback(() => likeMutation.mutate(), [likeMutation]);
     const unLikePost = useCallback(() => unLikeMutation.mutate(), [unLikeMutation]);
@@ -149,8 +170,12 @@ export const Post = memo(
       [likePost, unLikePost, session],
     );
     const handleCommentsToggle = useCallback(() => {
+      if (!session?.user) {
+        window.location.href = '/login';
+        return;
+      }
       toggleComments(postId);
-    }, [postId, toggleComments]);
+    }, [postId, toggleComments, session]);
     
     const handleTTSToggle = useCallback(() => {
       if (!data?.content) return;
@@ -394,12 +419,33 @@ export const Post = memo(
     return (
       <div className="rounded-2xl bg-card px-4 shadow sm:px-8">
         <div className="flex items-center justify-between pt-4 sm:pt-5">
-          <ProfileBlock
-            name={author.name || author.username || 'Unknown User'}
-            username={author.username || author.id}
-            time={timeAgo || createdAt}
-            photoUrl={author.profilePhoto || ''}
-          />
+          <div className="flex items-center gap-3">
+            <ProfileBlock
+              name={author.name || author.username || 'Unknown User'}
+              username={author.username || author.id}
+              time={timeAgo || createdAt}
+              photoUrl={author.profilePhoto || ''}
+              isPunked={data?.user?.punked && data?.user?.ttsVoiceId?.startsWith('S_')}
+            />
+            {/* Show punk button if user has custom voice and is punked */}
+            {data?.user?.punked && data?.user?.ttsVoiceId?.startsWith('S_') && (
+              <PunkButton
+                isPunked={isPunkedActive && punkedByUserId === data.user.id}
+                onPunk={() => {
+                  if (isPunkedActive && punkedByUserId === data.user.id) {
+                    clearPunkedVoice();
+                  } else {
+                    setPunkedVoice(
+                      data.user.ttsVoiceId!,
+                      data.user.id,
+                      data.user.name || data.user.username || 'Unknown'
+                    );
+                  }
+                }}
+                disabled={!session?.user}
+              />
+            )}
+          </div>
           {isOwnPost && <PostOptions postId={postId} content={content} visualMedia={visualMedia} />}
         </div>
         {isTask && (
@@ -443,10 +489,8 @@ export const Post = memo(
             )}
             <div className="flex-1">
               {!showText && !isCompleted ? (
-                // Initially hide text - show nothing or a subtle placeholder
-                <div className="text-lg text-muted-foreground opacity-0">
-                  <HighlightedMentionsAndHashTags text={content} shouldAddLinks />
-                </div>
+                // Don't render anything until playback starts
+                null
               ) : isPlaying || (showText && !isCompleted) ? (
                 // Show typewriter effect during playback with smooth fade-in
                 <div className="text-lg text-muted-foreground">
@@ -509,6 +553,7 @@ export const Post = memo(
               onChange={handleLikeToggle}
               Icon={SvgHeart}
               quantity={numberOfLikes}
+              isDisabled={!session?.user}
               // noun="Like"
             />
             <ToggleStepper
@@ -517,6 +562,7 @@ export const Post = memo(
               Icon={SvgComment}
               quantity={_count.comments}
               color="blue"
+              isDisabled={!session?.user}
               // noun="Comment"
             />
           </div>

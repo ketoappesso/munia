@@ -19,7 +19,7 @@ const CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
 // Generate cache key
 function getCacheKey(text: string, voice?: string, speed?: number): string {
-  return `${text.slice(0, 100)}_${voice || 'BV001'}_${speed || 1.0}`;
+  return `${text.slice(0, 100)}_${voice || 'BV005'}_${speed || 1.1}`;
 }
 
 // Clean old cache entries
@@ -34,6 +34,12 @@ function cleanCache() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Clear cache if requested (for debugging)
+    if (request.headers.get('x-clear-cache') === 'true') {
+      ttsCache.clear();
+      console.log('TTS cache cleared');
+    }
+    
     // Check authentication (optional - remove if you want public access)
     // Temporarily disabled for testing
     // const session = await auth();
@@ -54,7 +60,17 @@ export async function POST(request: NextRequest) {
 
     const { text, voice, speed, volume, pitch, encoding } = validation.data;
 
-    // Check cache first
+    // Only process custom voices (S_xxxxx), fallback to browser for everything else
+    if (!voice || !voice.startsWith('S_')) {
+      console.log('No custom voice provided, falling back to browser TTS');
+      return NextResponse.json({
+        success: false,
+        error: 'Use browser TTS for standard voices',
+        fallback: true,
+      });
+    }
+
+    // Check cache first for custom voices
     const cacheKey = getCacheKey(text, voice, speed);
     const cached = ttsCache.get(cacheKey);
     
@@ -85,29 +101,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Synthesize speech
-    // For custom voices (S_xxxxx), pass directly; for standard voices, use the constant
-    const voiceId = voice && voice.startsWith('S_') 
-      ? voice 
-      : (voice ? `${voice}_streaming` : CHINESE_VOICES.BV001);
+    // Synthesize custom voice only
+    const voiceId = voice;
     
     console.log('Synthesizing TTS with params:', {
       text: text.slice(0, 50) + '...',
       voiceId,
-      speed: speed || 1.0,
+      speed: speed || 1.1,
       volume: volume || 1.0,
       pitch: pitch || 1.0,
       encoding: encoding || 'mp3',
     });
     
-    const audioBase64 = await ttsClient.synthesizeToBase64({
+    let audioBase64 = await ttsClient.synthesizeToBase64({
       text,
       voiceType: voiceId,
-      speed: speed || 1.0,
+      speed: speed || 1.1,
       volume: volume || 1.0,
       pitch: pitch || 1.0,
       encoding: encoding || 'mp3',
     });
+
+    // If custom voice failed, fallback to browser TTS
+    // Don't try standard Volcengine voices
 
     if (!audioBase64) {
       console.error('TTS synthesis failed - no audio data returned');
@@ -132,7 +148,7 @@ export async function POST(request: NextRequest) {
       success: true,
       audio: audioBase64,
       cached: false,
-      duration: ttsClient.estimateDuration(text, speed || 1.0),
+      duration: ttsClient.estimateDuration(text, speed || 1.1),
     });
 
   } catch (error) {

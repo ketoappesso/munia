@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Test script for balance transfers between Munia and Appesso
+ * Test script for balance transfers between Appesso and Appesso
  * 
  * Usage: node test-transfer.js <phoneNumber> [amount]
  * 
@@ -44,7 +44,7 @@ function makePospalRequest(endpoint, payload) {
         'Content-Length': Buffer.byteLength(body),
         'time-stamp': timestamp,
         'data-signature': signature,
-        'User-Agent': 'Munia/1.0',
+        'User-Agent': 'Appesso/1.0',
       }
     };
 
@@ -110,8 +110,8 @@ async function testTransfer() {
     console.log(`   Initial balance: ¥${totalInitialBalance} (Main: ¥${initialBalance}, Subsidy: ¥${subsidyBalance})`);
     console.log('');
 
-    // Step 2: Test adding balance (simulating transfer from Munia to Appesso)
-    console.log('2️⃣ Testing balance addition (Munia → Appesso)...');
+    // Step 2: Test adding balance (simulating transfer from Appesso to Appesso)
+    console.log('2️⃣ Testing balance addition (Appesso → Appesso)...');
     
     const addResult = await makePospalRequest('customerOpenApi/updateBalancePointByIncrement', {
       customerUid: BigInt(customerUid),
@@ -138,8 +138,8 @@ async function testTransfer() {
     console.log(`✅ Current balance: ¥${balanceAfterAdd}`);
     console.log('');
 
-    // Step 4: Test reducing balance (simulating transfer from Appesso to Munia)
-    console.log('4️⃣ Testing balance reduction (Appesso → Munia)...');
+    // Step 4: Test reducing balance (simulating transfer from Appesso to Appesso)
+    console.log('4️⃣ Testing balance reduction (Appesso → Appesso)...');
     console.log('   Waiting 2 seconds to avoid duplicate submission...');
     await new Promise(resolve => setTimeout(resolve, 2000));
     
@@ -179,7 +179,7 @@ async function testTransfer() {
     console.log('✅ Balance transfer system is working correctly!');
     console.log('');
     console.log('📝 Next steps:');
-    console.log('1. Login to the Munia app at http://localhost:3002/login');
+    console.log('1. Login to the Appesso app at http://localhost:3002/login');
     console.log('2. Navigate to the wallet page at http://localhost:3002/wallet');
     console.log('3. The transfer functionality is now available via API');
     console.log('');

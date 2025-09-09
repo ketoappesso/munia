@@ -81,7 +81,7 @@ export class PospalAPIClient {
         'Content-Type': 'application/json; charset=utf-8',
         'time-stamp': timestamp,
         'data-signature': signature,
-        'User-Agent': 'Munia/1.0',
+        'User-Agent': 'Appesso/1.0',
       },
       body: JSONBigInstance.stringify(payload),
     });
@@ -183,7 +183,7 @@ export class PospalAPIClient {
     customerUid: string | bigint,
     balanceIncrement: number,
     pointIncrement: number = 0,
-    reason: string = 'Munia transaction'
+    reason: string = 'Appesso transaction'
   ): Promise<boolean> {
     try {
       if (!this.appKey) {

@@ -26,7 +26,7 @@ async function testVoice(voiceId) {
         cluster: 'volcano_icl',
       },
       user: {
-        uid: 'munia-user-001',
+        uid: 'appesso-user-001',
       },
       audio: {
         voice_type: voiceId,

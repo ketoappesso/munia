@@ -5,7 +5,7 @@ test.describe('Authentication Flow', () => {
     await page.goto('/register');
 
     // Verify the title
-    await expect(page).toHaveTitle(/Munia.*Sign Up/);
+    await expect(page).toHaveTitle(/Appesso.*Sign Up/);
 
     // Check if the main elements are present
     await expect(page.getByRole('heading', { name: 'Sign Up' })).toBeVisible();

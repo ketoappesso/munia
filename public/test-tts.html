@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>火山引擎 TTS API 测试</h1>
+    
+    <div>
+        <h2>测试控制</h2>
+        <button onclick="testCustomVoice()">测试自定义语音 S_r3YGBCoB1</button>
+        <button onclick="testStandardVoice()">测试标准语音 BV005</button>
+        <button onclick="clearLogs()">清空日志</button>
+    </div>
+    
+    <div>
+        <h2>测试日志</h2>
+        <div id="log" class="log"></div>
+    </div>
+    
+    <div>
+        <h2>音频播放器</h2>
+        <audio id="audioPlayer" controls style="width: 100%;"></audio>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        async function testCustomVoice() {
+            log('开始测试自定义语音 S_r3YGBCoB1...');
+            
+            const payload = {
+                text: '你好，这是自定义语音测试。我是猿素大师兄。',
+                voice: 'S_r3YGBCoB1',
+                speed: 1.1,
+                volume: 1.0,
+                pitch: 1.0,
+                encoding: 'mp3'
+            };
+            
+            log('请求参数: ' + JSON.stringify(payload, null, 2));
+            
+            try {
+                const response = await fetch('/api/tts/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`响应状态: ${response.status}`);
+                
+                const result = await response.json();
+                log('响应结果: ' + JSON.stringify({
+                    success: result.success,
+                    hasAudio: !!result.audio,
+                    audioLength: result.audio?.length,
+                    cached: result.cached,
+                    fallback: result.fallback,
+                    error: result.error
+                }, null, 2));
+                
+                if (result.success && result.audio) {
+                    // 检查是否是静音
+                    const audioSample = result.audio.substring(0, 100);
+                    const isSilence = audioSample === '//PkxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+                    
+                    if (isSilence) {
+                        log('⚠️ 警告: API返回了静音音频数据！', 'error');
+                        log('可能原因: 1. 语音ID无效或过期 2. 认证问题 3. 权限不足', 'error');
+                    } else {
+                        log('✅ 成功: 收到有效音频数据', 'success');
+                        
+                        // 播放音频
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.src = `data:audio/mp3;base64,${result.audio}`;
+                        
+                        // 尝试自动播放
+                        try {
+                            await audioPlayer.play();
+                            log('✅ 音频开始播放', 'success');
+                        } catch (playError) {
+                            log('音频自动播放失败，请手动点击播放按钮: ' + playError.message, 'error');
+                        }
+                    }
+                } else {
+                    log('❌ 错误: ' + (result.error || '未知错误'), 'error');
+                }
+            } catch (error) {
+                log('❌ 请求失败: ' + error.message, 'error');
+            }
+        }
+        
+        async function testStandardVoice() {
+            log('开始测试标准语音 BV005...');
+            
+            const payload = {
+                text: '你好，这是标准语音测试。',
+                voice: 'BV005',
+                speed: 1.1,
+                volume: 1.0,
+                pitch: 1.0,
+                encoding: 'mp3'
+            };
+            
+            log('请求参数: ' + JSON.stringify(payload, null, 2));
+            
+            try {
+                const response = await fetch('/api/tts/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`响应状态: ${response.status}`);
+                
+                const result = await response.json();
+                log('响应结果: ' + JSON.stringify({
+                    success: result.success,
+                    hasAudio: !!result.audio,
+                    audioLength: result.audio?.length,
+                    cached: result.cached,
+                    fallback: result.fallback,
+                    error: result.error
+                }, null, 2));
+                
+                if (result.success && result.audio) {
+                    log('✅ 成功: 收到音频数据', 'success');
+                    
+                    // 播放音频
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = `data:audio/mp3;base64,${result.audio}`;
+                    
+                    try {
+                        await audioPlayer.play();
+                        log('✅ 音频开始播放', 'success');
+                    } catch (playError) {
+                        log('音频自动播放失败，请手动点击播放按钮', 'error');
+                    }
+                } else {
+                    log('❌ 错误: ' + (result.error || '未知错误'), 'error');
+                }
+            } catch (error) {
+                log('❌ 请求失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 页面加载时显示欢迎信息
+        window.onload = () => {
+            log('TTS API 测试页面已加载');
+            log('点击上方按钮开始测试');
+        };
+    </script>
+</body>
+</html>

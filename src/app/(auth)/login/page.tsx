@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { PhoneAuthForm } from '../PhoneAuthForm';
 
 export const metadata = {
-  title: 'Munia | 登录',
+  title: 'Appesso | 登录',
 };
 
 export default function Page() {
@@ -13,7 +13,7 @@ export default function Page() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">欢迎回来</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            登录您的 Munia 账户
+            登录您的 Appesso 账户
           </p>
         </div>
 

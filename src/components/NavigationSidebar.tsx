@@ -16,16 +16,12 @@ interface NavigationSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   currentPage?: 'feed' | 'messages';
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
 }
 
 export function NavigationSidebar({ 
   isOpen, 
   onClose, 
-  currentPage = 'feed',
-  activeTab, 
-  onTabChange 
+  currentPage = 'feed'
 }: NavigationSidebarProps) {
   const router = useRouter();
   const { data: wallet } = useWalletQuery();
@@ -95,26 +91,6 @@ export function NavigationSidebar({
     router.push(path);
   };
 
-  const handleTabClick = (tab: string) => {
-    if (onTabChange) {
-      onTabChange(tab);
-    }
-    onClose();
-  };
-
-  const feedTabs = [
-    { id: 'following', label: t('nav.following'), description: t('nav.followingDesc') },
-    { id: 'discover', label: t('nav.discover'), description: t('nav.discoverDesc') },
-    { id: 'tasks', label: t('nav.tasks'), description: t('nav.tasksDesc') },
-  ];
-
-  const messageTabs = [
-    { id: 'messages', label: t('nav.messages'), description: t('nav.messagesDesc') },
-    { id: 'notifications', label: t('nav.notifications'), description: t('nav.notificationsDesc') },
-  ];
-
-  const currentTabs = currentPage === 'feed' ? feedTabs : messageTabs;
-
   return (
     <>
     <AnimatePresence>
@@ -154,30 +130,6 @@ export function NavigationSidebar({
             {/* Content */}
             <div className="flex h-[calc(100%-72px)] flex-col overflow-hidden">
               <div className="flex-1 space-y-2 overflow-y-auto p-4">
-              {/* Current Page Tabs */}
-              {onTabChange && (
-                <div>
-                  <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-                    {currentPage === 'feed' ? t('nav.feedTabs') : t('nav.messageTabs')}
-                  </h3>
-                  {currentTabs.map((tab) => (
-                    <ButtonNaked
-                      key={tab.id}
-                      onPress={() => handleTabClick(tab.id)}
-                      className={`mb-2 flex w-full flex-col items-start rounded-lg p-3 transition-colors ${
-                        activeTab === tab.id
-                          ? 'bg-primary/10 text-primary'
-                          : 'hover:bg-muted/50 text-foreground'
-                      }`}>
-                      <span className="text-lg font-medium">{tab.label}</span>
-                      <span className="text-sm text-muted-foreground">{tab.description}</span>
-                    </ButtonNaked>
-                  ))}
-                </div>
-              )}
-
-              {/* Divider */}
-              <div className="my-4 border-t border-border" />
 
               {/* Wallet Section */}
               <div className="mb-4">
@@ -266,57 +218,30 @@ export function NavigationSidebar({
                 </ButtonNaked>
               </div>
 
-              {/* Navigation Links */}
-              <div>
-                <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('nav.pages')}</h3>
-                
-                <ButtonNaked
-                  onPress={() => handleNavigation('/feed')}
-                  className={`mb-2 flex w-full items-center rounded-lg p-3 transition-colors ${
-                    currentPage === 'feed' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
-                  }`}>
-                  <span className="text-foreground">{t('nav.feed')}</span>
-                </ButtonNaked>
+              {/* Divider */}
+              <div className="my-4 border-t border-border" />
 
-                <ButtonNaked
-                  onPress={() => handleNavigation('/messages')}
-                  className={`mb-2 flex w-full items-center rounded-lg p-3 transition-colors ${
-                    currentPage === 'messages' ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
-                  }`}>
-                  <span className="text-foreground">{t('nav.messages')}</span>
-                </ButtonNaked>
+              {/* Profile Actions */}
+              {session?.user && (
+                <div>
+                  <ButtonNaked
+                    onPress={() => handleNavigation('/edit-profile')}
+                    className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <Edit className="h-5 w-5 text-foreground" />
+                    <span className="text-foreground">{t('nav.editProfile')}</span>
+                  </ButtonNaked>
 
-                <ButtonNaked
-                  onPress={() => handleNavigation('/discover')}
-                  className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                  <span className="text-foreground">{t('nav.discoverPeople')}</span>
-                </ButtonNaked>
-
-                {/* Divider */}
-                <div className="my-4 border-t border-border" />
-
-                {/* Profile Actions */}
-                {session?.user && (
-                  <>
-                    <ButtonNaked
-                      onPress={() => handleNavigation('/edit-profile')}
-                      className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                      <Edit className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">{t('nav.editProfile')}</span>
-                    </ButtonNaked>
-
-                    <ButtonNaked
-                      onPress={() => {
-                        onClose();
-                        setTimeout(() => setIsSettingsOpen(true), 300);
-                      }}
-                      className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                      <Settings className="h-5 w-5 text-foreground" />
-                      <span className="text-foreground">{t('nav.settings')}</span>
-                    </ButtonNaked>
-                  </>
-                )}
-              </div>
+                  <ButtonNaked
+                    onPress={() => {
+                      onClose();
+                      setTimeout(() => setIsSettingsOpen(true), 300);
+                    }}
+                    className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <Settings className="h-5 w-5 text-foreground" />
+                    <span className="text-foreground">{t('nav.settings')}</span>
+                  </ButtonNaked>
+                </div>
+              )}
             </div>
 
             {/* Logout Button */}

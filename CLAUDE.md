@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Munia** is a responsive and accessible full-stack social media web app built with **Next.js 14**, **TypeScript**, and **SQLite** (development) / **PostgreSQL** (production). This is a production-ready social platform featuring posts, comments, likes, follows, and media uploads with drag-and-drop functionality.
+**Appesso** (formerly Munia) is a responsive full-stack social media web app built with **Next.js 14**, **TypeScript**, and **SQLite** (development) / **PostgreSQL** (production). Features include posts, comments, likes, follows, media uploads with drag-and-drop, and integrated Text-to-Speech functionality with Volcengine TTS API.
 
 ## Core Commands
 
@@ -53,7 +53,7 @@ npm run test:e2e:debug    # Run in debug mode
 npm run test:e2e:headed   # Run in headed mode
 
 # Run specific test file
-npx playwright test tests/auth.spec.ts
+npx playwright test tests/voice-synthesis.spec.ts
 
 # Run tests with specific browser
 npx playwright test --project=chromium
@@ -84,11 +84,12 @@ node ./scripts/setup-test-users.mjs
 
 ### Tech Stack
 - **Frontend**: Next.js 14 (App Router), React 18, TypeScript
-- **Styling**: Tailwind CSS, framer-motion for animations
+- **Styling**: Tailwind CSS, framer-motion
 - **Database**: SQLite (dev) / PostgreSQL (prod) with Prisma ORM
-- **Authentication**: NextAuth.js v5 with OAuth providers + phone/password
+- **Authentication**: NextAuth.js v5 with phone/password authentication (OAuth removed from UI)
 - **State Management**: @tanstack/react-query for client-side state
 - **File Storage**: AWS S3 for media uploads
+- **TTS**: Volcengine TTS API with browser fallback
 - **Forms**: React Hook Form + Zod validation
 - **Accessibility**: React Aria for accessible components
 - **Drag & Drop**: @dnd-kit for media sorting
@@ -98,17 +99,19 @@ node ./scripts/setup-test-users.mjs
 
 **App Structure (App Router):**
 - `/src/app/` - Main application with route grouping
-  - `/(auth)/` - Login/register pages (email, OAuth, phone)
+  - `/(auth)/` - Login/register pages (phone/password only)
   - `/(protected)/` - Protected routes requiring authentication
   - `/(unprotected)/` - Public routes (home, terms, privacy)
   - `/(setup)/` - Profile setup and edit flows
   - `/api/` - API routes organized by resource type
+  - `/api/tts/` - Text-to-Speech API endpoints
 
 **Business Logic:**
-- `/src/components/` - Reusable React components (UI, post, comment, etc.)
-- `/src/hooks/` - Custom React hooks (mutations/queries, form handling)
+- `/src/components/` - React components including PunkButton, AudioPlayer
+- `/src/hooks/` - Custom hooks including useVolcengineTTS, useTTS
 - `/src/lib/` - Business logic, utilities, external integrations
-- `/src/contexts/` - React context providers (theme, modals, toasts)
+- `/src/lib/volcengine/` - TTS client and voice mapping
+- `/src/contexts/` - React contexts including PunkContext, TTSContext
 - `/src/types/` - TypeScript type definitions
 
 **External Integrations:**
@@ -119,12 +122,12 @@ node ./scripts/setup-test-users.mjs
 ### Core Data Model
 
 **Entities:**
-- **User**: Profile with photos, relationships, authentication methods
-- **Post**: Content with media attachments, hashtags, mentions
-- **Comment**: Nested comments/replies with self-referential relationship
-- **VisualMedia**: S3-managed photos/videos with drag-drop ordering
-- **Follow**: Bidirectional follow relationships with unique constraints
-- **Activity**: Unified notifications and activity feed system
+- **User**: Profile with `punked` boolean field, `ttsVoiceId` for custom voices
+- **Post**: Content with media attachments, TTS support
+- **Comment**: Nested comments with self-referential relationship
+- **VisualMedia**: S3-managed photos/videos
+- **Follow**: Bidirectional follow relationships
+- **Activity**: Unified notifications and activity feed
 
 **Key Relationships:**
 - Posts ↔ Users (one-to-many with cascade delete)
@@ -145,10 +148,9 @@ node ./scripts/setup-test-users.mjs
 
 ### Authentication System
 
-**Supported Methods:**
-- OAuth 2.0 (GitHub, Google, Facebook)
-- Email/password with verification
-- Phone number/password authentication
+**Current Method:**
+- Phone number/password authentication only
+- OAuth providers (GitHub, Google, Facebook) removed from UI
 - Session-based authentication with JWT
 
 **Security Features:**
@@ -160,12 +162,14 @@ node ./scripts/setup-test-users.mjs
 ## Development Environment
 
 ### Required Setup
-1. **Environment variables** (copy from `.env.local.example`):
+1. **Environment variables**:
    - `DATABASE_URL`: SQLite/PostgreSQL connection string
-   - AWS S3 bucket credentials (access key, secret, bucket name)
-   - OAuth provider secrets (GitHub, Google, Facebook client IDs/secrets)
    - `NEXTAUTH_SECRET`: Session encryption secret
    - `NEXTAUTH_URL`: Base URL for authentication callbacks
+   - `AWS_ACCESS_KEY_ID`: S3 access key
+   - `AWS_SECRET_ACCESS_KEY`: S3 secret key
+   - `AWS_BUCKET_NAME`: S3 bucket name
+   - `AWS_REGION`: AWS region
 
 2. **Database**: SQLite for development, PostgreSQL for production
 3. **File storage**: AWS S3 configured with CORS for direct uploads
@@ -234,16 +238,39 @@ node ./scripts/setup-test-users.mjs
 - SSL certificate for HTTPS in production
 - Environment variables for all secrets and configuration
 
-### Monitoring and Error Handling
+## TTS (Text-to-Speech) System
 
-**Server-side:**
-- All API routes include comprehensive validation schemas
-- Structured error responses with user-friendly messages
-- Prisma query optimization and connection pooling
-- AWS S3 upload error handling and retry logic
+### Architecture
+- Volcengine TTS API integration with custom and standard voices
+- Browser Speech Synthesis API as fallback
+- Audio cleanup and error handling for smooth playback
 
-**Client-side:**
-- React Error Boundaries for graceful error handling
-- Loading states and skeleton screens for better UX
-- Toast notifications for user actions and errors
-- Offline detection and recovery mechanisms
+### Key Components
+- `/src/app/api/tts/synthesize/route.ts` - TTS synthesis endpoint
+- `/src/hooks/useVolcengineTTS.ts` - Main TTS hook with fallback logic
+- `/src/hooks/useTTS.ts` - Browser TTS fallback
+- `/src/lib/volcengine/tts-client.ts` - Volcengine API client
+
+### Voice System
+- Standard voices: BV001-BV005 (Chinese voices)
+- Custom voices: S_xxxx format (user-specific trained voices)
+- Automatic fallback: Custom → Standard → Browser TTS
+
+## Punked Member Feature
+
+Special status for members with custom voices:
+- Visual "PUNK" badge on profiles
+- PunkButton component for voice override
+- Global punk state via PunkContext
+- Database field: `User.punked` boolean
+
+## Known Issues & Solutions
+
+### TTS Playback Issues
+- Audio interruption errors handled with automatic cleanup
+- Custom voice failures fallback to standard voices then browser TTS
+- Multiple play requests are queued properly
+
+### Development Server
+- Runs on port 3002 to avoid conflicts
+- Multiple dev server instances may accumulate (check with `lsof -i :3002`)

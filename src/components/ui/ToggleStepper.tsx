@@ -42,15 +42,37 @@ export function ToggleStepper({ Icon, quantity, noun, color, ...rest }: ToggleSt
   const { buttonProps } = useToggleButton(rest, state, ref);
   const { isFocusVisible, focusProps } = useFocusRing();
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Check if disabled (for non-authenticated users)
+    if (rest.isDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Redirect to login if disabled (which means user is not authenticated)
+      console.log('Redirecting to login - button is disabled for non-authenticated user');
+      window.location.href = '/login';
+      return;
+    }
+    // Call the original onClick if not disabled
+    if (buttonProps.onClick) {
+      (buttonProps.onClick as any)(e);
+    }
+  };
+
+  // Override the onClick from buttonProps
+  const mergedProps = mergeProps(buttonProps, focusProps, {
+    onClick: handleClick
+  });
+
   return (
     <button
       type="button"
-      {...mergeProps(buttonProps, focusProps)}
+      {...mergedProps}
       ref={ref}
       className={cn(
         'transition-transform active:scale-90',
         toggle({ color }),
         isFocusVisible && 'ring-2 ring-violet-500 ring-offset-2',
+        rest.isDisabled && 'cursor-pointer', // Keep cursor pointer even when disabled for redirect
       )}>
       <Icon width={24} height={24} className={cn(state.isSelected ? icon({ color }) : 'stroke-muted-foreground')} />
       <p className="text-lg font-medium text-muted-foreground">

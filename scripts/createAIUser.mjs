@@ -23,9 +23,9 @@ async function createAIUser() {
       data: {
         id: aiUserId,
         username: aiUsername,
-        name: '小猿AI',
-        email: 'ai@munia.app',
-        bio: '你的AI智能助手，随时为你答疑解惑，帮助你完成各种任务。',
+        name: '小助手AI',
+        email: 'ai@appesso.app',
+        bio: '您的AI智能助手，随时为您答疑解惑，帮助您完成各种任务。',
         profilePhoto: 'ai-avatar.png', // You'll need to add this image
         gender: 'NONBINARY',
         apeBalance: 999999999, // Give AI unlimited balance

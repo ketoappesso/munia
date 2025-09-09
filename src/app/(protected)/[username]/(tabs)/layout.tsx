@@ -13,7 +13,11 @@ export default async function Layout({
 }) {
   const [user] = await getServerUser();
   
-  // Allow public access - don't redirect if no user
+  // Redirect non-authenticated users to login
+  if (!user) {
+    redirect('/login');
+  }
+  
   const profile = await getProfile(params.username);
   
   // If profile doesn't exist, show error page

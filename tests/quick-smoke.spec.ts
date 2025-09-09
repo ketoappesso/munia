@@ -5,7 +5,7 @@ test.describe('Registration Quick Smoke Test', () => {
     await page.goto('/register');
 
     // Basic page load assertion
-    await expect(page).toHaveTitle('Munia | Register');
+    await expect(page).toHaveTitle('Appesso | Register');
 
     // Check header
     await expect(page.getByRole('heading', { name: 'Sign Up' })).toBeVisible();

@@ -18,7 +18,7 @@ import React from 'react';
 // });
 
 export const metadata = {
-  title: 'Munia',
+  title: 'Appesso',
   description: 'A social media web app, built with Next.js 13.',
 };
 

@@ -1,5 +1,5 @@
 {
-  "name": "munia",
+  "name": "appesso",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "prisma:seed": "npx prisma migrate reset && node ./scripts/createMockUsers.mjs",
     "prisma:studio": "npx prisma studio",
     "prepm2": "npm run build",
-    "pm2": "pm2 start next --name 'munia' -- start -p 3002",
+    "pm2": "pm2 start next --name 'appesso' -- start -p 3002",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

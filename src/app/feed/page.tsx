@@ -57,8 +57,6 @@ export default function Page() {
           isOpen={isSidebarOpen}
           onClose={handleCloseSidebar}
           currentPage="feed"
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
         />
         
         <BottomNavigation />
@@ -125,8 +123,6 @@ export default function Page() {
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
         currentPage="feed"
-        activeTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab as 'following' | 'discover' | 'tasks')}
       />
 
       <BottomNavigation />

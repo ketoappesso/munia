@@ -15,6 +15,7 @@ export interface UserSummaryAfterSetUp {
   ttsVoiceId?: string | null;
   ttsModelId?: string | null;
   featured?: boolean;
+  punked?: boolean;
 }
 
 interface UserAfterSetUp extends User {

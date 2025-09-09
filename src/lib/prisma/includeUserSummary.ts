@@ -9,6 +9,7 @@ export const includeUserSummary = () => ({
       ttsVoiceId: true,
       ttsModelId: true,
       featured: true,
+      punked: true,
     },
   },
 });

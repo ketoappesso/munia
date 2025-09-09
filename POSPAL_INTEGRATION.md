@@ -1,7 +1,7 @@
 # Pospal API Integration for Appesso Coffee Balance
 
 ## Overview
-This integration connects the Munia wallet page to the Pospal POS system to display real-time Appesso coffee shop balances.
+This integration connects the Appesso wallet page to the Pospal POS system to display real-time Appesso coffee shop balances.
 
 ## Configuration Complete ✅
 

@@ -81,6 +81,9 @@ model User {
   featured     Boolean @default(false)
   ttsModelId   String?
   ttsVoiceId   String?
+  
+  // Punked member status - members with custom voices who can override public voices
+  punked       Boolean @default(false)
 
   // Pospal balance caching fields
   appessoBalance          Float?    // Cached Appesso balance

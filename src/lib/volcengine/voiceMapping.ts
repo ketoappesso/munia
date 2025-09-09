@@ -62,7 +62,7 @@ export const STANDARD_VOICES = {
 export function getVoiceForUser(
   phoneNumber?: string | null,
   customVoiceId?: string | null,
-  defaultVoice: string = 'BV001_streaming'
+  defaultVoice: string = 'BV005_streaming'
 ): string {
   // First, check if user has a custom voice ID set
   if (customVoiceId) {

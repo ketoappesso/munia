@@ -1,17 +1,17 @@
-# Munia-Appesso Balance Transfer System
+# Appesso-Appesso Balance Transfer System
 
 ## Overview
-This document describes the balance transfer system between Munia (APE tokens) and Appesso Coffee balance, implemented through the Pospal POS API integration.
+This document describes the balance transfer system between Appesso (APE tokens) and Appesso Coffee balance, implemented through the Pospal POS API integration.
 
 ## System Architecture
 
 ### Components
-1. **Munia Wallet** - APE token balance stored in the Munia database
+1. **Appesso Wallet** - APE token balance stored in the Appesso database
 2. **Appesso Balance** - Coffee shop balance stored in Pospal POS system
 3. **Transfer API** - Bidirectional transfer endpoint for moving funds
 
 ### Prerequisites
-- User must have a phone number linked to their Munia account
+- User must have a phone number linked to their Appesso account
 - Phone number must be registered in the Appesso/Pospal system
 - Valid Pospal API key configured in environment variables
 
@@ -83,13 +83,13 @@ POST /api/wallet/transfer
 ## Transfer Directions
 
 ### TO_APPESSO (APE → Appesso)
-1. Deducts APE balance from user's Munia wallet
+1. Deducts APE balance from user's Appesso wallet
 2. Adds equivalent amount to Appesso balance via Pospal API
 3. Records transaction in database
 
 ### FROM_APPESSO (Appesso → APE)
 1. Deducts balance from Appesso account via Pospal API
-2. Adds equivalent APE tokens to user's Munia wallet
+2. Adds equivalent APE tokens to user's Appesso wallet
 3. Records transaction in database
 
 ## Implementation Details

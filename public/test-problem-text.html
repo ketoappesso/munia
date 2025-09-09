@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Voice Problem Text Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-group {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-text {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .audio-analysis {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Custom Voice Problem Text Test</h1>
+        <p>Testing problematic text with custom voice: <strong>S_r3YGBCoB1</strong></p>
+        
+        <div class="test-group">
+            <h2>Test 1: Problematic Text (from feed)</h2>
+            <div class="test-text" id="text1">不停的测试，再测试，字体出不出来？</div>
+            <button onclick="testTTS('text1')">Test This Text</button>
+            <div id="status1" class="status" style="display:none;"></div>
+            <audio id="audio1" controls style="display:none;"></audio>
+            <div id="analysis1" class="audio-analysis" style="display:none;"></div>
+        </div>
+
+        <div class="test-group">
+            <h2>Test 2: Working Text (from test page)</h2>
+            <div class="test-text" id="text2">你好，这是自定义语音测试。我是猿素大师兄。</div>
+            <button onclick="testTTS('text2')">Test This Text</button>
+            <div id="status2" class="status" style="display:none;"></div>
+            <audio id="audio2" controls style="display:none;"></audio>
+            <div id="analysis2" class="audio-analysis" style="display:none;"></div>
+        </div>
+
+        <div class="test-group">
+            <h2>Test 3: Parts of Problematic Text</h2>
+            <div class="test-text" id="text3a">不停的测试</div>
+            <button onclick="testTTS('text3a')">Test Part 1</button>
+            <div id="status3a" class="status" style="display:none;"></div>
+            <audio id="audio3a" controls style="display:none;"></audio>
+            
+            <div class="test-text" id="text3b">再测试</div>
+            <button onclick="testTTS('text3b')">Test Part 2</button>
+            <div id="status3b" class="status" style="display:none;"></div>
+            <audio id="audio3b" controls style="display:none;"></audio>
+            
+            <div class="test-text" id="text3c">字体出不出来</div>
+            <button onclick="testTTS('text3c')">Test Part 3</button>
+            <div id="status3c" class="status" style="display:none;"></div>
+            <audio id="audio3c" controls style="display:none;"></audio>
+        </div>
+
+        <div class="test-group">
+            <h2>Test 4: Custom Input</h2>
+            <textarea id="customText" rows="3" style="width: 100%; padding: 10px; font-size: 16px;">输入自定义文本进行测试</textarea>
+            <br>
+            <button onclick="testCustom()">Test Custom Text</button>
+            <div id="statusCustom" class="status" style="display:none;"></div>
+            <audio id="audioCustom" controls style="display:none;"></audio>
+            <div id="analysisCustom" class="audio-analysis" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testTTS(textId) {
+            const text = document.getElementById(textId).innerText;
+            const statusId = textId.replace('text', 'status');
+            const audioId = textId.replace('text', 'audio');
+            const analysisId = textId.replace('text', 'analysis');
+            
+            await performTTSTest(text, statusId, audioId, analysisId);
+        }
+        
+        async function testCustom() {
+            const text = document.getElementById('customText').value;
+            await performTTSTest(text, 'statusCustom', 'audioCustom', 'analysisCustom');
+        }
+        
+        async function performTTSTest(text, statusId, audioId, analysisId) {
+            const statusEl = document.getElementById(statusId);
+            const audioEl = document.getElementById(audioId);
+            const analysisEl = document.getElementById(analysisId || statusId);
+            
+            // Show loading
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Loading...';
+            audioEl.style.display = 'none';
+            if (analysisEl && analysisEl !== statusEl) {
+                analysisEl.style.display = 'none';
+            }
+            
+            try {
+                console.log('Testing text:', text);
+                
+                // Call the API
+                const response = await fetch('/api/tts/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text,
+                        voice: 'S_r3YGBCoB1',
+                        speed: 1.1,
+                        volume: 1.0,
+                        pitch: 1.0,
+                        encoding: 'mp3',
+                    }),
+                });
+                
+                const result = await response.json();
+                console.log('API Response:', result);
+                
+                if (!result.success || !result.audio) {
+                    throw new Error(result.error || 'No audio data received');
+                }
+                
+                // Analyze the audio data
+                const audioData = result.audio;
+                const isSilence = audioData.substring(0, 50) === '//PkxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+                
+                // Decode to check size
+                const binaryString = atob(audioData);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Count non-zero bytes
+                let nonZeroCount = 0;
+                for (let i = 100; i < Math.min(bytes.length, 1000); i++) {
+                    if (bytes[i] !== 0x00 && bytes[i] !== 0xFF) {
+                        nonZeroCount++;
+                    }
+                }
+                
+                // Show analysis
+                if (analysisEl && analysisEl !== statusEl) {
+                    analysisEl.style.display = 'block';
+                    analysisEl.innerHTML = `
+                        <strong>Audio Analysis:</strong><br>
+                        Size: ${bytes.length} bytes<br>
+                        Is Silence Pattern: ${isSilence ? '❌ YES' : '✅ NO'}<br>
+                        Non-zero bytes (100-1000): ${nonZeroCount}<br>
+                        Audio Quality: ${nonZeroCount > 100 ? '✅ GOOD' : nonZeroCount > 10 ? '⚠️ POOR' : '❌ SILENT'}<br>
+                        First 30 chars: ${audioData.substring(0, 30)}...
+                    `;
+                }
+                
+                // Set up audio element
+                audioEl.src = `data:audio/mp3;base64,${audioData}`;
+                audioEl.style.display = 'block';
+                
+                // Try to play
+                audioEl.onloadedmetadata = () => {
+                    console.log('Audio metadata loaded, duration:', audioEl.duration);
+                    if (audioEl.duration > 0) {
+                        statusEl.className = 'status success';
+                        statusEl.textContent = `✅ Success! Duration: ${audioEl.duration.toFixed(2)}s${isSilence ? ' (but appears to be silence)' : ''}`;
+                    } else {
+                        statusEl.className = 'status error';
+                        statusEl.textContent = '❌ Audio has no duration';
+                    }
+                };
+                
+                audioEl.onerror = (e) => {
+                    console.error('Audio error:', e);
+                    statusEl.className = 'status error';
+                    statusEl.textContent = '❌ Audio playback error';
+                };
+                
+                audioEl.oncanplay = () => {
+                    console.log('Audio can play');
+                };
+                
+            } catch (error) {
+                console.error('Error:', error);
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Error: ${error.message}`;
+                audioEl.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

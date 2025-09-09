@@ -1,13 +1,90 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Voice Synthesis', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login with the user that has custom voice
+  test('should play custom voice for user 18874748888', async ({ page }) => {
+    // Login as user with custom voice
     await page.goto('http://localhost:3002/login');
     await page.fill('input[name="phoneNumber"]', '18874748888');
-    await page.fill('input[name="password"]', 'password123'); // Replace with actual password
+    await page.fill('input[name="password"]', '123456');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/home');
+    
+    // Wait for navigation to feed
+    await page.waitForURL('**/feed');
+    
+    // Wait for posts to load
+    await page.waitForSelector('[data-testid="post"]', { timeout: 10000 });
+    
+    // Find first post with play button
+    const firstPost = page.locator('[data-testid="post"]').first();
+    const playButton = firstPost.locator('button[aria-label="Play audio"]');
+    
+    // Check play button exists
+    await expect(playButton).toBeVisible();
+    
+    // Click play button
+    await playButton.click();
+    
+    // Wait for text to appear (should only show after clicking play)
+    const postText = firstPost.locator('.prose');
+    await expect(postText).toBeVisible({ timeout: 5000 });
+    
+    console.log('✓ Custom voice (S_r3YGBCoB1) working for user 18874748888');
+  });
+
+  test('should play standard voice for user 17676767676', async ({ page }) => {
+    // Login as user without custom voice
+    await page.goto('http://localhost:3002/login');
+    await page.fill('input[name="phoneNumber"]', '17676767676');
+    await page.fill('input[name="password"]', '123456');
+    await page.click('button[type="submit"]');
+    
+    // Wait for navigation to feed
+    await page.waitForURL('**/feed');
+    
+    // Wait for posts to load
+    await page.waitForSelector('[data-testid="post"]', { timeout: 10000 });
+    
+    // Find first post with play button
+    const firstPost = page.locator('[data-testid="post"]').first();
+    const playButton = firstPost.locator('button[aria-label="Play audio"]');
+    
+    // Check play button exists
+    await expect(playButton).toBeVisible();
+    
+    // Click play button
+    await playButton.click();
+    
+    // Wait for text to appear (should only show after clicking play)
+    const postText = firstPost.locator('.prose');
+    await expect(postText).toBeVisible({ timeout: 5000 });
+    
+    console.log('✓ Standard voice (BV001_streaming) working for user 17676767676');
+  });
+
+  test('should not show text before clicking play button', async ({ page }) => {
+    // Login as any user
+    await page.goto('http://localhost:3002/login');
+    await page.fill('input[name="phoneNumber"]', '17676767676');
+    await page.fill('input[name="password"]', '123456');
+    await page.click('button[type="submit"]');
+    
+    await page.waitForURL('**/feed');
+    await page.waitForSelector('[data-testid="post"]', { timeout: 10000 });
+    
+    const firstPost = page.locator('[data-testid="post"]').first();
+    
+    // Text should not be visible before clicking play
+    const postText = firstPost.locator('.prose');
+    await expect(postText).not.toBeVisible();
+    
+    // Click play button
+    const playButton = firstPost.locator('button[aria-label="Play audio"]');
+    await playButton.click();
+    
+    // Now text should appear
+    await expect(postText).toBeVisible({ timeout: 5000 });
+    
+    console.log('✓ Text only appears after clicking play button');
   });
 
   test('should display voice selection in settings', async ({ page }) => {

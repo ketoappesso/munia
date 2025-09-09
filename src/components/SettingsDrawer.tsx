@@ -31,7 +31,7 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
   // TTS for voice preview
   const { speak, stop, isPlaying } = useVolcengineTTS({
     voice: selectedVoice as any, // Type assertion needed for voice compatibility
-    speed: 1.0,
+    speed: 1.1,
   });
 
   // Check if user has custom voice
@@ -131,55 +131,6 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
                 </div>
               </div>
 
-              {/* Voice Settings Section */}
-              <div>
-                <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.voiceSettings')}</h3>
-                
-                {/* Voice Selection */}
-                <div className="mb-3 rounded-lg bg-muted/50 p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Volume2 className="mr-2 h-4 w-4 stroke-foreground" />
-                      <span className="text-foreground">{t('settings.voiceSelection')}</span>
-                    </div>
-                    {userHasCustomVoice ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-primary">{t('settings.customVoice')}</span>
-                        <ButtonNaked
-                          onPress={handleVoicePreview}
-                          className="rounded-md px-2 py-1 text-sm hover:bg-muted/70">
-                          {isPlaying ? t('settings.stopPreview') : t('settings.preview')}
-                        </ButtonNaked>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={selectedVoice}
-                          onChange={(e) => setSelectedVoice(e.target.value)}
-                          className="rounded-md border border-border bg-background px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                          {Object.entries(availableVoices).map(([key, voice]) => (
-                            <option key={voice.id} value={voice.id}>
-                              {language === 'zh' ? voice.nameZh : voice.name}
-                            </option>
-                          ))}
-                        </select>
-                        <ButtonNaked
-                          onPress={handleVoicePreview}
-                          className="rounded-md px-2 py-1 text-sm hover:bg-muted/70">
-                          {isPlaying ? t('settings.stopPreview') : t('settings.preview')}
-                        </ButtonNaked>
-                      </div>
-                    )}
-                  </div>
-                  {userHasCustomVoice && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {t('settings.customVoiceDescription')}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               {/* Account Section */}
               <div>
                 <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.account')}</h3>
@@ -192,7 +143,6 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
                     <Wallet className="mr-3 h-5 w-5 stroke-foreground" />
                     <span className="text-foreground">{t('nav.wallet')}</span>
                   </div>
-                  <span className="font-medium text-foreground">¥1,250.50</span>
                 </ButtonNaked>
 
                 {/* Logout */}

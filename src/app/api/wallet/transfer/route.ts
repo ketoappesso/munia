@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Handle transfer based on direction
     if (direction === 'TO_APPESSO') {
-      // Transfer from Munia (APE) to Appesso
+      // Transfer from Appesso (APE) to Appesso
       if (userInfo.apeBalance < amount) {
         return NextResponse.json(
           { error: 'Insufficient APE balance' },
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
           customerUid,
           amount, // Positive amount to add
           0, // No points change
-          `Transfer from Munia wallet by ${userInfo.username}`
+          `Transfer from Appesso wallet by ${userInfo.username}`
         );
 
         if (!success) {
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(result);
 
     } else if (direction === 'FROM_APPESSO') {
-      // Transfer from Appesso to Munia (APE)
+      // Transfer from Appesso to Appesso (APE)
       if (currentAppessoBalance < amount) {
         return NextResponse.json(
           { error: 'Insufficient Appesso balance' },
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
           customerUid,
           -amount, // Negative amount to deduct
           0, // No points change
-          `Transfer to Munia wallet by ${userInfo.username}`
+          `Transfer to Appesso wallet by ${userInfo.username}`
         );
 
         if (!success) {

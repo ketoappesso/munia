@@ -83,7 +83,7 @@ async function testStandardVoice() {
       cluster: 'volcano_icl'
     },
     user: {
-      uid: 'munia-user-001'
+      uid: 'appesso-user-001'
     },
     audio: {
       voice_type: 'BV001_streaming',

@@ -42,7 +42,7 @@ async function queryCustomerByPhone(phoneNumber) {
         'Content-Type': 'application/json; charset=utf-8',
         'time-stamp': timestamp,
         'data-signature': signature,
-        'User-Agent': 'Munia/1.0',
+        'User-Agent': 'Appesso/1.0',
       },
       body: JSONBigInstance.stringify(payload),
     });

@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 
-// Volcengine TTS API configuration
+// Volcengine TTS API configuration - Updated
 const VOLCENGINE_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts';
 const VOLCENGINE_V2_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts'; // Use v1 for both
+const STANDARD_VOICE_API_URL = 'https://openspeech.bytedance.com/api/v1/tts'; // Use v1 for standard voices (v3 auth issues)
 
 // Custom voice credentials (verified and working)
 const CUSTOM_VOICE_APP_ID = '7820115171';
@@ -10,8 +11,9 @@ const CUSTOM_VOICE_ACCESS_TOKEN = 'o2H8GJLh9eO-7kuzzyw93To2iJ1C6YC-';
 const CUSTOM_VOICE_SECRET_KEY = 'jjGxcdxz6-u5ISj5n1cKgcZmwyBoEKMv';
 
 // Standard voice credentials (for BV001-BV005)
-const STANDARD_VOICE_APP_ID = process.env.VOLCENGINE_STANDARD_APP_ID || '6704779984';
-const STANDARD_VOICE_ACCESS_TOKEN = process.env.VOLCENGINE_STANDARD_ACCESS_TOKEN || 'QXlNWJpa1Jm80W6Ocdr71N-6bRmnzTVw';
+const STANDARD_VOICE_APP_ID = process.env.VOLCENGINE_STANDARD_APP_ID || '4228648687';
+const STANDARD_VOICE_ACCESS_TOKEN = process.env.VOLCENGINE_STANDARD_ACCESS_TOKEN || 'VhSkXqLCd1ZPs68O4Em2prHI3Xu7WYq9';
+const STANDARD_VOICE_SECRET_KEY = 'h4SvM1IlL1jDL0As8Nde12dW8CA4H3rP';
 
 // Response type from Volcengine TTS API
 export interface TTSResponse {
@@ -93,7 +95,7 @@ export class VolcengineTTSClient {
           audio: {
             voice_type: params.voiceType, // S_xxxx format
             encoding: params.encoding || 'mp3',
-            speed_ratio: params.speed || 1.0
+            speed_ratio: params.speed || 1.1
           },
           request: {
             reqid: requestId,
@@ -102,30 +104,28 @@ export class VolcengineTTSClient {
           }
         };
       } else {
-        // Standard voice payload with standard credentials
+        // Standard voice payload for v1 API
         payload = {
           app: {
             appid: STANDARD_VOICE_APP_ID,
             token: 'access_token',
-            cluster: 'volcano_icl',
+            cluster: 'volcano_tts',
           },
           user: {
-            uid: 'munia-user-001',
+            uid: 'appesso-user-001',
           },
           audio: {
-            voice_type: params.voiceType || CHINESE_VOICES.BV001,
+            voice_type: params.voiceType || CHINESE_VOICES.BV005,
             encoding: params.encoding || 'mp3',
-            speed_ratio: params.speed || 1.0,
-            volume_ratio: params.volume || 1.0,
-            pitch_ratio: params.pitch || 1.0,
+            speed: params.speed || 1.1,
+            volume: params.volume || 1.0,
+            pitch: params.pitch || 1.0,
           },
           request: {
             reqid: requestId,
             text: params.text,
             text_type: 'plain',
             operation: 'query',
-            with_frontend: 1,
-            frontend_type: 'unitTson'
           },
         };
       }
@@ -143,14 +143,13 @@ export class VolcengineTTSClient {
         };
         console.log('Using custom voice API with custom credentials');
       } else {
-        // Standard voices use v2 API with standard credentials
-        apiUrl = VOLCENGINE_V2_TTS_URL;
+        // Standard voices use v1 API 
+        apiUrl = STANDARD_VOICE_API_URL;
         headers = {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer;${STANDARD_VOICE_ACCESS_TOKEN}`,
-          'X-Api-Resource-Id': 'volc.service_type.10029',
+          'Authorization': `Bearer;${STANDARD_VOICE_ACCESS_TOKEN}`, // v1 uses semicolon separator
         };
-        console.log('Using standard voice API with Authorization header');
+        console.log('Using standard voice API v1 with standard configuration');
       }
       
       console.log('TTS API Request:', {
@@ -158,6 +157,8 @@ export class VolcengineTTSClient {
         voiceType: params.voiceType,
         isCustomVoice,
         headers: Object.keys(headers), // Log header keys only for security
+        textPreview: params.text.substring(0, 20),
+        appId: isCustomVoice ? CUSTOM_VOICE_APP_ID : STANDARD_VOICE_APP_ID,
       });
       
       // Make API request
@@ -182,11 +183,14 @@ export class VolcengineTTSClient {
         message: result.Message,
         reqid: result.reqid,
         hasData: !!result.data,
+        dataLength: result.data?.length,
+        dataPreview: result.data?.substring(0, 50),
       });
 
       // Different success codes for different APIs
-      // Custom voice returns 3000, standard voice returns 0 or 3000
-      const isSuccess = isCustomVoice ? result.code === 3000 : (result.code === 0 || result.code === 3000);
+      // Custom voice API v1 returns 3000
+      // Standard voice API v1 also returns 3000 for success
+      const isSuccess = result.code === 3000;
       
       if (!isSuccess) {
         console.error('TTS API Error Details:', result);

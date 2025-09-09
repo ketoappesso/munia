@@ -240,28 +240,6 @@ export function ProfileSidebar({
                   </>
                 )}
 
-                {/* Navigation Links */}
-                <div>
-                  <h3 className="mb-3 text-sm font-medium text-muted-foreground">{t('nav.navigation')}</h3>
-                  
-                  <ButtonNaked
-                    onPress={() => handleNavigation('/feed')}
-                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">{t('nav.feed')}</span>
-                  </ButtonNaked>
-
-                  <ButtonNaked
-                    onPress={() => handleNavigation('/messages')}
-                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">{t('nav.messages')}</span>
-                  </ButtonNaked>
-
-                  <ButtonNaked
-                    onPress={() => handleNavigation('/discover')}
-                    className="mb-2 flex w-full items-center rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <span className="text-foreground">{t('nav.discoverPeople')}</span>
-                  </ButtonNaked>
-                </div>
               </div>
 
               {/* Logout Button - Only show for own profile */}

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
-const MUNIA_BOT_ID = 'munia-assistant'; // Special ID for the Munia assistant
+const APPESSO_BOT_ID = 'appesso-assistant'; // Special ID for the Appesso assistant
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,20 +35,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Users not found' }, { status: 404 });
     }
 
-    // Check if Munia assistant exists, if not create it
-    let muniaBot = await prisma.user.findUnique({
-      where: { id: MUNIA_BOT_ID },
+    // Check if Appesso assistant exists, if not create it
+    let appessoBot = await prisma.user.findUnique({
+      where: { id: APPESSO_BOT_ID },
     });
 
-    if (!muniaBot) {
-      muniaBot = await prisma.user.create({
+    if (!appessoBot) {
+      appessoBot = await prisma.user.create({
         data: {
-          id: MUNIA_BOT_ID,
-          username: 'munia_assistant',
-          name: '小猿助手',
-          email: 'assistant@munia.app',
-          bio: '我是Munia平台的智能助手，负责协助处理任务交接和纠纷处理。',
-          profilePhoto: 'munia-bot-avatar.png',
+          id: APPESSO_BOT_ID,
+          username: 'appesso_assistant',
+          name: '小助手',
+          email: 'assistant@appesso.app',
+          bio: '我是Appesso平台的智能助手，负责协助处理任务交接和纠纷处理。',
+          profilePhoto: 'appesso-bot-avatar.png',
         },
       });
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Create a unique conversation ID
     const conversationId = `task-${taskId}-${Date.now()}`;
 
-    // Create initial message from Munia bot
+    // Create initial message from Appesso bot
     const initialMessage = `
 🎯 **任务协作群聊已创建**
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     const conversation = await prisma.message.create({
       data: {
         content: initialMessage,
-        senderId: MUNIA_BOT_ID,
+        senderId: APPESSO_BOT_ID,
         receiverId: taskOwnerId, // This is simplified, real group chat needs proper modeling
         conversationId,
       },
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
           type: 'TASK_GROUP_CREATED',
           sourceId: taskId,
           targetId: taskId,
-          sourceUserId: MUNIA_BOT_ID,
+          sourceUserId: APPESSO_BOT_ID,
           targetUserId: taskOwnerId,
         },
       }),
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
           type: 'TASK_GROUP_CREATED',
           sourceId: taskId,
           targetId: taskId,
-          sourceUserId: MUNIA_BOT_ID,
+          sourceUserId: APPESSO_BOT_ID,
           targetUserId: acceptorId,
         },
       }),

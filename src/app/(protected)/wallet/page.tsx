@@ -127,7 +127,7 @@ export default function WalletPage() {
     },
   });
 
-  // Transfer mutation for Munia-Appesso transfers
+  // Transfer mutation for Appesso-Appesso transfers
   const transferMutation = useMutation({
     mutationFn: async (data: { direction: 'TO_APPESSO' | 'FROM_APPESSO'; amount: number; description?: string }) => {
       const response = await fetch('/api/wallet/transfer', {

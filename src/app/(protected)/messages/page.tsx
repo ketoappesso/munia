@@ -163,8 +163,6 @@ export default function MessagesPage() {
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
         currentPage="messages"
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
       />
     </>
   );

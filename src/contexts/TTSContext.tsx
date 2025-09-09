@@ -16,7 +16,7 @@ const TTSContext = createContext<TTSContextType | undefined>(undefined);
 const LS_TTS_VOICE_KEY = 'tts-voice';
 
 export function TTSContextProvider({ children }: { children: React.ReactNode }) {
-  const [selectedVoice, setSelectedVoiceState] = useState<string>('BV001_streaming');
+  const [selectedVoice, setSelectedVoiceState] = useState<string>('BV005_streaming');
   const [isCustomVoice, setIsCustomVoice] = useState(false);
   const { data: session } = useSession();
 

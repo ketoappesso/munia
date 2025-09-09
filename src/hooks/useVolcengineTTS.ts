@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTTS } from './useTTS'; // Fallback to browser TTS
+import { usePunk } from '@/contexts/PunkContext';
 
 interface UseVolcengineTTSOptions {
-  voice?: 'BV001' | 'BV002' | 'BV003' | 'BV004' | 'BV005';
+  voice?: string | null; // Custom voice ID (S_xxx) or null for browser TTS
   speed?: number;
   volume?: number;
   pitch?: number;
@@ -13,7 +14,7 @@ interface UseVolcengineTTSOptions {
   onPause?: () => void;
   onResume?: () => void;
   onProgress?: (progress: number) => void;
-  fallbackToBrowser?: boolean; // Use browser TTS if Volcengine fails
+  fallbackToBrowser?: boolean; // Use browser TTS if Volcengine fails (default true)
 }
 
 export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
@@ -26,18 +27,23 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isSupported, setIsSupported] = useState(true);
   
+  // Get punk context
+  const { punkedVoiceId, isPunkedActive } = usePunk();
+  
   // Fallback to browser TTS
   const browserTTS = useTTS(options);
 
-  // Clean up on unmount
+  // Clean up on unmount - simplified to avoid interrupting playback
   useEffect(() => {
     return () => {
+      // Clean up progress interval
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
+      // Clear reference but don't stop audio to avoid interruption
       if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+        audioRef.current = null;
       }
     };
   }, []);
@@ -54,8 +60,25 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
     setIsLoading(true);
     setProgress(0);
 
+    // Determine voice to use
+    let voiceToUse = options.voice;
+    
+    // Use punked voice if active
+    if (isPunkedActive && punkedVoiceId) {
+      voiceToUse = punkedVoiceId;
+    }
+    
+    // If no custom voice, use browser TTS directly
+    if (!voiceToUse || !voiceToUse.startsWith('S_')) {
+      console.log('No custom voice, using browser TTS');
+      setIsLoading(false);
+      browserTTS.speak(text, onCharacter, textLength);
+      setIsPlaying(browserTTS.isPlaying);
+      return;
+    }
+
     try {
-      // Fetch synthesized audio from API
+      // Only call API for custom voices
       const response = await fetch('/api/tts/synthesize', {
         method: 'POST',
         headers: {
@@ -63,8 +86,8 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         },
         body: JSON.stringify({
           text,
-          voice: options.voice?.replace('_streaming', '') || 'BV001', // Remove _streaming suffix if present
-          speed: options.speed || 1.0,
+          voice: voiceToUse,
+          speed: options.speed || 1.1,
           volume: options.volume || 1.0,
           pitch: options.pitch || 1.0,
           encoding: 'mp3',
@@ -86,10 +109,28 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         throw new Error(result.error || 'Failed to synthesize speech');
       }
 
-      // Create audio element
+      // Clean up any existing audio before creating new one
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+        // Small delay to ensure cleanup
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
+
+      // Debug audio data
+      console.log('Audio data received:', {
+        length: result.audio?.length,
+        preview: result.audio?.substring(0, 100)
+      });
+
+      // Check if audio data is valid
+      if (!result.audio || result.audio.length === 0) {
+        throw new Error('No audio data received from API');
+      }
+
+      // Remove incorrect silence detection - //PkxAAAA is just a normal MP3 header pattern
+      // The API returns valid audio data even when it starts with this pattern
 
       const audio = new Audio(`data:audio/mp3;base64,${result.audio}`);
       audioRef.current = audio;
@@ -188,8 +229,31 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         }
       };
 
-      // Start playback
-      await audio.play();
+      // Start playback with better error handling
+      try {
+        await audio.play();
+      } catch (playError) {
+        // Handle play() interruption gracefully
+        if (playError instanceof Error && playError.name === 'AbortError') {
+          console.log('Playback was interrupted');
+          // Don't fallback on AbortError as it's usually just user navigation
+          setIsLoading(false);
+          return;
+        } else if (playError instanceof Error && playError.name === 'NotAllowedError') {
+          console.log('Playback not allowed, user interaction required');
+          setError('Please click play again to start audio');
+          setIsLoading(false);
+        } else {
+          console.error('Unexpected playback error:', playError);
+          // For unexpected errors, try browser TTS fallback
+          if (options.fallbackToBrowser !== false) {
+            console.log('Falling back to browser TTS due to playback error');
+            browserTTS.speak(text, onCharacter, textLength);
+            setIsPlaying(browserTTS.isPlaying);
+          }
+          setIsLoading(false);
+        }
+      }
       
       // Additional fallback: Use estimated duration if audio duration is still not available
       if (onCharacter && textLength && !progressIntervalRef.current) {
@@ -228,7 +292,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         setIsPlaying(browserTTS.isPlaying);
       }
     }
-  }, [options, browserTTS]);
+  }, [options, browserTTS, isPunkedActive, punkedVoiceId]);
 
   const pause = useCallback(() => {
     if (audioRef.current && isPlaying && !isPaused) {

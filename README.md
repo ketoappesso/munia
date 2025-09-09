@@ -1,4 +1,4 @@
-# Munia 
+# Appesso 
 
 A responsive and accessible full stack social media web app.
 
@@ -71,7 +71,7 @@ The UI components are built with React Aria's accessibility hooks, assuring acce
 
 ## Deployment on EC2
 
-Follow these steps to deploy Munia on an EC2 instance.
+Follow these steps to deploy Appesso on an EC2 instance.
 
 1. Set up a PostgreSQL database and copy its connection URL into `.env`.
 2. Set up a client application for each OAuth provider (Github, Google and Facebook) and copy the client id's and client secrets into `.env.local`.

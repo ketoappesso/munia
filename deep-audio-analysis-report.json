@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-09-09T07:20:34.757Z",
+  "voiceId": "S_r3YGBCoB1",
+  "results": [
+    {
+      "text": "不停的测试，再测试，字体出不出来？",
+      "label": "Problematic text",
+      "size": 66720,
+      "nonZeroPercentage": 98.04,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 485,
+      "success": true
+    },
+    {
+      "text": "你好，这是自定义语音测试。我是猿素大师兄。",
+      "label": "Working text",
+      "size": 84480,
+      "nonZeroPercentage": 98.17,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 494,
+      "success": true
+    },
+    {
+      "text": "测试",
+      "label": "Simple test",
+      "size": 18240,
+      "nonZeroPercentage": 95.96,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 485,
+      "success": true
+    },
+    {
+      "text": "字体",
+      "label": "Just '字体'",
+      "size": 15360,
+      "nonZeroPercentage": 95.51,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 485,
+      "success": true
+    },
+    {
+      "text": "出不出来",
+      "label": "Just '出不出来'",
+      "size": 23520,
+      "nonZeroPercentage": 96.85,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 485,
+      "success": true
+    },
+    {
+      "text": "不停的测试",
+      "label": "Just '不停的测试'",
+      "size": 27840,
+      "nonZeroPercentage": 97.03,
+      "uniqueBytes": 256,
+      "isSilencePattern": true,
+      "firstSignificantIndex": 485,
+      "success": true
+    }
+  ]
+}

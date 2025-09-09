@@ -38,14 +38,24 @@ export function useTTS(options: UseTTSOptions = {}) {
 
       loadVoices();
       window.speechSynthesis.onvoiceschanged = loadVoices;
+      
+      // Cleanup: Cancel any ongoing speech when component unmounts
+      return () => {
+        if (window.speechSynthesis.speaking) {
+          console.log('Cleaning up browser TTS on unmount');
+          window.speechSynthesis.cancel();
+        }
+      };
     }
   }, []);
 
   const speak = useCallback((text: string, onCharacter?: (charIndex: number) => void, textLength?: number) => {
     if (!isSupported || !text) return;
 
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
+    // Cancel any ongoing speech silently
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
 
     const utterance = new SpeechSynthesisUtterance(text);
     utteranceRef.current = utterance;
@@ -134,7 +144,10 @@ export function useTTS(options: UseTTSOptions = {}) {
     };
 
     utterance.onerror = (event) => {
-      console.error('TTS Error:', event);
+      // Only log actual errors, not interruptions from navigation or new TTS requests
+      if (event.error !== 'interrupted') {
+        console.error('TTS Error:', event);
+      }
       setIsPlaying(false);
       setIsPaused(false);
     };

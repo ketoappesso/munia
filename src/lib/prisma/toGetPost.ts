@@ -39,6 +39,7 @@ export async function toGetPost(findPostResult: FindPostResult): Promise<GetPost
       ttsVoiceId: rest.user.ttsVoiceId,
       ttsModelId: rest.user.ttsModelId,
       featured: rest.user.featured,
+      punked: rest.user.punked,
     },
     visualMedia,
     content: str,
