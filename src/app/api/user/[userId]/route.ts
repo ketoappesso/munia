@@ -27,11 +27,9 @@ export async function GET(
         profilePhoto: true,
         bio: true,
         ttsVoiceId: true,
-        createdAt: true,
         // Only include sensitive fields if it's the user's own profile
         ...(session.user.id === userId && {
           emailVerified: true,
-          phoneNumberVerified: true,
         }),
       },
     });

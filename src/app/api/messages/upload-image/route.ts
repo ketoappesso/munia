@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { uploadObject } from '@/lib/s3/uploadObject';
-import { fileNameToUrl } from '@/lib/s3/fileNameToUrl';
+import { uploadObject } from '@/lib/tos/uploadObject';
+import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 import { nanoid } from 'nanoid';
 
 export async function POST(request: NextRequest) {

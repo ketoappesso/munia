@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
+import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,8 +65,17 @@ export async function GET(request: NextRequest) {
 
       return {
         id: conversation.id,
-        otherUser,
-        lastMessage: conversation.messages[0] || null,
+        otherUser: {
+          ...otherUser,
+          profilePhoto: fileNameToUrl(otherUser.profilePhoto) || '/images/default-avatar.jpg',
+        },
+        lastMessage: conversation.messages[0] ? {
+          ...conversation.messages[0],
+          sender: {
+            ...conversation.messages[0].sender,
+            profilePhoto: fileNameToUrl(conversation.messages[0].sender.profilePhoto) || '/images/default-avatar.jpg',
+          },
+        } : null,
         unreadCount: conversation._count.messages,
       };
     });

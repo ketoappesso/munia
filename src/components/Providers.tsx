@@ -14,6 +14,7 @@ import { SessionProvider } from 'next-auth/react';
 import type { Session } from 'next-auth';
 import React from 'react';
 import { OfflineQueueProcessor } from './OfflineQueueProcessor';
+import PunkIndicator from './PunkIndicator';
 
 export function Providers({ children, session }: { children: React.ReactNode; session: Session | null }) {
   return (
@@ -29,6 +30,7 @@ export function Providers({ children, session }: { children: React.ReactNode; se
                       <CreatePostModalContextProvider>
                         <ShouldAnimateContextProvider>
                           <OfflineQueueProcessor />
+                          <PunkIndicator />
                           {children}
                         </ShouldAnimateContextProvider>
                       </CreatePostModalContextProvider>

@@ -7,14 +7,12 @@ export default function ProfileBlock({
   name,
   time,
   photoUrl,
-  isPunked = false,
 }: {
   type?: 'post' | 'comment';
   name: string;
   username: string;
   time: string;
   photoUrl: string;
-  isPunked?: boolean;
 }) {
   return (
     <div className="flex gap-3">
@@ -24,15 +22,10 @@ export default function ProfileBlock({
 
       <div className="flex flex-col">
         <div className="flex items-center gap-1 sm:gap-3">
-          <h2 className="cursor-pointer text-lg font-semibold text-muted-foreground flex items-center gap-2">
+          <h2 className="cursor-pointer text-lg font-semibold text-muted-foreground">
             <Link href={`/${username}`} className="link">
               {name}
             </Link>
-            {isPunked && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-                PUNK
-              </span>
-            )}
           </h2>
           {type === 'comment' && <h2 className="text-sm text-muted-foreground/90">{time} ago</h2>}
         </div>

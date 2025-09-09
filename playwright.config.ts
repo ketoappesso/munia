@@ -70,9 +70,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
+  webServer: process.env.CI ? {
     command: 'npm run dev',
     url: 'http://localhost:3002',
-    reuseExistingServer: true, // Always reuse existing server
-  },
+    reuseExistingServer: false,
+  } : undefined, // Don't start server in local development
 });

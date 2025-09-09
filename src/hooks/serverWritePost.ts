@@ -10,8 +10,8 @@ import { toGetPost } from '@/lib/prisma/toGetPost';
 import { getServerUser } from '@/lib/getServerUser';
 import { convertMentionUsernamesToIds } from '@/lib/convertMentionUsernamesToIds';
 import { mentionsActivityLogger } from '@/lib/mentionsActivityLogger';
-import { deleteObject } from '@/lib/s3/deleteObject';
-import { savePostFiles } from '@/lib/s3/savePostFiles';
+import { deleteObject } from '@/lib/tos/deleteObject';
+import { savePostFiles } from '@/lib/tos/savePostFiles';
 import { verifyAccessToPost } from '@/app/api/posts/[postId]/verifyAccessToPost';
 // import { generateTtsAudio } from '@/lib/tts';
 // import { uploadAudio } from '@/lib/tos';
@@ -126,8 +126,8 @@ export async function serverWritePost({ formData, type, postId }: Props) {
               amount: rewardAmount,
               status: 'COMPLETED',
               description: `发布悬赏任务 - ${str?.substring(0, 50)}`,
-              fromUserId: userId,
-              toUserId: userId, // Initially held by system
+              fromUser: { connect: { id: userId } },
+              toUser: { connect: { id: userId } }, // Initially held by system
               completedAt: new Date(),
             },
           });

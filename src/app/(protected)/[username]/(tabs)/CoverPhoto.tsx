@@ -41,7 +41,7 @@ export default function CoverPhoto({ isOwnProfile, photoUrl }: { isOwnProfile: b
               ref={inputFileRef}
               onChange={handleChange}
               className="hidden"
-              accept="image/png, image/jpg, image/jpeg"
+              accept="image/png, image/jpg, image/jpeg, image/webp"
             />
             <Button
               Icon={SvgImage}

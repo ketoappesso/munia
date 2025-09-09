@@ -4,7 +4,7 @@
  */
 
 import prisma from '@/lib/prisma/prisma';
-import { fileNameToUrl } from '@/lib/s3/fileNameToUrl';
+import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 import { NextResponse } from 'next/server';
 import { GetVisualMedia } from '@/types/definitions';
 

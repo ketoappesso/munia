@@ -51,7 +51,7 @@ export const Post = memo(
     const router = useRouter();
     
     // Punk context
-    const { setPunkedVoice, clearPunkedVoice, punkedByUserId, isPunkedActive } = usePunk();
+    const { setPunkedVoice, clearPunkedVoice, punkedByUserId, punkedByUsername, isPunkedActive } = usePunk();
 
     // Fetch post data first
     const { data, isPending, isError } = useQuery<GetPost>({
@@ -425,12 +425,13 @@ export const Post = memo(
               username={author.username || author.id}
               time={timeAgo || createdAt}
               photoUrl={author.profilePhoto || ''}
-              isPunked={data?.user?.punked && data?.user?.ttsVoiceId?.startsWith('S_')}
             />
             {/* Show punk button if user has custom voice and is punked */}
             {data?.user?.punked && data?.user?.ttsVoiceId?.startsWith('S_') && (
               <PunkButton
                 isPunked={isPunkedActive && punkedByUserId === data.user.id}
+                currentPunkedUsername={punkedByUsername}
+                targetUsername={data.user.name || data.user.username || 'Unknown'}
                 onPunk={() => {
                   if (isPunkedActive && punkedByUserId === data.user.id) {
                     clearPunkedVoice();

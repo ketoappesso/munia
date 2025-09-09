@@ -54,7 +54,7 @@ export default function ProfilePhoto({
               ref={inputFileRef}
               onChange={handleChange}
               className="hidden"
-              accept="image/png, image/jpg, image/jpeg"
+              accept="image/png, image/jpg, image/jpeg, image/webp"
             />
             <Button Icon={Camera} onPress={openInput} size="small" loading={isPending} />
           </div>

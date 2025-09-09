@@ -5,7 +5,7 @@
  */
 
 import { FindUserResult, GetUser } from '@/types/definitions';
-import { fileNameToUrl } from '../s3/fileNameToUrl';
+import { fileNameToUrl } from '../tos/fileNameToUrl';
 
 export const toGetUser = (findUserResult: FindUserResult): GetUser => {
   const followerCount = findUserResult?._count.followers || 0;

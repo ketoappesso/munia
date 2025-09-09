@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
-import { deleteObject } from '@/lib/s3/deleteObject';
+import { deleteObject } from '@/lib/tos/deleteObject';
 import { verifyAccessToPost } from './verifyAccessToPost';
 
 export async function DELETE(request: Request, { params }: { params: { postId: string } }) {
@@ -25,7 +25,7 @@ export async function DELETE(request: Request, { params }: { params: { postId: s
     },
   });
 
-  // Delete the associated `visualMedia` files from the S3 bucket
+  // Delete the associated `visualMedia` files from the TOS bucket
   const filenames = res.visualMedia.map((m) => m.fileName);
   await Promise.all(filenames.map(deleteObject));
 

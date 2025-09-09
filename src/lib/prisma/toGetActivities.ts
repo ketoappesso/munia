@@ -1,7 +1,7 @@
 import { FindActivityResults, GetActivities } from '@/types/definitions';
 import prisma from './prisma';
 import { convertMentionUsernamesToIds } from '../convertMentionUsernamesToIds';
-import { fileNameToUrl } from '../s3/fileNameToUrl';
+import { fileNameToUrl } from '../tos/fileNameToUrl';
 
 async function getContentFromPostOrComment(type: string, sourceId: number, targetId: number | null): Promise<string> {
   const entity =

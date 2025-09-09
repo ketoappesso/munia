@@ -24,7 +24,7 @@ import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
 import { useSession } from 'next-auth/react';
 import { useUserQuery } from '@/hooks/queries/useUserQuery';
 import Link from 'next/link';
-import { fileNameToUrl } from '@/lib/fileNameToUrl';
+import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 
 interface UnifiedSidebarProps {
   isOpen: boolean;

@@ -3,11 +3,11 @@ import 'server-only';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 import { v4 as uuid } from 'uuid';
-import { uploadObject } from '@/lib/s3/uploadObject';
-import { fileNameToUrl } from '@/lib/s3/fileNameToUrl';
+import { uploadObject } from '@/lib/tos/uploadObject';
+import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 import { getServerUser } from '@/lib/getServerUser';
 
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 export async function useUpdateProfileAndCoverPhoto({
   request,
   userIdParam,
@@ -36,10 +36,10 @@ export async function useUpdateProfileAndCoverPhoto({
       return NextResponse.json({ error: 'Unsupported file type.' }, { status: 400 });
     }
 
-    // Upload image to S3
+    // Upload image to TOS
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${uuid()}.${fileExtension}`;
-    await uploadObject(buffer, fileName, fileExtension);
+    await uploadObject(buffer, fileName, file.type);
 
     await prisma.user.update({
       where: {

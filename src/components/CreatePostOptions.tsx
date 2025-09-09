@@ -56,7 +56,7 @@ export const CreatePostOptions = forwardRef<
         className="hidden"
         name="visualMedia"
         onChange={handleVisualMediaChange}
-        accept="video/*,.jpg,.jpeg,.png"
+        accept="video/*,.jpg,.jpeg,.png,.webp"
         multiple
       />
     </div>
