@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
+import punkAIService from '@/lib/llm/punk-ai-service';
 
 export async function GET(request: NextRequest, { params }: { params: { conversationId: string } }) {
   try {
@@ -45,12 +46,16 @@ export async function GET(request: NextRequest, { params }: { params: { conversa
         taskPostId: true,
         taskFinalAmount: true,
         taskCompletionStatus: true,
+        // AI response field
+        isAIResponse: true,
         sender: {
           select: {
             id: true,
             username: true,
             name: true,
             profilePhoto: true,
+            punked: true,
+            ttsVoiceId: true,
           },
         },
       },
@@ -118,12 +123,16 @@ export async function POST(request: NextRequest, { params }: { params: { convers
         taskPostId: true,
         taskFinalAmount: true,
         taskCompletionStatus: true,
+        // AI response field
+        isAIResponse: true,
         sender: {
           select: {
             id: true,
             username: true,
             name: true,
             profilePhoto: true,
+            punked: true,
+            ttsVoiceId: true,
           },
         },
       },
@@ -136,6 +145,47 @@ export async function POST(request: NextRequest, { params }: { params: { convers
         lastMessageAt: new Date(),
       },
     });
+
+    // Check if the recipient is a punk user and generate AI response
+    const recipientId = conversation.participant1Id === user.id 
+      ? conversation.participant2Id 
+      : conversation.participant1Id;
+
+    const aiResponse = await punkAIService.processPunkUserMessage(
+      conversationId,
+      user.id,
+      recipientId,
+      content.trim()
+    );
+
+    if (aiResponse) {
+      // Create AI response message after a short delay
+      setTimeout(async () => {
+        try {
+          const aiMessage = await prisma.message.create({
+            data: {
+              conversationId,
+              senderId: recipientId,
+              content: aiResponse.text,
+              type: 'TEXT',
+              isAIResponse: true,
+            },
+          });
+
+          // Update conversation's last message time again
+          await prisma.conversation.update({
+            where: { id: conversationId },
+            data: {
+              lastMessageAt: new Date(),
+            },
+          });
+
+          console.log('AI response created for punk user:', recipientId);
+        } catch (error) {
+          console.error('Error creating AI response message:', error);
+        }
+      }, 1000 + Math.random() * 2000); // 1-3 second delay for more natural feel
+    }
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {

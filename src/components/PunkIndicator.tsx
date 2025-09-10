@@ -2,11 +2,65 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePunk } from '@/contexts/PunkContext';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 
 export default function PunkIndicator() {
-  const { isPunkedActive, punkedByUsername, clearPunkedVoice } = usePunk();
+  const { isPunkedActive, punkedByUsername, punkedByUserPhoto, clearPunkedVoice } = usePunk();
+  const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const hideTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  if (!isPunkedActive || !punkedByUsername) {
+  // Check if we're on a profile page
+  const isProfilePage = pathname && /^\/[^\/]+$/.test(pathname) && !pathname.startsWith('/feed') && !pathname.startsWith('/messages');
+
+  // Auto-hide logic for non-profile pages
+  useEffect(() => {
+    // Don't auto-hide on profile pages
+    if (isProfilePage) {
+      setIsVisible(true);
+      return;
+    }
+
+    if (isPunkedActive) {
+      setIsVisible(true);
+      
+      // Clear any existing timer
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+
+      // Set timer to hide after 1 second
+      hideTimerRef.current = setTimeout(() => {
+        setIsVisible(false);
+      }, 1000);
+
+      // Set up event listeners for user interaction
+      const handleUserInteraction = () => {
+        setIsVisible(false);
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+        }
+      };
+
+      window.addEventListener('click', handleUserInteraction);
+      window.addEventListener('scroll', handleUserInteraction);
+      window.addEventListener('keydown', handleUserInteraction);
+
+      return () => {
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+        }
+        window.removeEventListener('click', handleUserInteraction);
+        window.removeEventListener('scroll', handleUserInteraction);
+        window.removeEventListener('keydown', handleUserInteraction);
+      };
+    }
+  }, [isPunkedActive, isProfilePage]);
+
+  // Don't render on profile pages - ProfilePunkIndicator will be used instead
+  if (isProfilePage || !isPunkedActive || !punkedByUsername || !isVisible) {
     return null;
   }
 
@@ -20,6 +74,19 @@ export default function PunkIndicator() {
       >
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-3">
           <div className="flex items-center gap-2">
+            {/* User Avatar */}
+            {punkedByUserPhoto && (
+              <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white/30">
+                <Image
+                  src={punkedByUserPhoto}
+                  alt={punkedByUsername}
+                  width={24}
+                  height={24}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            
             <motion.div
               animate={{ 
                 scale: [1, 1.2, 1],

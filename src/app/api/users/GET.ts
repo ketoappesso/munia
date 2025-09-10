@@ -29,6 +29,7 @@ export async function GET(request: Request) {
   const relationshipStatus = toUpper(snakeCase(searchParams.get('relationship-status') || undefined));
   const followersOf = searchParams.get('followers-of');
   const followingOf = searchParams.get('following-of');
+  const punkedOnly = searchParams.get('punked-only') === 'true';
 
   // If username is provided, fetch single user
   if (username) {
@@ -65,6 +66,9 @@ export async function GET(request: Request) {
               followerId: followingOf,
             },
           },
+        }),
+        ...(punkedOnly && {
+          punked: true,
         }),
         id: {
           not: user?.id,

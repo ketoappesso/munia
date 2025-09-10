@@ -15,7 +15,7 @@ import { getDiscoverProfiles } from '@/lib/client_data_fetching/getDiscoverProfi
 import { DISCOVER_PROFILES_PER_PAGE } from '@/constants';
 import { cn } from '@/lib/cn';
 
-export function DiscoverProfiles({ followersOf, followingOf }: { followersOf?: string; followingOf?: string }) {
+export function DiscoverProfiles({ followersOf, followingOf, punkedOnly }: { followersOf?: string; followingOf?: string; punkedOnly?: boolean }) {
   const searchParams = useSearchParams();
   const bottomElRef = useRef<HTMLDivElement>(null);
   const isBottomOnScreen = useOnScreen(bottomElRef);
@@ -37,6 +37,7 @@ export function DiscoverProfiles({ followersOf, followingOf }: { followersOf?: s
         relationshipStatus: searchParams.get('relationship-status'),
         followersOf,
         followingOf,
+        punkedOnly,
       },
     ],
     queryFn: async ({ pageParam: offset }) => {
@@ -44,6 +45,7 @@ export function DiscoverProfiles({ followersOf, followingOf }: { followersOf?: s
         offset,
         followersOf,
         followingOf,
+        punkedOnly,
         searchParams,
       });
 

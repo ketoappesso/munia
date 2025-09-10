@@ -8,6 +8,7 @@ import { ChevronDown } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { RedPacketMessage } from './RedPacketMessage';
 import { TaskCompletionMessage } from './TaskCompletionMessage';
+import { PunkAIMessage } from './PunkAIMessage';
 
 interface Message {
   id: string;
@@ -19,6 +20,8 @@ interface Message {
     username: string;
     name: string;
     profilePhoto: string;
+    punked?: boolean;
+    ttsVoiceId?: string;
   };
   type?: string;
   redPacketAmount?: number;
@@ -29,6 +32,9 @@ interface Message {
   taskPostId?: number;
   taskFinalAmount?: number;
   taskCompletionStatus?: string;
+  // AI message fields
+  isAIResponse?: boolean;
+  audioUrl?: string;
 }
 
 interface ChatMessagesProps {
@@ -48,6 +54,21 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [playedMessageIds, setPlayedMessageIds] = useState<Set<string>>(() => {
+    // Load played message IDs from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(`playedMessages_${otherUser.id}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
+
+  // Save played message IDs to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && playedMessageIds.size > 0) {
+      localStorage.setItem(`playedMessages_${otherUser.id}`, JSON.stringify(Array.from(playedMessageIds)));
+    }
+  }, [playedMessageIds, otherUser.id]);
 
   // Sort messages by serverTs to ensure correct order
   const sortedMessages = useMemo(() => {
@@ -138,7 +159,13 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                   {!isOwnMessage && (
                     <div className="mr-2 flex-shrink-0">
                       <Image
-                        src={message.sender.profilePhoto || '/images/default-avatar.jpg'}
+                        src={
+                          message.sender.profilePhoto 
+                            ? (message.sender.profilePhoto.startsWith('http') 
+                              ? message.sender.profilePhoto 
+                              : `https://xiaoyuan-chat.tos-cn-guangzhou.volces.com/${message.sender.profilePhoto}`)
+                            : '/images/default-avatar.jpg'
+                        }
                         alt={message.sender.name}
                         width={36}
                         height={36}
@@ -254,7 +281,31 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                         );
                       }
                       
-                      // Render text message
+                      // Check if this is an AI response from a punk user
+                      const isPunkAIMessage = !isOwnMessage && message.sender.punked && message.isAIResponse;
+                      const hasBeenPlayed = playedMessageIds.has(message.id);
+                      
+                      // Only use PunkAIMessage for new messages that haven't been played yet
+                      if (isPunkAIMessage && !hasBeenPlayed) {
+                        return (
+                          <PunkAIMessage
+                            key={message.id}
+                            content={message.content}
+                            voiceId={message.sender.ttsVoiceId || 'BV001_streaming'}
+                            isOwn={isOwnMessage}
+                            onComplete={() => {
+                              // Mark as played and save to localStorage
+                              setPlayedMessageIds(prev => {
+                                const newSet = new Set(prev);
+                                newSet.add(message.id);
+                                return newSet;
+                              });
+                            }}
+                          />
+                        );
+                      }
+                      
+                      // Render regular text message
                       return (
                         <div
                           className={cn(

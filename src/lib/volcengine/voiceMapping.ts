@@ -20,41 +20,21 @@ export const CUSTOM_VOICE_MAPPINGS: VoiceMapping[] = [
 ];
 
 // Standard voice options for users without custom voices
+// Currently confirmed working voices with v3 API
 export const STANDARD_VOICES = {
-  BV001: {
-    id: 'BV001_streaming',
-    name: 'Female Voice',
-    nameZh: '女声',
-    description: 'Professional female voice',
-    descriptionZh: '专业女声',
+  FEMALE_SHUANGKUAI: {
+    id: 'zh_female_shuangkuaisisi_moon_bigtts',
+    name: 'Shuangkuai Sisi',
+    nameZh: '双快思思',
+    description: 'Energetic and clear female voice',
+    descriptionZh: '活泼清晰女声',
   },
-  BV002: {
-    id: 'BV002_streaming',
-    name: 'Male Voice',
-    nameZh: '男声',
-    description: 'Professional male voice',
-    descriptionZh: '专业男声',
-  },
-  BV003: {
-    id: 'BV003_streaming',
-    name: 'Child Voice',
-    nameZh: '童声',
-    description: 'Youthful voice',
-    descriptionZh: '活泼童声',
-  },
-  BV004: {
-    id: 'BV004_streaming',
-    name: 'News Voice',
-    nameZh: '新闻播音',
-    description: 'Professional news anchor voice',
-    descriptionZh: '专业新闻播音',
-  },
-  BV005: {
-    id: 'BV005_streaming',
-    name: 'Storytelling Voice',
-    nameZh: '故事讲述',
-    description: 'Warm storytelling voice',
-    descriptionZh: '温暖故事讲述',
+  MALE_AHU: {
+    id: 'zh_male_ahu_conversation_wvae_bigtts',
+    name: 'Ahu Conversation',
+    nameZh: '阿虎对话',
+    description: 'Natural conversational male voice',
+    descriptionZh: '自然对话男声',
   },
 };
 
@@ -62,7 +42,7 @@ export const STANDARD_VOICES = {
 export function getVoiceForUser(
   phoneNumber?: string | null,
   customVoiceId?: string | null,
-  defaultVoice: string = 'BV005_streaming'
+  defaultVoice: string = 'zh_female_shuangkuaisisi_moon_bigtts'
 ): string {
   // First, check if user has a custom voice ID set
   if (customVoiceId) {

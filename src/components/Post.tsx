@@ -439,7 +439,8 @@ export const Post = memo(
                     setPunkedVoice(
                       data.user.ttsVoiceId!,
                       data.user.id,
-                      data.user.name || data.user.username || 'Unknown'
+                      data.user.name || data.user.username || 'Unknown',
+                      author.profilePhoto || null
                     );
                   }
                 }}

@@ -11,7 +11,9 @@ import CoverPhoto from './CoverPhoto';
 import ProfilePhoto from './ProfilePhoto';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
 import { ProfileSidebar } from '@/components/ProfileSidebar';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import ProfilePunkIndicator from '@/components/ProfilePunkIndicator';
+import { usePunk } from '@/contexts/PunkContext';
 
 export function ProfileHeader({
   isOwnProfile,
@@ -23,6 +25,16 @@ export function ProfileHeader({
   const { data } = useUserQuery(initialProfileData.id);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), []);
+  const { isPunkedActive } = usePunk();
+  const [punkedCount, setPunkedCount] = useState<number>(0);
+  
+  // Fetch punked users count
+  useEffect(() => {
+    fetch('/api/users/punked-count')
+      .then(res => res.json())
+      .then(data => setPunkedCount(data.count || 0))
+      .catch(err => console.error('Failed to fetch punked count:', err));
+  }, []);
   
   // If there is no query of the user data yet, use the
   // `initialProfileData` that was fetched on server.
@@ -46,9 +58,13 @@ export function ProfileHeader({
         <ProfilePhoto isOwnProfile={isOwnProfile} photoUrl={profile.profilePhoto} name={initialProfileData.name!} />
         <div className="absolute -bottom-20 right-2 md:right-0">
           {isOwnProfile ? (
-            <ButtonLink shape="pill" mode="subtle" href="/edit-profile">
-              Edit Profile
-            </ButtonLink>
+            isPunkedActive ? (
+              <ProfilePunkIndicator />
+            ) : (
+              <ButtonLink shape="pill" mode="subtle" href="/edit-profile">
+                Edit Profile
+              </ButtonLink>
+            )
           ) : (
             <ProfileActionButtons targetUserId={profile.id} />
           )}
@@ -74,6 +90,14 @@ export function ProfileHeader({
             title={`${initialProfileData.name}&apos; followed users`}>
             <span className="font-semibold">{profile.followingCount}</span>{' '}
             <span className="font-medium text-muted-foreground">Following</span>
+          </Link>
+          <Ellipse className="h-1 w-1 fill-foreground" />
+          <Link
+            href={`/${profile.username}/punked`}
+            className="link"
+            title="Punked users">
+            <span className="font-semibold">{punkedCount}</span>{' '}
+            <span className="font-medium text-muted-foreground">Punked</span>
           </Link>
         </div>
         <Tabs isOwnProfile={isOwnProfile} />

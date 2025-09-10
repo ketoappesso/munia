@@ -1,19 +1,21 @@
 import crypto from 'crypto';
 
-// Volcengine TTS API configuration - Updated
-const VOLCENGINE_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts';
-const VOLCENGINE_V2_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts'; // Use v1 for both
-const STANDARD_VOICE_API_URL = 'https://openspeech.bytedance.com/api/v1/tts'; // Use v1 for standard voices (v3 auth issues)
+// Volcengine TTS API configuration - Updated for v3
+const VOLCENGINE_V1_TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts';
+const VOLCENGINE_V3_TTS_URL = 'https://openspeech.bytedance.com/api/v3/tts/unidirectional';
 
-// Custom voice credentials (verified and working)
-const CUSTOM_VOICE_APP_ID = '7820115171';
-const CUSTOM_VOICE_ACCESS_TOKEN = 'o2H8GJLh9eO-7kuzzyw93To2iJ1C6YC-';
-const CUSTOM_VOICE_SECRET_KEY = 'jjGxcdxz6-u5ISj5n1cKgcZmwyBoEKMv';
+// Unified credentials for v3 API (both custom and standard voices)
+const VOLCENGINE_APP_ID = '7820115171';
+const VOLCENGINE_ACCESS_KEY = 'o2H8GJLh9eO-7kuzzyw93To2iJ1C6YC-';
+const VOLCENGINE_SECRET_KEY = 'jjGxcdxz6-u5ISj5n1cKgcZmwyBoEKMv';
 
-// Standard voice credentials (for BV001-BV005)
-const STANDARD_VOICE_APP_ID = process.env.VOLCENGINE_STANDARD_APP_ID || '4228648687';
-const STANDARD_VOICE_ACCESS_TOKEN = process.env.VOLCENGINE_STANDARD_ACCESS_TOKEN || 'VhSkXqLCd1ZPs68O4Em2prHI3Xu7WYq9';
-const STANDARD_VOICE_SECRET_KEY = 'h4SvM1IlL1jDL0As8Nde12dW8CA4H3rP';
+// Resource IDs for different voice types
+const RESOURCE_IDS = {
+  BIGTTS: 'volc.service_type.10029',  // 大模型语音合成（字符版）
+  BIGTTS_CONCURR: 'volc.service_type.10048',  // 大模型语音合成（并发版）
+  MEGATTS: 'volc.megatts.default',  // 声音复刻2.0（字符版）
+  MEGATTS_CONCURR: 'volc.megatts.concurr',  // 声音复刻2.0（并发版）
+};
 
 // Response type from Volcengine TTS API
 export interface TTSResponse {
@@ -36,14 +38,18 @@ export interface TTSParams {
   pitch?: number; // 0.5-2.0, default 1.0
 }
 
-// Voice options for Chinese TTS
-export const CHINESE_VOICES = {
-  BV001: 'BV001_streaming', // Chinese female voice (streaming)
-  BV002: 'BV002_streaming', // Chinese male voice (streaming)
-  BV003: 'BV003_streaming', // Chinese child voice (streaming)
-  BV004: 'BV004_streaming', // Chinese news voice (streaming)
-  BV005: 'BV005_streaming', // Chinese storytelling voice (streaming)
+// Voice options for Volcengine TTS
+// Currently confirmed working voices with v3 API and BigTTS resource ID
+export const VOLCENGINE_VOICES = {
+  // 女声 (Female voices)
+  FEMALE_SHUANGKUAI: 'zh_female_shuangkuaisisi_moon_bigtts',  // 双快思思月光
+  
+  // 男声 (Male voices)
+  MALE_AHU: 'zh_male_ahu_conversation_wvae_bigtts',  // 阿虎对话
 } as const;
+
+// Alias for backward compatibility
+export const CHINESE_VOICES = VOLCENGINE_VOICES;
 
 export class VolcengineTTSClient {
   private appId: string;
@@ -51,10 +57,10 @@ export class VolcengineTTSClient {
   private cluster: string;
 
   constructor(appId?: string, accessToken?: string, cluster?: string) {
-    // Use standard voice credentials by default
-    this.appId = appId || STANDARD_VOICE_APP_ID;
-    this.accessToken = accessToken || STANDARD_VOICE_ACCESS_TOKEN;
-    this.cluster = cluster || 'volcano_icl';
+    // Use unified credentials for v3 API
+    this.appId = appId || VOLCENGINE_APP_ID;
+    this.accessToken = accessToken || VOLCENGINE_ACCESS_KEY;
+    this.cluster = cluster || 'volcano_tts';
     
     if (!this.accessToken) {
       console.warn('Volcengine TTS access token not configured');
@@ -69,96 +75,62 @@ export class VolcengineTTSClient {
   }
 
   /**
-   * Synthesize text to speech
+   * Synthesize text to speech using v3 API
    */
   async synthesize(params: TTSParams): Promise<Buffer | null> {
     try {
       const requestId = this.generateRequestId();
       
-      // Check if this is a custom voice (S_ prefix)
+      // Check voice type
       const isCustomVoice = params.voiceType?.startsWith('S_');
+      const isBigTTSVoice = params.voiceType?.includes('bigtts');
       
-      // Build request payload based on voice type
-      let payload: any;
+      // Use v3 API for all voices
+      const apiUrl = VOLCENGINE_V3_TTS_URL;
       
+      // Determine resource ID based on voice type
+      let resourceId: string;
       if (isCustomVoice) {
-        // Custom voice payload with proper credentials
-        payload = {
-          app: {
-            appid: CUSTOM_VOICE_APP_ID,
-            token: 'access_token',
-            cluster: 'volcano_icl'
-          },
-          user: {
-            uid: 'uid123'
-          },
-          audio: {
-            voice_type: params.voiceType, // S_xxxx format
-            encoding: params.encoding || 'mp3',
-            speed_ratio: params.speed || 1.1
-          },
-          request: {
-            reqid: requestId,
-            text: params.text,
-            operation: 'query'
+        resourceId = RESOURCE_IDS.MEGATTS;  // Custom voices use MegaTTS
+      } else if (isBigTTSVoice) {
+        resourceId = RESOURCE_IDS.BIGTTS;  // BigTTS voices
+      } else {
+        resourceId = RESOURCE_IDS.BIGTTS;  // Default to BigTTS for standard voices
+      }
+      
+      // Build v3 API request payload
+      const payload = {
+        user: {
+          uid: 'appesso-user'
+        },
+        req_params: {
+          text: params.text,
+          speaker: params.voiceType || VOLCENGINE_VOICES.FEMALE_SHUANGKUAI,
+          audio_params: {
+            format: params.encoding || 'mp3',
+            sample_rate: 24000,
+            speech_rate: Math.round((params.speed || 1.0) * 50 - 50), // Convert to [-50, 100] range
+            loudness_rate: Math.round((params.volume || 1.0) * 50 - 50), // Convert to [-50, 100] range
           }
-        };
-      } else {
-        // Standard voice payload for v1 API
-        payload = {
-          app: {
-            appid: STANDARD_VOICE_APP_ID,
-            token: 'access_token',
-            cluster: 'volcano_tts',
-          },
-          user: {
-            uid: 'appesso-user-001',
-          },
-          audio: {
-            voice_type: params.voiceType || CHINESE_VOICES.BV005,
-            encoding: params.encoding || 'mp3',
-            speed: params.speed || 1.1,
-            volume: params.volume || 1.0,
-            pitch: params.pitch || 1.0,
-          },
-          request: {
-            reqid: requestId,
-            text: params.text,
-            text_type: 'plain',
-            operation: 'query',
-          },
-        };
-      }
-
-      let headers: Record<string, string>;
-      let apiUrl: string;
+        }
+      };
       
-      if (isCustomVoice) {
-        // Custom voices use Bearer token with custom credentials
-        apiUrl = VOLCENGINE_TTS_URL;
-        headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer;${CUSTOM_VOICE_ACCESS_TOKEN}`,
-          'X-Api-Resource-Id': 'volc.megatts.default',
-        };
-        console.log('Using custom voice API with custom credentials');
-      } else {
-        // Standard voices use v1 API 
-        apiUrl = STANDARD_VOICE_API_URL;
-        headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer;${STANDARD_VOICE_ACCESS_TOKEN}`, // v1 uses semicolon separator
-        };
-        console.log('Using standard voice API v1 with standard configuration');
-      }
+      // v3 API headers
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-Api-App-Id': VOLCENGINE_APP_ID,
+        'X-Api-Access-Key': VOLCENGINE_ACCESS_KEY,
+        'X-Api-Resource-Id': resourceId,
+        'X-Api-Request-Id': requestId,
+      };
       
-      console.log('TTS API Request:', {
+      console.log('TTS v3 API Request:', {
         apiUrl,
-        voiceType: params.voiceType,
-        isCustomVoice,
-        headers: Object.keys(headers), // Log header keys only for security
+        speaker: params.voiceType,
+        resourceId,
+        headers: Object.keys(headers),
         textPreview: params.text.substring(0, 20),
-        appId: isCustomVoice ? CUSTOM_VOICE_APP_ID : STANDARD_VOICE_APP_ID,
+        appId: VOLCENGINE_APP_ID,
       });
       
       // Make API request
@@ -168,48 +140,60 @@ export class VolcengineTTSClient {
         body: JSON.stringify(payload),
       });
       
-      console.log('TTS API Response Status:', response.status);
+      console.log('TTS v3 API Response Status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('TTS API Error Response:', errorText);
-        throw new Error(`TTS API request failed: ${response.statusText}`);
+        console.error('TTS v3 API Error Response:', errorText);
+        throw new Error(`TTS v3 API request failed: ${response.statusText}`);
       }
 
-      const result: TTSResponse = await response.json();
+      // v3 API may return streaming response
+      const responseText = await response.text();
       
-      console.log('TTS API Result:', {
-        code: result.code,
-        message: result.Message,
-        reqid: result.reqid,
-        hasData: !!result.data,
-        dataLength: result.data?.length,
-        dataPreview: result.data?.substring(0, 50),
-      });
-
-      // Different success codes for different APIs
-      // Custom voice API v1 returns 3000
-      // Standard voice API v1 also returns 3000 for success
-      const isSuccess = result.code === 3000;
+      // v3 API returns multiple JSON objects separated by newlines
+      const jsonLines = responseText.split('\n').filter(line => line.trim());
+      let audioData = '';
       
-      if (!isSuccess) {
-        console.error('TTS API Error Details:', result);
-        
-        // If custom voice fails, try fallback to standard voice
-        if (isCustomVoice && result.code === 3001) {
-          console.log('Custom voice failed, falling back to standard voice BV001');
-          return this.synthesize({
-            ...params,
-            voiceType: CHINESE_VOICES.BV001,
+      for (const line of jsonLines) {
+        try {
+          const result = JSON.parse(line);
+          
+          console.log('TTS v3 API Response Line:', {
+            code: result.code,
+            message: result.message,
+            hasData: !!result.data,
           });
+          
+          // v3 API success codes: 0 for data, 20000000 for completion
+          if (result.code === 0 && result.data) {
+            audioData += result.data;
+          } else if (result.code === 20000000) {
+            // End of stream
+            console.log('TTS v3 API: Stream completed successfully');
+          } else if (result.code !== 0 && result.code !== 20000000) {
+            console.error('TTS v3 API Error:', result);
+            
+            // If standard voice fails, could try fallback
+            if (!isCustomVoice && result.message?.includes('resource ID is mismatched')) {
+              console.log('Standard voice failed, resource mismatch');
+            }
+            
+            throw new Error(`TTS v3 API error: ${result.message || `Code ${result.code}`}`);
+          }
+        } catch (e) {
+          console.error('Error parsing v3 response line:', e, 'Line:', line);
         }
-        
-        throw new Error(`TTS API error: ${result.Message || `Code ${result.code}`}`);
+      }
+      
+      if (!audioData) {
+        console.error('No audio data received from v3 API');
+        return null;
       }
 
       // Decode base64 audio data
-      const audioData = Buffer.from(result.data, 'base64');
-      return audioData;
+      const audioBuffer = Buffer.from(audioData, 'base64');
+      return audioBuffer;
 
     } catch (error) {
       console.error('Error synthesizing speech:', error);

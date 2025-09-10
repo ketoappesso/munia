@@ -15,6 +15,11 @@ const nextConfig = {
         hostname: 'appesso-s3-bucket.s3.us-east-1.amazonaws.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'xiaoyuan-chat.tos-cn-guangzhou.volces.com',
+        port: '',
+      },
     ],
   },
 };

@@ -331,8 +331,17 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
     }
   }, [browserTTS]);
 
+  // Simple play function for direct text-to-speech
+  const playTTS = useCallback(async (text: string, voiceId?: string) => {
+    // Use provided voice or default to standard voice
+    const voice = voiceId || 'BV001_streaming';
+    // Call speak with the voice option
+    await speak(text, undefined, undefined, voice);
+  }, [speak]);
+
   return {
     speak,
+    playTTS,
     pause,
     resume,
     stop,

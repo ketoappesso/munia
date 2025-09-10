@@ -6,11 +6,13 @@ export async function getDiscoverProfiles({
   offset,
   followersOf,
   followingOf,
+  punkedOnly,
   searchParams,
 }: {
   offset: number;
   followersOf?: string;
   followingOf?: string;
+  punkedOnly?: boolean;
   searchParams: ReadonlyURLSearchParams;
 }) {
   const params = new URLSearchParams(searchParams);
@@ -19,6 +21,7 @@ export async function getDiscoverProfiles({
 
   if (followersOf) params.set('followers-of', followersOf);
   if (followingOf) params.set('following-of', followingOf);
+  if (punkedOnly) params.set('punked-only', 'true');
 
   const res = await fetch(`/api/users?${params.toString()}`);
 

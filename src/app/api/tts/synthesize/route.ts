@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createVolcengineTTSClient, CHINESE_VOICES } from '@/lib/volcengine/tts-client';
+import { createVolcengineTTSClient, VOLCENGINE_VOICES } from '@/lib/volcengine/tts-client';
 import { z } from 'zod';
 import { auth } from '@/auth';
 
@@ -60,16 +60,6 @@ export async function POST(request: NextRequest) {
 
     const { text, voice, speed, volume, pitch, encoding } = validation.data;
 
-    // Only process custom voices (S_xxxxx), fallback to browser for everything else
-    if (!voice || !voice.startsWith('S_')) {
-      console.log('No custom voice provided, falling back to browser TTS');
-      return NextResponse.json({
-        success: false,
-        error: 'Use browser TTS for standard voices',
-        fallback: true,
-      });
-    }
-
     // Check cache first for custom voices
     const cacheKey = getCacheKey(text, voice, speed);
     const cached = ttsCache.get(cacheKey);
@@ -101,8 +91,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Synthesize custom voice only
-    const voiceId = voice;
+    // Synthesize voice (custom or standard)
+    const voiceId = voice || 'zh_female_shuangkuaisisi_moon_bigtts'; // Default to a standard voice
     
     console.log('Synthesizing TTS with params:', {
       text: text.slice(0, 50) + '...',
@@ -122,8 +112,7 @@ export async function POST(request: NextRequest) {
       encoding: encoding || 'mp3',
     });
 
-    // If custom voice failed, fallback to browser TTS
-    // Don't try standard Volcengine voices
+    // If synthesis failed, try fallback to browser TTS
 
     if (!audioBase64) {
       console.error('TTS synthesis failed - no audio data returned');
@@ -171,7 +160,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       configured: ttsClient.isConfigured(),
-      voices: Object.keys(CHINESE_VOICES),
+      voices: Object.keys(VOLCENGINE_VOICES),
       cacheSize: ttsCache.size,
     });
 

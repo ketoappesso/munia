@@ -6,7 +6,8 @@ interface PunkContextType {
   punkedVoiceId: string | null;
   punkedByUserId: string | null;
   punkedByUsername: string | null;
-  setPunkedVoice: (voiceId: string | null, userId: string | null, username: string | null) => void;
+  punkedByUserPhoto: string | null;
+  setPunkedVoice: (voiceId: string | null, userId: string | null, username: string | null, userPhoto: string | null) => void;
   isPunkedActive: boolean;
   clearPunkedVoice: () => void;
 }
@@ -17,17 +18,20 @@ export function PunkProvider({ children }: { children: ReactNode }) {
   const [punkedVoiceId, setPunkedVoiceId] = useState<string | null>(null);
   const [punkedByUserId, setPunkedByUserId] = useState<string | null>(null);
   const [punkedByUsername, setPunkedByUsername] = useState<string | null>(null);
+  const [punkedByUserPhoto, setPunkedByUserPhoto] = useState<string | null>(null);
 
-  const setPunkedVoice = useCallback((voiceId: string | null, userId: string | null, username: string | null) => {
+  const setPunkedVoice = useCallback((voiceId: string | null, userId: string | null, username: string | null, userPhoto: string | null) => {
     setPunkedVoiceId(voiceId);
     setPunkedByUserId(userId);
     setPunkedByUsername(username);
+    setPunkedByUserPhoto(userPhoto);
   }, []);
 
   const clearPunkedVoice = useCallback(() => {
     setPunkedVoiceId(null);
     setPunkedByUserId(null);
     setPunkedByUsername(null);
+    setPunkedByUserPhoto(null);
   }, []);
 
   return (
@@ -36,6 +40,7 @@ export function PunkProvider({ children }: { children: ReactNode }) {
         punkedVoiceId,
         punkedByUserId,
         punkedByUsername,
+        punkedByUserPhoto,
         setPunkedVoice,
         isPunkedActive: !!punkedVoiceId,
         clearPunkedVoice,

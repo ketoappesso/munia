@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
-import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon, Gift } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon, Gift, Bot, Sparkles } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetcher } from '@/lib/fetcher';
 import { useMessaging } from '@/hooks/useMessaging';
@@ -44,6 +44,7 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const [showActions, setShowActions] = useState(false);
   const [showRedPacketModal, setShowRedPacketModal] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isAIResponding, setIsAIResponding] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +59,22 @@ export default function MessagesPage({ params }: { params: { username: string } 
     },
     enabled: !!username,
   });
+
+  // Check if other user is a punk user
+  const { data: punkStatus } = useQuery({
+    queryKey: ['punk-status', otherUser?.id],
+    queryFn: async () => {
+      if (!otherUser?.id) return null;
+      const res = await fetch(`/api/punk-ai?userId=${otherUser.id}`);
+      if (res.ok) {
+        return await res.json();
+      }
+      return { isPunk: false };
+    },
+    enabled: !!otherUser?.id,
+  });
+
+  const isPunkUser = punkStatus?.isPunk || false;
 
   // Get or create conversation
   const { data: conversation, error: conversationError } = useQuery({
@@ -236,15 +253,26 @@ export default function MessagesPage({ params }: { params: { username: string } 
     mutationFn: async (content: string) => {
       if (!conversation?.id) throw new Error('No conversation');
 
+      // If sending to a punk user, show AI responding indicator
+      if (isPunkUser) {
+        setIsAIResponding(true);
+      }
+
       // Use the messaging hook to send
       const success = await sendWebSocketMessage(content);
       if (success) {
+        // Set a timeout to remove the AI responding indicator
+        if (isPunkUser) {
+          setTimeout(() => {
+            setIsAIResponding(false);
+          }, 3000); // Hide after 3 seconds
+        }
         return { success: true };
       }
       throw new Error('Failed to send message');
     },
     onSuccess: () => {
-      setMessage('');
+      // Input already cleared in handleSendMessage
       // Messages will be refreshed by the onNewMessage callback
     },
   });
@@ -269,7 +297,9 @@ export default function MessagesPage({ params }: { params: { username: string } 
     });
 
     if (message.trim() && !sendMessageMutation.isPending && conversation?.id) {
-      sendMessageMutation.mutate(message.trim());
+      const messageToSend = message.trim();
+      setMessage(''); // Clear input immediately
+      sendMessageMutation.mutate(messageToSend);
     }
   }, [message, sendMessageMutation.isPending, sendMessageMutation.mutate, conversation?.id]);
 
@@ -377,10 +407,18 @@ export default function MessagesPage({ params }: { params: { username: string } 
             <ArrowLeft className="h-5 w-5" />
           </ButtonNaked>
           <div className="ml-3 flex-1">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h1 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
               {otherUser.name || otherUser.username}
+              {isPunkUser && (
+                <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-0.5 text-xs font-medium text-white">
+                  <Sparkles className="h-3 w-3" />
+                  AI
+                </span>
+              )}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{isConnected ? '在线' : '离线'}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {isPunkUser ? 'AI 助手 • 随时在线' : (isConnected ? '在线' : '离线')}
+            </p>
           </div>
           <div className="w-9" /> {/* Spacer for symmetry */}
         </div>
@@ -389,6 +427,19 @@ export default function MessagesPage({ params }: { params: { username: string } 
       {/* Messages fill the space between header and input */}
       <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <ChatMessages messages={messages} otherUser={otherUser} />
+        {isAIResponding && (
+          <div className="flex items-center gap-2 px-4 py-2">
+            <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm dark:bg-gray-800">
+              <Bot className="h-4 w-4 animate-pulse text-purple-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">AI 正在思考...</span>
+              <div className="flex gap-1">
+                <span className="h-2 w-2 animate-bounce rounded-full bg-purple-500" style={{ animationDelay: '0ms' }}></span>
+                <span className="h-2 w-2 animate-bounce rounded-full bg-purple-500" style={{ animationDelay: '150ms' }}></span>
+                <span className="h-2 w-2 animate-bounce rounded-full bg-purple-500" style={{ animationDelay: '300ms' }}></span>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
