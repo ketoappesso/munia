@@ -79,7 +79,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
     reset(defaultValues);
   }, [reset, defaultValues]);
 
-  if (!userData) return <GenericLoading>Loading form</GenericLoading>;
+  if (!userData) return <GenericLoading>加载表单中</GenericLoading>;
   return (
     <div>
       <form onSubmit={handleSubmit(onValid, onInvalid)} className="flex flex-col gap-4">
@@ -89,7 +89,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <TextInput
-                label="Username *"
+                label="用户名 *"
                 value={value}
                 onChange={(v) => onChange(v)}
                 errorMessage={error?.message}
@@ -126,7 +126,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <TextInput
-                label="Name *"
+                label="姓名 *"
                 value={value}
                 onChange={(v) => onChange(v)}
                 errorMessage={error?.message}
@@ -143,7 +143,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <TextInput
-                label="Phone Number"
+                label="手机号码"
                 value={value || ''}
                 onChange={(v) => onChange(v || null)}
                 errorMessage={error?.message}
@@ -160,7 +160,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <Textarea
-                label="Bio"
+                label="个人简介"
                 value={value || ''}
                 onChange={(v) => onChange(v || null)}
                 errorMessage={error?.message}
@@ -176,7 +176,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <TextInput
-                label="Website"
+                label="网站"
                 value={value || ''}
                 onChange={(v) => onChange(v || null)}
                 errorMessage={error?.message}
@@ -193,7 +193,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <TextInput
-                label="Address"
+                label="地址"
                 value={value || ''}
                 onChange={(v) => onChange(v || null)}
                 errorMessage={error?.message}
@@ -210,16 +210,16 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <Select
-                label="Gender"
+                label="性别"
                 name="gender"
                 selectedKey={value || null}
                 onSelectionChange={(key) => onChange(key || null)}
                 errorMessage={error?.message}
                 ref={ref}
                 Icon={Other}>
-                <Item key="MALE">Male</Item>
-                <Item key="FEMALE">Female</Item>
-                <Item key="NONBINARY">Nonbinary</Item>
+                <Item key="MALE">男</Item>
+                <Item key="FEMALE">女</Item>
+                <Item key="NONBINARY">非二元性别</Item>
               </Select>
             </div>
           )}
@@ -231,17 +231,17 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref, value }, fieldState: { error } }) => (
             <div>
               <Select
-                label="Relationship Status"
+                label="感情状态"
                 name="relationshipStatus"
                 selectedKey={value || null}
                 onSelectionChange={(key) => onChange(key || null)}
                 errorMessage={error?.message}
                 Icon={Heart}
                 ref={ref}>
-                <Item key="SINGLE">Single</Item>
-                <Item key="IN_A_RELATIONSHIP">In a relationship</Item>
-                <Item key="ENGAGED">Enganged</Item>
-                <Item key="MARRIED">Married</Item>
+                <Item key="SINGLE">单身</Item>
+                <Item key="IN_A_RELATIONSHIP">恋爱中</Item>
+                <Item key="ENGAGED">已订婚</Item>
+                <Item key="MARRIED">已婚</Item>
               </Select>
             </div>
           )}
@@ -254,7 +254,7 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
           render={({ field: { onChange, ref }, fieldState: { error } }) => (
             <div>
               <DatePicker
-                label="Birth Date"
+                label="出生日期"
                 defaultValue={
                   userData.birthDate &&
                   parseDate(
@@ -279,10 +279,10 @@ export function EditProfileForm({ redirectTo }: { redirectTo?: string }) {
             type="button"
             loading={updateSessionUserDataMutation.isPending === true}
             onPress={resetForm}>
-            Reset
+            重置
           </Button>
           <Button type="submit" loading={updateSessionUserDataMutation.isPending === true}>
-            Submit
+            提交
           </Button>
         </div>
       </form>

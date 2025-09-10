@@ -118,7 +118,7 @@ export function NavigationSidebar({
             aria-label="Navigation">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border p-4">
-              <h2 className="text-xl font-semibold text-foreground">{t('nav.navigation')}</h2>
+              <h2 className="text-xl font-semibold text-foreground">导航</h2>
               <ButtonNaked
                 onPress={onClose}
                 className="rounded-full p-1 hover:bg-foreground/5"
@@ -141,8 +141,8 @@ export function NavigationSidebar({
                       <Wallet className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t('nav.myWallet')}</p>
-                      <p className="text-xs text-muted-foreground">{t('nav.clickToManage')}</p>
+                      <p className="text-sm font-medium text-foreground">我的钱包</p>
+                      <p className="text-xs text-muted-foreground">点击管理资产</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -167,8 +167,8 @@ export function NavigationSidebar({
                       <Home className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t('nav.mySpace')}</p>
-                      <p className="text-xs text-muted-foreground">{t('nav.takeSelfie')}</p>
+                      <p className="text-sm font-medium text-foreground">我的空间</p>
+                      <p className="text-xs text-muted-foreground">拍摄自拍</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-center">
@@ -189,8 +189,8 @@ export function NavigationSidebar({
                       <Smartphone className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t('nav.myDevice')}</p>
-                      <p className="text-xs text-muted-foreground">{t('nav.scanDeviceCode')}</p>
+                      <p className="text-sm font-medium text-foreground">我的设备</p>
+                      <p className="text-xs text-muted-foreground">扫描设备码</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-center">
@@ -211,8 +211,8 @@ export function NavigationSidebar({
                       <Gamepad2 className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{t('nav.myGames')}</p>
-                      <p className="text-xs text-muted-foreground">{t('nav.enterGameCenter')}</p>
+                      <p className="text-sm font-medium text-foreground">我的游戏</p>
+                      <p className="text-xs text-muted-foreground">进入游戏中心</p>
                     </div>
                   </div>
                 </ButtonNaked>
@@ -221,26 +221,31 @@ export function NavigationSidebar({
               {/* Divider */}
               <div className="my-4 border-t border-border" />
 
-              {/* Profile Actions */}
+              {/* Edit Profile Section */}
               {session?.user && (
-                <div>
+                <>
                   <ButtonNaked
                     onPress={() => handleNavigation('/edit-profile')}
-                    className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <Edit className="h-5 w-5 text-foreground" />
-                    <span className="text-foreground">{t('nav.editProfile')}</span>
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <div className="flex h-10 w-10 items-center justify-center">
+                      <Edit className="h-6 w-6 text-foreground" />
+                    </div>
+                    <span className="text-foreground font-medium">编辑资料</span>
                   </ButtonNaked>
 
+                  {/* Settings Section */}
                   <ButtonNaked
                     onPress={() => {
                       onClose();
                       setTimeout(() => setIsSettingsOpen(true), 300);
                     }}
-                    className="mb-2 flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <Settings className="h-5 w-5 text-foreground" />
-                    <span className="text-foreground">{t('nav.settings')}</span>
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <div className="flex h-10 w-10 items-center justify-center">
+                      <Settings className="h-6 w-6 text-foreground" />
+                    </div>
+                    <span className="text-foreground font-medium">设置</span>
                   </ButtonNaked>
-                </div>
+                </>
               )}
             </div>
 
@@ -251,7 +256,7 @@ export function NavigationSidebar({
                   onPress={handleLogout}
                   className="flex w-full items-center gap-3 rounded-lg p-3 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20">
                   <LogOut className="h-5 w-5" />
-                  <span className="font-medium">{t('nav.logout')}</span>
+                  <span className="font-medium">退出登录</span>
                 </ButtonNaked>
               </div>
             )}

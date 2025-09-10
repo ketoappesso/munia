@@ -24,8 +24,8 @@ export function PostOptions({
   const handleDeleteClick = useCallback(() => {
     if (!session?.user) return;
     confirm({
-      title: 'Delete Post',
-      message: 'Do you really wish to delete this post?',
+      title: '删除帖子',
+      message: '确定要删除这条帖子吗？',
       onConfirm: () => {
         // Wait for the dialog to close before deleting the comment to pass the focus to
         // the next element first, preventing the focus from resetting to the top
@@ -57,8 +57,8 @@ export function PostOptions({
   return (
     <DropdownMenuButton key={`posts-${postId}-options`} label="Post options" onAction={handleOptionClick}>
       <Section>
-        <Item key="edit">Edit Post</Item>
-        <Item key="delete">Delete Post</Item>
+        <Item key="edit">编辑帖子</Item>
+        <Item key="delete">删除帖子</Item>
       </Section>
     </DropdownMenuButton>
   );
