@@ -84,7 +84,7 @@ export function VirtualizedMessages({ messages, currentUsername, className = '' 
                 {!isOwnMessage ? (
                   <div className="flex items-start gap-2">
                     <Image
-                      src={message.sender.profilePhoto || '/images/default-avatar.jpg'}
+                      src={message.sender.profilePhoto || '/images/default-avatar.svg'}
                       alt={message.sender.name}
                       width={32}
                       height={32}

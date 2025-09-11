@@ -67,13 +67,13 @@ export async function GET(request: NextRequest) {
         id: conversation.id,
         otherUser: {
           ...otherUser,
-          profilePhoto: fileNameToUrl(otherUser.profilePhoto) || '/images/default-avatar.jpg',
+          profilePhoto: fileNameToUrl(otherUser.profilePhoto) || '/images/default-avatar.svg',
         },
         lastMessage: conversation.messages[0] ? {
           ...conversation.messages[0],
           sender: {
             ...conversation.messages[0].sender,
-            profilePhoto: fileNameToUrl(conversation.messages[0].sender.profilePhoto) || '/images/default-avatar.jpg',
+            profilePhoto: fileNameToUrl(conversation.messages[0].sender.profilePhoto) || '/images/default-avatar.svg',
           },
         } : null,
         unreadCount: conversation._count.messages,

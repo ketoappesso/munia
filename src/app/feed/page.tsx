@@ -3,22 +3,21 @@
 import { CreatePostModalLauncher } from '@/components/CreatePostModalLauncher';
 import { Posts } from '@/components/Posts';
 import { useSession } from 'next-auth/react';
-import { AuthModal } from '@/components/AuthModal';
 import { useCallback, useState } from 'react';
 import ActionsPlus from '@/svg_components/ActionsPlus';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
 import { NavigationSidebar } from '@/components/NavigationSidebar';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Page() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const { t } = useLanguage();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'following' | 'discover' | 'tasks'>('discover');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const handleCloseAuthModal = useCallback(() => setShowAuthModal(false), []);
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), []);
   const handleTabChange = useCallback((tab: 'following' | 'discover' | 'tasks') => {
     setActiveTab(tab);
@@ -42,7 +41,13 @@ export default function Page() {
           <div className="flex flex-1 items-center justify-end">
             <button
               type="button"
-              onClick={() => setIsSidebarOpen(true)}
+              onClick={() => {
+                if (!session?.user) {
+                  router.push('/login');
+                } else {
+                  setIsSidebarOpen(true);
+                }
+              }}
               className="ml-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
               <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
             </button>
@@ -69,11 +74,19 @@ export default function Page() {
       <div className="px-4 pt-4 pb-20">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex flex-1 justify-start">
-            <Link
-              href="/discover"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300">
-              <ActionsPlus className="h-5 w-5 stroke-gray-700" />
-            </Link>
+            {session?.user ? (
+              <Link
+                href="/discover"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300">
+                <ActionsPlus className="h-5 w-5 stroke-gray-700" />
+              </Link>
+            ) : (
+              <button
+                onClick={() => router.push('/login')}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-colors hover:bg-gray-300">
+                <ActionsPlus className="h-5 w-5 stroke-gray-700" />
+              </button>
+            )}
           </div>
           <div className="flex items-center">
             <div className="flex rounded-lg bg-gray-200 p-1">
@@ -97,7 +110,13 @@ export default function Page() {
           <div className="flex flex-1 items-center justify-end">
             <button
               type="button"
-              onClick={() => setIsSidebarOpen(true)}
+              onClick={() => {
+                if (!session?.user) {
+                  router.push('/login');
+                } else {
+                  setIsSidebarOpen(true);
+                }
+              }}
               className="ml-3 flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
               <HamburgerMenu className="h-5 w-5 stroke-gray-700" />
             </button>
@@ -115,8 +134,6 @@ export default function Page() {
       ) : (
         <Posts type="public" />
       )}
-
-        <AuthModal isOpen={showAuthModal} onClose={handleCloseAuthModal} />
       </div>
 
       <NavigationSidebar

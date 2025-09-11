@@ -3,7 +3,7 @@
 import { useActiveRouteChecker } from '@/hooks/useActiveRouteChecker';
 import { useDialogs } from '@/hooks/useDialogs';
 import { cn } from '@/lib/cn';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { SVGProps, useCallback, useEffect } from 'react';
 import { Badge } from './ui/Badge';
@@ -21,10 +21,17 @@ export function MenuBarItem({
   badge?: number;
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isActive] = useActiveRouteChecker(route);
   const { confirm } = useDialogs();
 
   const onItemClick = useCallback(() => {
+    // Check if user needs to login for protected routes
+    if (!session?.user && (route === '/messages' || route.startsWith('/messages/') || route.includes('user-not-found'))) {
+      router.push('/login');
+      return;
+    }
+    
     if (route === '/api/auth/signout') {
       confirm({
         title: 'Confirm Logout',
@@ -34,7 +41,7 @@ export function MenuBarItem({
     } else {
       router.push(route);
     }
-  }, [route, router, confirm]);
+  }, [route, router, confirm, session]);
 
   useEffect(() => {
     if (route === '/api/auth/signout') return;

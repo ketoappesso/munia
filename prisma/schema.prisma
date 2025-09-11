@@ -88,6 +88,10 @@ model User {
   // Pospal balance caching fields
   appessoBalance          Float?    // Cached Appesso balance
   appessoBalanceUpdatedAt DateTime? // When the balance was last fetched from Pospal
+
+  // AI Profile relation
+  aiProfile               AIProfile?
+  aiMemories              AIMemory[]
 }
 
 model VerificationToken {
@@ -296,4 +300,80 @@ model WalletTransaction {
   @@index([fromUserId])
   @@index([toUserId])
   @@index([createdAt])
+}
+
+// AI Profile configuration for each user
+model AIProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Model configuration
+  llmProvider   String   @default("deepseek")
+  llmModel      String   @default("deepseek-chat")
+  temperature   Float    @default(0.7)
+  maxTokens     Int      @default(2000)
+  topP          Float    @default(0.9)
+  
+  // Prompt configuration
+  systemPrompt  String?
+  roleTemplate  String   @default("assistant")
+  contextPrompts String? // JSON string for scene prompts
+  
+  // Voice configuration
+  voiceTrainings VoiceTraining[]
+  activeVoiceId  String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// AI Memory system for personalization
+model AIMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // long_term, short_term
+  category  String   // personal, preferences, history
+  title     String
+  content   String
+  tags      String   // Comma-separated tags
+  score     Float    @default(1.0) // Weight score for importance
+  
+  metadata  String?  // JSON string for extra metadata
+  expiresAt DateTime? // Expiration for short-term memories
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId, type, category])
+  @@index([userId, score])
+}
+
+// Voice training records
+model VoiceTraining {
+  id          String   @id @default(cuid())
+  userId      String
+  profileId   String
+  profile     AIProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  name        String
+  version     String
+  status      String   @default("pending") // pending, training, completed, failed
+  progress    Int      @default(0)
+  
+  // TOS storage references
+  sampleKeys  String   // JSON array of TOS storage keys
+  modelKey    String?  // Trained model key in TOS
+  
+  sampleCount Int      @default(0)
+  duration    Int      @default(0) // Total duration in seconds
+  accuracy    Float?   // Similarity score
+  
+  trainingStartedAt  DateTime?
+  trainingCompletedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

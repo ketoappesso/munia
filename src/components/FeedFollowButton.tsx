@@ -43,8 +43,12 @@ export function FeedFollowButton({ authorId, authorUsername }: FeedFollowButtonP
   }, [currentUserId, isFollowing, followMutation, unFollowMutation, router]);
 
   const handleDM = useCallback(() => {
+    if (!currentUserId) {
+      router.push('/login');
+      return;
+    }
     router.push(`/messages/${authorUsername}`);
-  }, [router, authorUsername]);
+  }, [router, authorUsername, currentUserId]);
 
   if (currentUserId === authorId) return null;
 

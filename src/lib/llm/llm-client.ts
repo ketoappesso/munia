@@ -1,4 +1,5 @@
 import 'server-only';
+import prisma from '@/lib/prisma/prisma';
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -6,12 +7,14 @@ export interface LLMMessage {
 }
 
 export interface LLMConfig {
-  provider: 'openai' | 'deepseek' | 'custom';
+  provider: 'openai' | 'deepseek' | 'claude' | 'custom';
   apiKey?: string;
   apiUrl?: string;
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  topP?: number;
+  userId?: string; // Add userId to load user-specific config
 }
 
 export interface LLMResponse {
@@ -32,6 +35,7 @@ class LLMClient {
       provider: 'deepseek',
       maxTokens: 500,
       temperature: 0.7,
+      topP: 0.9,
       ...config,
     };
     
@@ -58,6 +62,41 @@ class LLMClient {
     }
   }
 
+  // Load user-specific configuration from database
+  async loadUserConfig(userId: string) {
+    try {
+      const aiProfile = await prisma.aIProfile.findUnique({
+        where: { userId },
+      });
+
+      if (aiProfile) {
+        this.config.provider = aiProfile.llmProvider as any;
+        this.config.model = aiProfile.llmModel;
+        this.config.temperature = aiProfile.temperature;
+        this.config.maxTokens = aiProfile.maxTokens;
+        this.config.topP = aiProfile.topP;
+        
+        // Update API URL based on provider
+        this.config.apiUrl = this.getDefaultApiUrl();
+        
+        // Set API key from environment based on provider
+        switch (aiProfile.llmProvider) {
+          case 'openai':
+            this.config.apiKey = process.env.OPENAI_API_KEY;
+            break;
+          case 'deepseek':
+            this.config.apiKey = process.env.DEEPSEEK_API_KEY || process.env.LLM_API_KEY;
+            break;
+          case 'claude':
+            this.config.apiKey = process.env.CLAUDE_API_KEY;
+            break;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user AI config:', error);
+    }
+  }
+
   private getDefaultApiUrl(): string {
     const provider = this.config.provider || 'deepseek';
     switch (provider) {
@@ -65,6 +104,8 @@ class LLMClient {
         return 'https://api.openai.com/v1/chat/completions';
       case 'deepseek':
         return 'https://api.deepseek.com/v1/chat/completions';
+      case 'claude':
+        return 'https://api.anthropic.com/v1/messages';
       default:
         return process.env.LLM_API_URL || 'http://localhost:8080/v1/chat/completions';
     }
@@ -74,9 +115,11 @@ class LLMClient {
     const provider = this.config.provider || 'deepseek';
     switch (provider) {
       case 'openai':
-        return 'gpt-3.5-turbo';
+        return 'gpt-4-turbo-preview';
       case 'deepseek':
         return 'deepseek-chat';
+      case 'claude':
+        return 'claude-3-opus-20240229';
       default:
         return 'default-model';
     }
@@ -93,6 +136,12 @@ class LLMClient {
     }
 
     try {
+      // Handle Claude API differently
+      if (this.config.provider === 'claude') {
+        return this.chatWithClaude(messages);
+      }
+
+      // OpenAI-compatible format (OpenAI, DeepSeek, etc.)
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
       };
@@ -109,6 +158,7 @@ class LLMClient {
           messages,
           max_tokens: this.config.maxTokens,
           temperature: this.config.temperature,
+          top_p: this.config.topP,
         }),
       });
 
@@ -131,6 +181,47 @@ class LLMClient {
       console.error('LLM chat error:', error);
       throw error;
     }
+  }
+
+  private async chatWithClaude(messages: LLMMessage[]): Promise<LLMResponse> {
+    // Convert messages to Claude format
+    const systemMessage = messages.find(m => m.role === 'system');
+    const nonSystemMessages = messages.filter(m => m.role !== 'system');
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'x-api-key': this.config.apiKey!,
+      'anthropic-version': '2023-06-01',
+    };
+
+    const response = await fetch(this.config.apiUrl!, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: this.config.model,
+        messages: nonSystemMessages,
+        system: systemMessage?.content,
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature,
+        top_p: this.config.topP,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Claude API error: ${response.status} - ${error}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      content: data.content[0]?.text || '',
+      usage: data.usage ? {
+        promptTokens: data.usage.input_tokens,
+        completionTokens: data.usage.output_tokens,
+        totalTokens: data.usage.input_tokens + data.usage.output_tokens,
+      } : undefined,
+    };
   }
 
   private generateMockResponse(messages: LLMMessage[]): LLMResponse {
@@ -185,14 +276,41 @@ class LLMClient {
   async generateResponse(
     userMessage: string,
     systemPrompt?: string,
-    history?: LLMMessage[]
+    history?: LLMMessage[],
+    userId?: string
   ): Promise<string> {
     const messages: LLMMessage[] = [];
 
+    // Load user configuration if userId is provided
+    if (userId) {
+      await this.loadUserConfig(userId);
+      
+      // Get user's AI profile for custom prompts
+      const aiProfile = await prisma.aIProfile.findUnique({
+        where: { userId },
+      });
+      
+      // Use custom system prompt if available
+      if (aiProfile?.systemPrompt) {
+        systemPrompt = aiProfile.systemPrompt;
+      }
+    }
+
+    // Add system prompt with injected memories
     if (systemPrompt) {
+      let enhancedPrompt = systemPrompt;
+      
+      // Inject user memories if available
+      if (userId) {
+        const memories = await this.getUserMemories(userId);
+        if (memories.length > 0) {
+          enhancedPrompt += '\n\n## User Context:\n' + memories.join('\n');
+        }
+      }
+      
       messages.push({
         role: 'system',
-        content: systemPrompt,
+        content: enhancedPrompt,
       });
     }
 
@@ -207,6 +325,36 @@ class LLMClient {
 
     const response = await this.chat(messages);
     return response.content;
+  }
+
+  private async getUserMemories(userId: string, limit: number = 10): Promise<string[]> {
+    try {
+      // Fetch high-priority memories for the user
+      const memories = await prisma.aIMemory.findMany({
+        where: {
+          userId,
+          OR: [
+            { type: 'long_term' },
+            {
+              type: 'short_term',
+              expiresAt: {
+                gte: new Date(),
+              },
+            },
+          ],
+        },
+        orderBy: [
+          { score: 'desc' },
+          { updatedAt: 'desc' },
+        ],
+        take: limit,
+      });
+
+      return memories.map(m => `- [${m.category}] ${m.title}: ${m.content}`);
+    } catch (error) {
+      console.error('Error fetching user memories:', error);
+      return [];
+    }
   }
 }
 

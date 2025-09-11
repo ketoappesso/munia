@@ -58,13 +58,17 @@ export function ProfileHeader({
         <ProfilePhoto isOwnProfile={isOwnProfile} photoUrl={profile.profilePhoto} name={initialProfileData.name!} />
         <div className="absolute -bottom-20 right-2 md:right-0">
           {isOwnProfile ? (
-            isPunkedActive ? (
-              <ProfilePunkIndicator />
-            ) : (
-              <ButtonLink shape="pill" mode="subtle" href="/edit-profile">
-                Edit Profile
+            <div className="flex items-center gap-2">
+              {isPunkedActive && <ProfilePunkIndicator />}
+              <ButtonLink 
+                shape="pill" 
+                mode="default"
+                href="/my-ai"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-none"
+              >
+                我的AI
               </ButtonLink>
-            )
+            </div>
           ) : (
             <ProfileActionButtons targetUserId={profile.id} />
           )}
@@ -79,25 +83,25 @@ export function ProfileHeader({
           <Link
             href={`/${profile.username}/followers`}
             className="link"
-            title={`${initialProfileData.name}&apos; followers`}>
+            title={`${initialProfileData.name} 的粉丝`}>
             <span className="font-semibold">{profile.followerCount}</span>{' '}
-            <span className="font-medium text-muted-foreground">Followers</span>
+            <span className="font-medium text-muted-foreground">粉丝</span>
           </Link>
           <Ellipse className="h-1 w-1 fill-foreground" />
           <Link
             href={`/${profile.username}/following`}
             className="link"
-            title={`${initialProfileData.name}&apos; followed users`}>
+            title={`${initialProfileData.name} 关注的人`}>
             <span className="font-semibold">{profile.followingCount}</span>{' '}
-            <span className="font-medium text-muted-foreground">Following</span>
+            <span className="font-medium text-muted-foreground">关注</span>
           </Link>
           <Ellipse className="h-1 w-1 fill-foreground" />
           <Link
             href={`/${profile.username}/punked`}
             className="link"
-            title="Punked users">
+            title="定制语音用户">
             <span className="font-semibold">{punkedCount}</span>{' '}
-            <span className="font-medium text-muted-foreground">Punked</span>
+            <span className="font-medium text-muted-foreground">定制语音</span>
           </Link>
         </div>
         <Tabs isOwnProfile={isOwnProfile} />

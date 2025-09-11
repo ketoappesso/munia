@@ -16,16 +16,16 @@ export default function ProfilePunkIndicator() {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-full shadow-lg"
+      className="inline-flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2 py-1 rounded-full shadow-lg max-w-[180px]"
     >
       {/* User Avatar */}
       {punkedByUserPhoto && (
-        <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white/30">
+        <div className="w-5 h-5 rounded-full overflow-hidden border border-white/30">
           <Image
             src={punkedByUserPhoto}
             alt={punkedByUsername}
-            width={24}
-            height={24}
+            width={20}
+            height={20}
             className="w-full h-full object-cover"
           />
         </div>
@@ -43,7 +43,7 @@ export default function ProfilePunkIndicator() {
         }}
       >
         <svg 
-          className="w-4 h-4" 
+          className="w-3.5 h-3.5" 
           fill="currentColor" 
           viewBox="0 0 24 24"
         >
@@ -52,14 +52,14 @@ export default function ProfilePunkIndicator() {
       </motion.div>
       
       {/* Text */}
-      <span className="text-xs font-bold">
+      <span className="text-xs font-semibold truncate">
         Using {punkedByUsername}'s voice
       </span>
       
       {/* Close Button */}
       <button
         onClick={clearPunkedVoice}
-        className="ml-1 p-0.5 hover:bg-white/20 rounded-full transition-colors"
+        className="p-0.5 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
         title="Stop using this voice"
       >
         <svg 

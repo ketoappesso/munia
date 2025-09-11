@@ -81,7 +81,7 @@ export function MessagesList() {
           href={`/messages/${conversation.otherUser.username}`}
           className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-gray-50 active:bg-gray-100">
           <Image
-            src={conversation.otherUser.profilePhoto || '/images/default-avatar.jpg'}
+            src={conversation.otherUser.profilePhoto || '/images/default-avatar.svg'}
             alt={conversation.otherUser.name}
             width={48}
             height={48}

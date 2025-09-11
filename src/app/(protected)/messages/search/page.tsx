@@ -227,7 +227,7 @@ export default function SearchPage() {
               >
                 <div className="flex items-start gap-3">
                   <Image
-                    src={result.conversation.otherUser.profilePhoto || '/images/default-avatar.jpg'}
+                    src={result.conversation.otherUser.profilePhoto || '/images/default-avatar.svg'}
                     alt={result.conversation.otherUser.name}
                     width={40}
                     height={40}

@@ -87,6 +87,11 @@ export function NavigationSidebar({
   }, [confirm, onClose]);
 
   const handleNavigation = (path: string) => {
+    if (!session?.user) {
+      onClose();
+      router.push('/login');
+      return;
+    }
     onClose();
     router.push(path);
   };
@@ -130,6 +135,41 @@ export function NavigationSidebar({
             {/* Content */}
             <div className="flex h-[calc(100%-72px)] flex-col overflow-hidden">
               <div className="flex-1 space-y-2 overflow-y-auto p-4">
+
+              {/* Edit Profile Section */}
+              {session?.user && (
+                <>
+                  <ButtonNaked
+                    onPress={() => handleNavigation('/edit-profile')}
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <div className="flex h-10 w-10 items-center justify-center">
+                      <Edit className="h-6 w-6 text-foreground" />
+                    </div>
+                    <span className="text-foreground font-medium">编辑资料</span>
+                  </ButtonNaked>
+
+                  {/* Settings Section */}
+                  <ButtonNaked
+                    onPress={() => {
+                      if (!session?.user) {
+                        onClose();
+                        router.push('/login');
+                        return;
+                      }
+                      onClose();
+                      setTimeout(() => setIsSettingsOpen(true), 300);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+                    <div className="flex h-10 w-10 items-center justify-center">
+                      <Settings className="h-6 w-6 text-foreground" />
+                    </div>
+                    <span className="text-foreground font-medium">设置</span>
+                  </ButtonNaked>
+                </>
+              )}
+
+              {/* Divider */}
+              <div className="my-4 border-t border-border" />
 
               {/* Wallet Section */}
               <div className="mb-4">
@@ -217,36 +257,6 @@ export function NavigationSidebar({
                   </div>
                 </ButtonNaked>
               </div>
-
-              {/* Divider */}
-              <div className="my-4 border-t border-border" />
-
-              {/* Edit Profile Section */}
-              {session?.user && (
-                <>
-                  <ButtonNaked
-                    onPress={() => handleNavigation('/edit-profile')}
-                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <div className="flex h-10 w-10 items-center justify-center">
-                      <Edit className="h-6 w-6 text-foreground" />
-                    </div>
-                    <span className="text-foreground font-medium">编辑资料</span>
-                  </ButtonNaked>
-
-                  {/* Settings Section */}
-                  <ButtonNaked
-                    onPress={() => {
-                      onClose();
-                      setTimeout(() => setIsSettingsOpen(true), 300);
-                    }}
-                    className="flex w-full items-center gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
-                    <div className="flex h-10 w-10 items-center justify-center">
-                      <Settings className="h-6 w-6 text-foreground" />
-                    </div>
-                    <span className="text-foreground font-medium">设置</span>
-                  </ButtonNaked>
-                </>
-              )}
             </div>
 
             {/* Logout Button */}

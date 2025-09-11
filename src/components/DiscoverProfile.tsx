@@ -15,8 +15,8 @@ export const DiscoverProfile = memo(
     const { data: user, isPending, isError } = useUserQuery(userId);
     const { data: session } = useSession();
 
-    if (isPending) return <div>Loading...</div>;
-    if (isError) return <div>Error loading profile.</div>;
+    if (isPending) return <div>加载中...</div>;
+    if (isError) return <div>加载资料出错。</div>;
     if (!user) return null;
 
     return (
@@ -47,13 +47,13 @@ export const DiscoverProfile = memo(
               {user.name}
             </Link>
           </h2>
-          <p className="mb-4 px-2 text-center text-muted-foreground">{user.bio || 'No bio yet'}</p>
+          <p className="mb-4 px-2 text-center text-muted-foreground">{user.bio || '暂无简介'}</p>
           <div className="flex gap-6">
             <p className="flex justify-center gap-1 text-lg font-semibold">
-              <span>{user.followerCount}</span> <span className="text-muted-foreground">Followers</span>
+              <span>{user.followerCount}</span> <span className="text-muted-foreground">粉丝</span>
             </p>
             <p className="flex justify-center gap-1 text-lg font-semibold">
-              <span>{user.followingCount}</span> <span className="text-muted-foreground">Following</span>
+              <span>{user.followingCount}</span> <span className="text-muted-foreground">关注</span>
             </p>
           </div>
         </div>

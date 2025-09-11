@@ -164,7 +164,7 @@ export function ChatMessages({ messages, otherUser, className = '' }: ChatMessag
                             ? (message.sender.profilePhoto.startsWith('http') 
                               ? message.sender.profilePhoto 
                               : `https://xiaoyuan-chat.tos-cn-guangzhou.volces.com/${message.sender.profilePhoto}`)
-                            : '/images/default-avatar.jpg'
+                            : '/images/default-avatar.svg'
                         }
                         alt={message.sender.name}
                         width={36}

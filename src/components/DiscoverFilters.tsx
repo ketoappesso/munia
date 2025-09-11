@@ -19,6 +19,19 @@ export function DiscoverFilters() {
   const genderFilters = ['MALE', 'FEMALE', 'NONBINARY'];
   const relationshipStatusFilters = ['SINGLE', 'IN_A_RELATIONSHIP', 'ENGAGED', 'MARRIED'];
 
+  // 显示用中文标签
+  const genderLabels: Record<string, string> = {
+    MALE: '男',
+    FEMALE: '女',
+    NONBINARY: '非二元',
+  };
+  const relationshipLabels: Record<string, string> = {
+    SINGLE: '单身',
+    IN_A_RELATIONSHIP: '恋爱中',
+    ENGAGED: '订婚',
+    MARRIED: '已婚',
+  };
+
   const updateParams = useCallback(
     <T extends DiscoverFilterKeys>({ key, value }: { key: T; value: TDiscoverFilters[T] }) => {
       const newSearchParams = new URLSearchParams(searchParams);
@@ -57,21 +70,21 @@ export function DiscoverFilters() {
     <div className="mb-6 flex flex-col gap-4 sm:flex-row">
       <div className="flex-1">
         <Select
-          label="Filter by Gender"
+          label="按性别筛选"
           selectedKey={toUpper(snakeCase(filters.gender)) || null}
           onSelectionChange={onSelectGender}>
           {genderFilters.map((gender) => (
-            <Item key={gender}>{startCase(lowerCase(gender))}</Item>
+            <Item key={gender}>{genderLabels[gender] || gender}</Item>
           ))}
         </Select>
       </div>
       <div className="flex-1">
         <Select
-          label="Filter by Status"
+          label="按状态筛选"
           selectedKey={toUpper(snakeCase(filters.relationshipStatus)) || null}
           onSelectionChange={onSelectRelationshipStatus}>
           {relationshipStatusFilters.map((relationship) => (
-            <Item key={relationship}>{startCase(lowerCase(relationship))}</Item>
+            <Item key={relationship}>{relationshipLabels[relationship] || relationship}</Item>
           ))}
         </Select>
       </div>
