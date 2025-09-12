@@ -161,7 +161,7 @@ export function CreatePostDialog({
           <TextAreaWithMentionsAndHashTags
             content={content}
             setContent={setContent}
-            placeholder={isTaskPost ? '求助任务描述...' : "What's on your mind?"}
+            placeholder={isTaskPost ? '求助任务描述...' : "说些啥?"}
           />
         </div>
         <div>

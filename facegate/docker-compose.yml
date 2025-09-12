@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.0
+    container_name: facegate_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: facegate
+      MYSQL_USER: facegate
+      MYSQL_PASSWORD: facegatepass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+  api:
+    build: ./server
+    container_name: facegate_api
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: facegate
+      DB_PASSWORD: facegatepass
+      DB_NAME: facegate
+      JWT_SECRET: change_me_secret
+      ADMIN_PASSWORD: admin123
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3001:3001"
+      - "7001:7001" # websocket port
+    restart: unless-stopped
+
+  admin:
+    build: ./admin
+    container_name: facegate_admin
+    environment:
+      VITE_API_BASE_URL: http://localhost:3001
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db_data:

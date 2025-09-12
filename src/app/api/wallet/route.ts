@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         data: {
           walletAddress,
           walletCreatedAt: new Date(),
-          apeBalance: 100, // Give initial bonus APE tokens
+          apeBalance: 5, // Give initial bonus APE tokens
         },
         select: {
           id: true,
@@ -51,9 +51,9 @@ export async function GET(request: NextRequest) {
       await prisma.walletTransaction.create({
         data: {
           type: 'REWARD',
-          amount: 100,
+          amount: 5,
           status: 'COMPLETED',
-          description: 'Welcome bonus - 100 APE tokens',
+          description: 'Welcome bonus - 5 APE tokens',
           toUserId: user.id,
           completedAt: new Date(),
         },

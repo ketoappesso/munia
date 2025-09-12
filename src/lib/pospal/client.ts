@@ -29,6 +29,18 @@ export interface CustomerInfo {
   discount: number;
   enable: number;
   createdDate: string;
+  categoryName?: string; // Member level (金卡, 银卡, 猿佬会员, etc.)
+  expiryDate?: string; // Membership expiry date
+  birthday?: string;
+  qq?: string;
+  email?: string;
+  address?: string;
+  remarks?: string;
+  onAccount?: number;
+  status?: number;
+  idCard?: string;
+  idCardImg?: string;
+  faceImgUrl?: string;
   extInfo?: {
     photoPath?: string;
     nickName?: string;

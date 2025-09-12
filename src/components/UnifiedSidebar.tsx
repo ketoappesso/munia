@@ -13,7 +13,8 @@ import {
   Camera, 
   Smartphone, 
   Gamepad2, 
-  Bot 
+  Bot,
+  Crown 
 } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
@@ -58,6 +59,34 @@ export function UnifiedSidebar({
   const { data: wallet } = useWalletQuery();
   const { data: session } = useSession();
   const { data: user } = useUserQuery(session?.user?.id);
+  
+  // State for member status
+  const [memberStatus, setMemberStatus] = useState<{ isApeLord: boolean } | null>(null);
+  
+  // Fetch member status
+  useEffect(() => {
+    if (isOwnProfile && session?.user) {
+      console.log('Fetching member status for sidebar...');
+      fetch('/api/pospal/member-info')
+        .then(res => {
+          console.log('Member status response status:', res.status);
+          return res.ok ? res.json() : null;
+        })
+        .then(data => {
+          console.log('Member status data:', data);
+          if (data) {
+            setMemberStatus({ isApeLord: data.isApeLord || false });
+          } else {
+            // If no data, default to false
+            setMemberStatus({ isApeLord: false });
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching member status:', error);
+          setMemberStatus({ isApeLord: false });
+        });
+    }
+  }, [isOwnProfile, session]);
 
   // Lock body scroll when sidebar is open
   useEffect(() => {
@@ -280,7 +309,18 @@ export function UnifiedSidebar({
                 {isOwnProfile && (
                   <div className="mb-4">
                     <ButtonNaked
-                      onPress={handleSelfieCapture}
+                      onPress={() => {
+                        console.log('My Space clicked, memberStatus:', memberStatus);
+                        // Route based on member status
+                        if (memberStatus === null) {
+                          // If member status not loaded yet, go to my-space by default
+                          handleNavigation('/my-space');
+                        } else if (memberStatus?.isApeLord) {
+                          handleNavigation('/my-space');
+                        } else {
+                          handleNavigation('/membership/upgrade');
+                        }
+                      }}
                       className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-green-500/10 to-teal-500/10 p-4 transition-all hover:from-green-500/20 hover:to-teal-500/20">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-500">
@@ -288,13 +328,26 @@ export function UnifiedSidebar({
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">我的空间</p>
-                          <p className="text-xs text-muted-foreground">拍摄自拍</p>
+                          <p className="text-xs text-muted-foreground">
+                            {memberStatus?.isApeLord ? '门禁管理中心' : '升级猿佬会员'}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center justify-center">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-                          <Camera className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                        </div>
+                        {memberStatus?.isApeLord ? (
+                          <ButtonNaked
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleNavigation('/my-space/access-control/face-recording');
+                            }}
+                            className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/50 hover:bg-purple-200 dark:hover:bg-purple-800/50 transition-colors">
+                            <Camera className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                          </ButtonNaked>
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Crown className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                          </div>
+                        )}
                       </div>
                     </ButtonNaked>
                   </div>

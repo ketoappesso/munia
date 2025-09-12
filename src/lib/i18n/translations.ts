@@ -381,7 +381,7 @@ export const translations = {
     },
     post: {
       createPost: "Create Post",
-      writePost: "What's on your mind?",
+      writePost: "说些啥?",
       publish: "Publish",
       cancel: "Cancel",
       uploading: "Uploading...",
