@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wallet, Coins, LogOut, Edit, Settings, QrCode, Home, Camera, Smartphone, Gamepad2 } from 'lucide-react';
+import { X, Wallet, Coins, LogOut, Edit, Settings, QrCode, Home, Camera, Smartphone, Gamepad2, Shield } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
@@ -12,15 +12,17 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { SettingsDrawer } from './SettingsDrawer';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const ADMIN_PHONE = '18874748888';
+
 interface NavigationSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   currentPage?: 'feed' | 'messages';
 }
 
-export function NavigationSidebar({ 
-  isOpen, 
-  onClose, 
+export function NavigationSidebar({
+  isOpen,
+  onClose,
   currentPage = 'feed'
 }: NavigationSidebarProps) {
   const router = useRouter();
@@ -30,6 +32,9 @@ export function NavigationSidebar({
   const { t } = useLanguage();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Check if user is admin (username matches admin phone)
+  const isAdmin = session?.user?.username === ADMIN_PHONE;
 
   // Lock body scroll when sidebar is open
   useEffect(() => {
@@ -229,6 +234,26 @@ export function NavigationSidebar({
                       </div>
                     </ButtonNaked>
                   </div>
+
+                  {/* Admin Backoffice Section - Only visible to admin */}
+                  {isAdmin && (
+                    <div className="mb-4">
+                      <ButtonNaked
+                        onPress={() => handleNavigation('/backoffice')}
+                        className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 p-4 transition-all hover:from-red-500/20 hover:to-orange-500/20"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-orange-500">
+                            <Shield className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">我的后台</p>
+                            <p className="text-xs text-muted-foreground">管理员控制中心</p>
+                          </div>
+                        </div>
+                      </ButtonNaked>
+                    </div>
+                  )}
 
                   {/* My Device Section with QR Scanner */}
                   <div className="mb-4">

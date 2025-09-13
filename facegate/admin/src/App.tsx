@@ -3,6 +3,8 @@ import Login from './pages/Login'
 import Devices from './pages/Devices'
 import Records from './pages/Records'
 import Persons from './pages/Persons'
+import Backoffice from './pages/Backoffice'
+import MySpace from './pages/MySpace'
 import Navbar from './components/Navbar'
 
 function useAuth() {
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="devices" element={<Devices />} />
         <Route path="records" element={<Records />} />
         <Route path="persons" element={<Persons />} />
+        <Route path="backoffice" element={<Backoffice />} />
+        <Route path="my-space" element={<MySpace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

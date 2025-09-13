@@ -4,6 +4,7 @@ import api from '../lib/api'
 
 export default function Login() {
   const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState(localStorage.getItem('phone') || '')
   const [err, setErr] = useState<string | null>(null)
   const navigate = useNavigate()
   const location = useLocation() as any
@@ -14,6 +15,7 @@ export default function Login() {
     try {
       const { data } = await api.post('/api/login', { password })
       localStorage.setItem('token', data.token)
+      if (phone) localStorage.setItem('phone', phone)
       const to = location.state?.from?.pathname || '/'
       navigate(to, { replace: true })
     } catch (e: any) {
@@ -25,6 +27,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form onSubmit={onSubmit} className="bg-white p-8 rounded-xl shadow w-96">
         <h2 className="text-xl font-bold mb-4">管理员登录</h2>
+        <input
+          type="text"
+          className="border rounded w-full p-2 mb-3"
+          placeholder="手机号（仅用于前端显示权限）"
+          value={phone}
+          onChange={(e)=>setPhone(e.target.value)}
+        />
         <input
           type="password"
           className="border rounded w-full p-2 mb-3"

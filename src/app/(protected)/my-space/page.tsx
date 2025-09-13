@@ -1,24 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ResponsiveContainer } from '@/components/ui/ResponsiveContainer';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
-import { 
-  ChevronLeft, 
-  Shield, 
-  Camera, 
-  Users, 
-  MapPin, 
-  History, 
-  Scan, 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  ChevronLeft,
+  Shield,
+  Camera,
+  Users,
+  MapPin,
+  History,
+  Scan,
   Crown,
   Clock,
   Coins,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Upload
 } from 'lucide-react';
 
 interface MemberStatus {
@@ -37,25 +39,85 @@ interface MemberStatus {
 export default function MySpacePage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [memberStatus, setMemberStatus] = useState<MemberStatus | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchMemberStatus();
-  }, []);
+  // Fetch member info using React Query - use existing Pospal API
+  const { data: memberStatus, isLoading: loading } = useQuery({
+    queryKey: ['member-info'],
+    queryFn: async () => {
+      const res = await fetch('/api/pospal/member-info');
+      if (!res.ok) throw new Error('Failed to fetch member info');
+      return res.json();
+    },
+    refetchInterval: 60000 // Refresh every minute
+  });
 
-  const fetchMemberStatus = async () => {
-    try {
-      const response = await fetch('/api/pospal/member-info');
-      if (response.ok) {
-        const data = await response.json();
-        setMemberStatus(data);
-      }
-    } catch (error) {
-      console.error('Error fetching member status:', error);
-    } finally {
-      setLoading(false);
+  // Fetch current face image
+  const { data: currentImage } = useQuery({
+    queryKey: ['face-image'],
+    queryFn: async () => {
+      const res = await fetch('/api/facegate/person-image');
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('Failed to fetch image');
+      return res.json();
     }
+  });
+
+  // Upload face image mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/facegate/person-image', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['face-image'] });
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      alert('头像已上传并同步到所有设备');
+    },
+    onError: (error: Error) => {
+      alert(`上传失败: ${error.message}`);
+    }
+  });
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      alert('只支持 JPG 和 PNG 格式');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('文件大小不能超过 5MB');
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleUpload = () => {
+    if (!selectedFile) return;
+    uploadMutation.mutate(selectedFile);
   };
 
   const getMemberLevelColor = (level: string) => {
@@ -106,10 +168,10 @@ export default function MySpacePage() {
           <div className="absolute top-0 right-0 text-6xl opacity-20">
             {getMemberLevelIcon(memberStatus.level)}
           </div>
-          
+
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-4">
-              <div>
+              <div data-testid="member-status">
                 <h2 className="text-2xl font-bold" data-testid="member-level">
                   {memberStatus.level}
                 </h2>
@@ -126,7 +188,7 @@ export default function MySpacePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
+              <div data-testid="member-balance">
                 <p className="text-white/60 text-sm">余额</p>
                 <p className="text-xl font-bold flex items-center gap-1">
                   <Coins className="h-5 w-5" />
@@ -238,14 +300,117 @@ export default function MySpacePage() {
         </div>
       )}
 
+      {/* Face Upload Section for Ape Lord members */}
+      {memberStatus?.isApeLord && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700" data-testid="face-upload-section">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Camera className="h-6 w-6 text-indigo-600" />
+            人脸录入
+          </h2>
+
+          <div className="space-y-4">
+            {/* Current Image */}
+            {currentImage && (
+              <div className="mb-4">
+                <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">当前头像</p>
+                <div className="relative inline-block">
+                  <img
+                    src={currentImage.imageUrl}
+                    alt="Current face"
+                    className="h-32 w-32 rounded-lg border object-cover"
+                  />
+                  {currentImage.syncStatus === 1 && (
+                    <CheckCircle className="absolute -right-2 -top-2 h-6 w-6 text-green-500" />
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  更新于: {new Date(currentImage.updatedAt).toLocaleString('zh-CN')}
+                </p>
+              </div>
+            )}
+
+            {/* Upload Section */}
+            <div>
+              <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">上传新头像</p>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              <div className="flex items-start space-x-4">
+                {/* Preview */}
+                {previewUrl ? (
+                  <div className="relative">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="h-32 w-32 rounded-lg border object-cover"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                      }}
+                      className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex h-32 w-32 flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
+                  >
+                    <Upload className="h-8 w-8 text-gray-400" />
+                    <span className="mt-2 text-sm text-gray-500">选择图片</span>
+                  </button>
+                )}
+
+                {/* Upload Button */}
+                {selectedFile && (
+                  <div className="flex flex-col justify-center">
+                    <button
+                      onClick={handleUpload}
+                      disabled={uploadMutation.isPending}
+                      className="rounded-lg bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {uploadMutation.isPending ? '上传中...' : '上传头像'}
+                    </button>
+                    <p className="mt-2 text-xs text-gray-500">
+                      文件大小: {(selectedFile.size / 1024).toFixed(2)} KB
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 p-3">
+                <p className="text-sm text-indigo-800 dark:text-indigo-300">
+                  <strong>提示：</strong>
+                </p>
+                <ul className="mt-1 list-inside list-disc text-xs text-indigo-700 dark:text-indigo-400">
+                  <li>请上传清晰的正面照片</li>
+                  <li>支持 JPG、PNG 格式，最大 5MB</li>
+                  <li>图片会自动压缩为设备所需的 JPG 格式</li>
+                  <li>上传后会自动同步到所有在线设备</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Access Control Features */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">门禁管理</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Face Recording - Only for Ape Lord members */}
+          {/* Face Recording - Now handled above */}
           <button
-            onClick={() => memberStatus?.isApeLord ? router.push('/my-space/access-control/face-recording') : null}
+            onClick={() => memberStatus?.isApeLord ? document.getElementById('face-upload-section')?.scrollIntoView({ behavior: 'smooth' }) : null}
             disabled={!memberStatus?.isApeLord}
             className={`p-4 rounded-xl border transition-all ${
               memberStatus?.isApeLord 

@@ -92,6 +92,9 @@ model User {
   // AI Profile relation
   aiProfile               AIProfile?
   aiMemories              AIMemory[]
+
+  // Facegate relation
+  facegatePerson          FacegatePerson?
 }
 
 model VerificationToken {
@@ -376,4 +379,144 @@ model VoiceTraining {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Facegate Models - Face Recognition Access Control System
+model FacegateDevice {
+  id         String   @id @default(cuid())
+  deviceId   String   @unique
+  prodType   String?
+  prodName   String?
+  relaySlots Int      @default(0)
+  lastSeenTs BigInt?
+  fwVersion  String?
+  status     Int      @default(1)
+  online     Boolean  @default(false)
+  tz         String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  records         FacegateRecord[]
+  scheduleTargets FacegateScheduleTarget[]
+  jobs            FacegateJob[]
+
+  @@index([deviceId])
+  @@index([online])
+}
+
+model FacegatePerson {
+  id             String    @id @default(cuid())
+  userId         String?   @unique
+  phone          String    @unique
+  personName     String
+  localImagePath String? // Local storage path for device sync
+  imageChecksum  String? // MD5 hash to detect changes
+  icCardId       String?
+  idCardNo       String?
+  memberLevel    String?
+  memberExpiry   DateTime?
+  isApeLord      Boolean   @default(false)
+  passPlans      String? // JSON array of plan IDs
+  syncStatus     Int       @default(0) // 0-pending, 1-synced, 2-failed
+  extInfo        String? // Additional custom fields as JSON string
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user    User?            @relation(fields: [userId], references: [id])
+  records FacegateRecord[]
+
+  @@index([phone])
+  @@index([userId])
+  @@index([syncStatus])
+}
+
+model FacegateRecord {
+  id              String    @id @default(cuid())
+  deviceId        String
+  recordId        BigInt
+  personPhone     String?
+  recordTime      BigInt
+  recordType      Int // See record_type_t enum
+  recordPass      Int // See record_pass_t enum
+  similarity      Float?
+  temperature     Float?
+  qrcode          String?
+  healthCodeColor String?
+  recordPicUrl    String?
+  idCardPicUrl    String?
+  raw             String? // Raw record data as JSON string
+  createdAt       DateTime  @default(now())
+
+  device FacegateDevice  @relation(fields: [deviceId], references: [deviceId])
+  person FacegatePerson? @relation(fields: [personPhone], references: [phone])
+
+  @@unique([deviceId, recordId])
+  @@index([personPhone])
+  @@index([recordTime])
+  @@index([deviceId])
+}
+
+model FacegateSchedule {
+  id          String    @id @default(cuid())
+  userPhone   String
+  imageId     String?
+  payloadType String    @default("image") // image or face
+  startAt     DateTime
+  endAt       DateTime?
+  cron        String? // Cron expression for recurring
+  status      Int       @default(0) // 0-active, 1-paused, 2-completed
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  image   FacegateImage?           @relation(fields: [imageId], references: [id])
+  targets FacegateScheduleTarget[]
+  jobs    FacegateJob[]
+
+  @@index([userPhone])
+  @@index([status])
+  @@index([startAt, endAt])
+}
+
+model FacegateImage {
+  id        String   @id @default(cuid())
+  userPhone String
+  localPath String // Local file path
+  fileName  String
+  url       String? // Optional URL for web access
+  createdAt DateTime @default(now())
+
+  schedules FacegateSchedule[]
+
+  @@index([userPhone])
+}
+
+model FacegateScheduleTarget {
+  id         String @id @default(cuid())
+  scheduleId String
+  deviceId   String
+
+  schedule FacegateSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  device   FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+
+  @@unique([scheduleId, deviceId])
+  @@index([scheduleId])
+  @@index([deviceId])
+}
+
+model FacegateJob {
+  id         String   @id @default(cuid())
+  scheduleId String
+  deviceId   String
+  state      String   @default("pending") // pending, sent, failed, completed
+  retryCount Int      @default(0)
+  lastError  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  schedule FacegateSchedule @relation(fields: [scheduleId], references: [id])
+  device   FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+
+  @@index([scheduleId, deviceId])
+  @@index([state])
+  @@index([deviceId])
 }

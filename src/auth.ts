@@ -7,7 +7,7 @@ import { sesClient } from '@/lib/ses/sesClient';
 
 declare module 'next-auth' {
   interface Session {
-    user: { id: string; name: string };
+    user: { id: string; name: string; phoneNumber?: string };
   }
 }
 
@@ -82,6 +82,7 @@ export const {
         token.id = user.id;
         token.name = user.name || user.username || user.phoneNumber;
         token.username = user.username;
+        token.phoneNumber = user.phoneNumber;
       }
       
       // Handle session updates (e.g., when user logs out and logs in with different account)
@@ -116,6 +117,7 @@ export const {
           id: token.sub,
           name: token.name as string,
           username: token.username as string,
+          phoneNumber: token.phoneNumber as string,
         },
         expires: rest.session.expires,
       };
