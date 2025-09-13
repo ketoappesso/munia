@@ -81,7 +81,8 @@ model User {
   featured     Boolean @default(false)
   ttsModelId   String?
   ttsVoiceId   String?
-  
+  ttsPlaybackSpeed Float? @default(1.0)
+
   // Punked member status - members with custom voices who can override public voices
   punked       Boolean @default(false)
 

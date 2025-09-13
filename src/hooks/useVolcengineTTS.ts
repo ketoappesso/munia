@@ -34,8 +34,11 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   // Get global TTS settings
   const { playbackSpeed } = useTTSContext();
 
-  // Fallback to browser TTS with global speed
-  const browserTTS = useTTS({ ...options, speed: options.speed || playbackSpeed });
+  // Fallback to browser TTS with global speed - don't pass callbacks to avoid duplicate triggers
+  const browserTTS = useTTS({
+    speed: options.speed || playbackSpeed,
+    // Don't pass callbacks here - we'll call them manually when needed
+  });
 
   // Clean up on unmount - simplified to avoid interrupting playback
   useEffect(() => {
@@ -66,18 +69,28 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
     // Determine voice to use
     let voiceToUse = options.voice;
-    
+
     // Use punked voice if active
     if (isPunkedActive && punkedVoiceId) {
       voiceToUse = punkedVoiceId;
     }
-    
+
+    console.log('[useVolcengineTTS] Voice selection:', {
+      optionsVoice: options.voice,
+      punkedVoiceId,
+      isPunkedActive,
+      voiceToUse,
+      isCustom: voiceToUse?.startsWith('S_')
+    });
+
     // If no custom voice, use browser TTS directly
     if (!voiceToUse || !voiceToUse.startsWith('S_')) {
-      console.log('No custom voice, using browser TTS');
+      console.log('[useVolcengineTTS] No custom voice, using browser TTS');
       setIsLoading(false);
+      options.onStart?.();
       browserTTS.speak(text, onCharacter, textLength);
       setIsPlaying(browserTTS.isPlaying);
+      // Note: onEnd will be called by browserTTS internally
       return;
     }
 
@@ -107,17 +120,32 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
       const result = await response.json();
 
+      console.log('[useVolcengineTTS] TTS API response:', {
+        status: response.status,
+        success: result.success,
+        hasAudio: !!result.audio,
+        fallback: result.fallback,
+        error: result.error
+      });
+
       if (!response.ok || !result.success) {
         // If Volcengine fails and fallback is enabled, use browser TTS
         if (options.fallbackToBrowser !== false && result.fallback) {
-          console.log('Falling back to browser TTS');
+          console.log('[useVolcengineTTS] API failed, falling back to browser TTS');
           setIsLoading(false);
+          options.onStart?.();
           browserTTS.speak(text, onCharacter, textLength);
           setIsPlaying(browserTTS.isPlaying);
           return;
         }
-        
-        throw new Error(result.error || 'Failed to synthesize speech');
+
+        // If fallback is disabled, just show error
+        setIsLoading(false);
+        const errorMsg = result.error || 'Failed to synthesize speech';
+        setError(errorMsg);
+        options.onEnd?.(); // Reset UI state
+        console.error('[useVolcengineTTS] API failed:', errorMsg);
+        return;
       }
 
       // Clean up any existing audio before creating new one
@@ -145,6 +173,8 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
       const audio = new Audio(`data:audio/mp3;base64,${result.audio}`);
       audioRef.current = audio;
+
+      console.log('[useVolcengineTTS] Created audio element for custom voice');
 
       // Set up event handlers
       audio.onloadedmetadata = () => {
@@ -227,16 +257,27 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
       };
 
       audio.onerror = (e) => {
-        console.error('Audio playback error:', e);
-        setError('Failed to play audio');
+        console.error('[useVolcengineTTS] Audio playback error:', e);
+        const errorMsg = 'Failed to play custom voice audio';
+        setError(errorMsg);
         setIsPlaying(false);
         setIsPaused(false);
         setIsLoading(false);
-        
-        // Try fallback to browser TTS
+
+        // Clean up the failed audio element
+        if (audioRef.current) {
+          audioRef.current.src = '';
+          audioRef.current = null;
+        }
+
+        // Try fallback to browser TTS only if enabled
         if (options.fallbackToBrowser !== false) {
-          console.log('Audio error, falling back to browser TTS');
+          console.log('[useVolcengineTTS] Audio error, falling back to browser TTS');
+          options.onStart?.();
           browserTTS.speak(text, onCharacter, textLength);
+        } else {
+          console.log('[useVolcengineTTS] Audio error, fallback disabled');
+          options.onEnd?.(); // Call onEnd to reset UI state
         }
       };
 
@@ -259,6 +300,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
           // For unexpected errors, try browser TTS fallback
           if (options.fallbackToBrowser !== false) {
             console.log('Falling back to browser TTS due to playback error');
+            options.onStart?.();
             browserTTS.speak(text, onCharacter, textLength);
             setIsPlaying(browserTTS.isPlaying);
           }
@@ -298,9 +340,13 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
       
       // Try fallback to browser TTS
       if (options.fallbackToBrowser !== false) {
-        console.log('Error occurred, falling back to browser TTS');
+        console.log('[useVolcengineTTS] Error occurred, falling back to browser TTS');
+        options.onStart?.();
         browserTTS.speak(text, onCharacter, textLength);
         setIsPlaying(browserTTS.isPlaying);
+      } else {
+        console.log('[useVolcengineTTS] Error occurred, fallback disabled');
+        options.onEnd?.(); // Reset UI state
       }
     }
   }, [options, browserTTS, isPunkedActive, punkedVoiceId]);

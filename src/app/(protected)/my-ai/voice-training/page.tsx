@@ -35,6 +35,7 @@ export default function VoiceTrainingPage() {
     voice: voiceStatus?.speakerId || null,
     onStart: () => setIsTTSPlaying(true),
     onEnd: () => setIsTTSPlaying(false),
+    fallbackToBrowser: false, // 不使用浏览器TTS回退，因为这是语音训练页面
   });
 
   // Fetch voice status on mount
@@ -526,7 +527,7 @@ export default function VoiceTrainingPage() {
           <div className="mt-4 text-xs text-gray-600 dark:text-gray-400 space-y-1">
             <p>• 训练完成后，您的自定义音色将自动应用于测试播放</p>
             <p>• 语音速度设置将全局生效，影响所有语音播放</p>
-            <p>• 如果自定义音色不可用，将使用标准音色或浏览器语音</p>
+            <p>• 此页面仅测试您的自定义音色，不会使用浏览器语音</p>
           </div>
         </div>
 
