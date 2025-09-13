@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createVolcengineTTSClient, VOLCENGINE_VOICES } from '@/lib/volcengine/tts-client';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/auth';
+
+// Dynamic import to avoid issues with crypto on client side
+const getTTSClient = async () => {
+  const { createVolcengineTTSClient, VOLCENGINE_VOICES } = await import('@/lib/volcengine/tts-client');
+  return { createVolcengineTTSClient, VOLCENGINE_VOICES };
+};
 
 // Validation schema
 const synthesizeSchema = z.object({
@@ -32,23 +36,33 @@ function cleanCache() {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    // Parse request body first - must be done before any other access to the request
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
     // Clear cache if requested (for debugging)
-    if (request.headers.get('x-clear-cache') === 'true') {
+    const clearCache = request.headers.get('x-clear-cache');
+    if (clearCache === 'true') {
       ttsCache.clear();
       console.log('TTS cache cleared');
     }
-    
+
     // Check authentication (optional - remove if you want public access)
     // Temporarily disabled for testing
     // const session = await auth();
     // if (!session?.user) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     // }
-
-    // Parse and validate request body
-    const body = await request.json();
     const validation = synthesizeSchema.safeParse(body);
 
     if (!validation.success) {
@@ -63,7 +77,7 @@ export async function POST(request: NextRequest) {
     // Check cache first for custom voices
     const cacheKey = getCacheKey(text, voice, speed);
     const cached = ttsCache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       console.log('Returning cached TTS audio for:', text.slice(0, 50));
       return NextResponse.json({
@@ -78,7 +92,8 @@ export async function POST(request: NextRequest) {
       cleanCache();
     }
 
-    // Create TTS client
+    // Dynamic import and create TTS client
+    const { createVolcengineTTSClient } = await getTTSClient();
     const ttsClient = createVolcengineTTSClient();
 
     // Check if TTS service is configured
@@ -154,10 +169,11 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to check TTS service status
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
+    const { createVolcengineTTSClient, VOLCENGINE_VOICES } = await getTTSClient();
     const ttsClient = createVolcengineTTSClient();
-    
+
     return NextResponse.json({
       configured: ttsClient.isConfigured(),
       voices: Object.keys(VOLCENGINE_VOICES),

@@ -39,8 +39,14 @@ app.prepare().then(async () => {
   const expressApp = express();
   const server = createServer(expressApp);
 
-  // Parse JSON bodies
-  expressApp.use(express.json({ limit: '10mb' }));
+  // Parse JSON bodies (exclude Next.js API routes)
+  expressApp.use((req, res, next) => {
+    // Skip JSON parsing for Next.js API routes
+    if (req.url.startsWith('/api/')) {
+      return next();
+    }
+    express.json({ limit: '10mb' })(req, res, next);
+  });
 
   // Serve static files for Facegate images
   const facegateImagesPath = path.join(__dirname, 'facegate-data', 'images');

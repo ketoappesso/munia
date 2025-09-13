@@ -1,17 +1,19 @@
 'use client';
 
 import { ResponsiveContainer } from '@/components/ui/ResponsiveContainer';
-import { ChevronLeft, Mic, Upload, Play, Pause, Square, Download, CheckCircle, AlertCircle, Clock, Loader2 } from 'lucide-react';
+import { ChevronLeft, Mic, Upload, Play, Pause, Square, Download, CheckCircle, AlertCircle, Clock, Loader2, Volume2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useState, useEffect, useRef } from 'react';
 import Button from '@/components/ui/Button';
 import { useSession } from 'next-auth/react';
+import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
+import { useTTSContext } from '@/contexts/TTSContext';
 
 export default function VoiceTrainingPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,10 +22,20 @@ export default function VoiceTrainingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTextIndex, setSelectedTextIndex] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
-  
+  const [testText, setTestText] = useState('你好，我是你的AI助理，很高兴为你服务。');
+  const [isTTSPlaying, setIsTTSPlaying] = useState(false);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // TTS hooks
+  const { playbackSpeed, setPlaybackSpeed } = useTTSContext();
+  const tts = useVolcengineTTS({
+    voice: voiceStatus?.speakerId || null,
+    onStart: () => setIsTTSPlaying(true),
+    onEnd: () => setIsTTSPlaying(false),
+  });
 
   // Fetch voice status on mount
   useEffect(() => {
@@ -360,7 +372,11 @@ export default function VoiceTrainingPage() {
                 className="rounded-full w-12 h-12 flex items-center justify-center"
                 disabled={!recordedBlob}
               >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                {isPlaying ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5" fill="currentColor" />
+                )}
               </Button>
               
               {recordedBlob && (
@@ -398,6 +414,121 @@ export default function VoiceTrainingPage() {
           </div>
         </div>
 
+
+        {/* TTS Test Section */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-xl border border-green-100 dark:border-green-800">
+          <h2 className="text-xl font-semibold mb-4 text-green-800 dark:text-green-200">
+            <Volume2 className="inline-block h-6 w-6 mr-2" />
+            测试语音效果
+          </h2>
+
+          {/* Speed Control */}
+          <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                语音速度
+              </label>
+              <span className="text-sm font-mono text-blue-600 dark:text-blue-400">
+                {(playbackSpeed || 1.00).toFixed(2)}x
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-500">0.50x</span>
+              <input
+                type="range"
+                min="0.50"
+                max="2.00"
+                step="0.01"
+                value={playbackSpeed || 1.00}
+                onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
+              />
+              <span className="text-xs text-gray-500">2.00x</span>
+            </div>
+            <div className="flex justify-center mt-2">
+              <button
+                onClick={() => setPlaybackSpeed(1.00)}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                重置为正常速度
+              </button>
+            </div>
+          </div>
+
+          {/* Test Text Input */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              测试文本
+            </label>
+            <textarea
+              value={testText}
+              onChange={(e) => setTestText(e.target.value)}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              rows={3}
+              placeholder="输入要测试的文本..."
+              maxLength={500}
+            />
+            <div className="text-xs text-gray-500 mt-1 text-right">
+              {testText.length}/500
+            </div>
+          </div>
+
+          {/* Play Controls */}
+          <div className="flex items-center gap-3">
+            <Button
+              onPress={() => {
+                if (tts.isPlaying) {
+                  tts.stop();
+                } else {
+                  tts.speak(testText);
+                }
+              }}
+              className={`${
+                tts.isPlaying
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-green-600 hover:bg-green-700'
+              } min-w-[120px]`}
+              disabled={tts.isLoading || !testText.trim()}
+            >
+              {tts.isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  加载中...
+                </>
+              ) : tts.isPlaying ? (
+                <>
+                  <Square className="h-4 w-4 mr-2" />
+                  停止播放
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" fill="currentColor" />
+                  播放测试
+                </>
+              )}
+            </Button>
+
+            {voiceStatus?.speakerId && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                使用音色: <span className="font-mono text-blue-600 dark:text-blue-400">{voiceStatus.speakerId}</span>
+              </div>
+            )}
+          </div>
+
+          {/* TTS Error */}
+          {tts.error && (
+            <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">{tts.error}</p>
+            </div>
+          )}
+
+          {/* Tips */}
+          <div className="mt-4 text-xs text-gray-600 dark:text-gray-400 space-y-1">
+            <p>• 训练完成后，您的自定义音色将自动应用于测试播放</p>
+            <p>• 语音速度设置将全局生效，影响所有语音播放</p>
+            <p>• 如果自定义音色不可用，将使用标准音色或浏览器语音</p>
+          </div>
+        </div>
 
         {/* Voice Samples */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">

@@ -1,0 +1,99 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - button [ref=e5] [cursor=pointer]:
+        - img [ref=e6] [cursor=pointer]
+      - generic [ref=e9]:
+        - button "关注" [ref=e10] [cursor=pointer]
+        - button "发现" [ref=e11] [cursor=pointer]
+        - button "任务" [ref=e12] [cursor=pointer]
+      - button [ref=e14] [cursor=pointer]:
+        - img [ref=e15] [cursor=pointer]
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - generic [ref=e22]:
+          - link "15574745555's avatar" [ref=e24] [cursor=pointer]:
+            - /url: /15574745555
+            - img "15574745555's avatar" [ref=e25] [cursor=pointer]
+          - generic [ref=e26]:
+            - heading "15574745555" [level=2] [ref=e28] [cursor=pointer]:
+              - link "15574745555" [ref=e29] [cursor=pointer]:
+                - /url: /15574745555
+            - heading "3 days ago" [level=2] [ref=e30]
+        - generic [ref=e31]:
+          - generic [ref=e33]: 0:06
+          - button "Play" [ref=e35] [cursor=pointer]:
+            - img [ref=e36] [cursor=pointer]
+        - button [ref=e40] [cursor=pointer]
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - button "0" [disabled] [ref=e43] [cursor=pointer]:
+              - img [ref=e44] [cursor=pointer]
+              - paragraph [ref=e46] [cursor=pointer]: "0"
+            - button "0" [disabled] [ref=e47] [cursor=pointer]:
+              - img [ref=e48] [cursor=pointer]
+              - paragraph [ref=e50] [cursor=pointer]: "0"
+          - button "关注" [ref=e52] [cursor=pointer]
+      - generic [ref=e54]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - link "Keto's avatar" [ref=e59] [cursor=pointer]:
+              - /url: /18874748888
+              - img "Keto's avatar" [ref=e60] [cursor=pointer]
+            - generic [ref=e61]:
+              - heading "Keto" [level=2] [ref=e63] [cursor=pointer]:
+                - link "Keto" [ref=e64] [cursor=pointer]:
+                  - /url: /18874748888
+              - heading "4 days ago" [level=2] [ref=e65]
+          - button "PUNK IT" [disabled] [ref=e67]:
+            - generic [ref=e68]:
+              - img [ref=e69]
+              - generic [ref=e71]: PUNK IT
+        - button [ref=e74] [cursor=pointer]
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - button "0" [disabled] [ref=e77] [cursor=pointer]:
+              - img [ref=e78] [cursor=pointer]
+              - paragraph [ref=e80] [cursor=pointer]: "0"
+            - button "0" [disabled] [ref=e81] [cursor=pointer]:
+              - img [ref=e82] [cursor=pointer]
+              - paragraph [ref=e84] [cursor=pointer]: "0"
+          - button "关注" [ref=e86] [cursor=pointer]
+      - generic [ref=e88]:
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - link "Keto's avatar" [ref=e93] [cursor=pointer]:
+              - /url: /18874748888
+              - img "Keto's avatar" [ref=e94] [cursor=pointer]
+            - generic [ref=e95]:
+              - heading "Keto" [level=2] [ref=e97] [cursor=pointer]:
+                - link "Keto" [ref=e98] [cursor=pointer]:
+                  - /url: /18874748888
+              - heading "4 days ago" [level=2] [ref=e99]
+          - button "PUNK IT" [disabled] [ref=e101]:
+            - generic [ref=e102]:
+              - img [ref=e103]
+              - generic [ref=e105]: PUNK IT
+        - generic [ref=e106]:
+          - generic [ref=e108]: 0:05
+          - button "Play" [ref=e110] [cursor=pointer]:
+            - img [ref=e111] [cursor=pointer]
+        - button [ref=e115] [cursor=pointer]
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - button "0" [disabled] [ref=e118] [cursor=pointer]:
+              - img [ref=e119] [cursor=pointer]
+              - paragraph [ref=e121] [cursor=pointer]: "0"
+            - button "0" [disabled] [ref=e122] [cursor=pointer]:
+              - img [ref=e123] [cursor=pointer]
+              - paragraph [ref=e125] [cursor=pointer]: "0"
+          - button "关注" [ref=e127] [cursor=pointer]
+  - generic [ref=e129]:
+    - img [ref=e131]
+    - button "Open Tanstack query devtools" [ref=e179] [cursor=pointer]:
+      - img [ref=e180] [cursor=pointer]
+  - alert [ref=e228]
+```

@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTTS } from './useTTS'; // Fallback to browser TTS
 import { usePunk } from '@/contexts/PunkContext';
+import { useTTSContext } from '@/contexts/TTSContext';
 
 interface UseVolcengineTTSOptions {
   voice?: string | null; // Custom voice ID (S_xxx) or null for browser TTS
@@ -29,9 +30,12 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   
   // Get punk context
   const { punkedVoiceId, isPunkedActive } = usePunk();
-  
-  // Fallback to browser TTS
-  const browserTTS = useTTS(options);
+
+  // Get global TTS settings
+  const { playbackSpeed } = useTTSContext();
+
+  // Fallback to browser TTS with global speed
+  const browserTTS = useTTS({ ...options, speed: options.speed || playbackSpeed });
 
   // Clean up on unmount - simplified to avoid interrupting playback
   useEffect(() => {
@@ -87,12 +91,19 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         body: JSON.stringify({
           text,
           voice: voiceToUse,
-          speed: options.speed || 1.1,
+          speed: options.speed || playbackSpeed || 1.0,
           volume: options.volume || 1.0,
           pitch: options.pitch || 1.0,
           encoding: 'mp3',
         }),
       });
+
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('TTS API returned non-JSON response:', response.status, response.statusText);
+        throw new Error('TTS API returned invalid response');
+      }
 
       const result = await response.json();
 
@@ -336,7 +347,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
     // Use provided voice or default to standard voice
     const voice = voiceId || 'BV001_streaming';
     // Call speak with the voice option
-    await speak(text, undefined, undefined, voice);
+    await speak(text, undefined, undefined);
   }, [speak]);
 
   return {
