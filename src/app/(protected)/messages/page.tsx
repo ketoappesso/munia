@@ -6,7 +6,7 @@ import { AuthModal } from '@/components/AuthModal';
 import { MessagesList } from './MessagesList';
 import { Notifications } from '../notifications/Notifications';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
-import { NavigationSidebar } from '@/components/NavigationSidebar';
+import { ProfileSidebar } from '@/components/ProfileSidebar';
 import Search from '@/svg_components/Search';
 import { DropdownMenuButton } from '@/components/ui/DropdownMenuButton';
 import { Section, Item } from 'react-stately';
@@ -78,12 +78,11 @@ export default function MessagesPage() {
           </div>
         </div>
         
-        <NavigationSidebar
+        <ProfileSidebar
           isOpen={isSidebarOpen}
           onClose={handleCloseSidebar}
-          currentPage="messages"
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
+          isOwnProfile={true}
+          username={session?.user?.username || ''}
         />
       </>
     );
@@ -159,10 +158,11 @@ export default function MessagesPage() {
         <AuthModal isOpen={showAuthModal} onClose={handleCloseAuthModal} />
       </div>
 
-      <NavigationSidebar
+      <ProfileSidebar
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
-        currentPage="messages"
+        isOwnProfile={true}
+        username={session?.user?.username || ''}
       />
     </>
   );

@@ -34,13 +34,77 @@ export default function VoiceTrainingPage() {
   const [testText, setTestText] = useState('你好，我是你的AI助理，很高兴为你服务。');
   const [isTTSPlaying, setIsTTSPlaying] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [latestAudioData, setLatestAudioData] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // TTS hooks
+  // TTS hooks with custom handler to capture audio data
   const { playbackSpeed, setPlaybackSpeed } = useTTSContext();
+
+  // Custom speak function that captures audio data
+  const handleTestSpeak = async (text: string) => {
+    if (!text) return;
+
+    setIsTTSPlaying(true);
+    setLatestAudioData(null); // Reset previous audio
+
+    try {
+      // Call API directly to get audio data
+      const response = await fetch('/api/tts/synthesize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          voice: voiceStatus?.speakerId || null,
+          speed: playbackSpeed || 1.0,
+          volume: 1.0,
+          pitch: 1.0,
+          encoding: 'mp3',
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.audio) {
+        // Store the audio data for download
+        setLatestAudioData(result.audio);
+
+        // Play the audio - NO playbackRate adjustment here since speed is already applied by API
+        const audio = new Audio(`data:audio/mp3;base64,${result.audio}`);
+        // Removed: audio.playbackRate = playbackSpeed || 1.0; // This was causing double speed application
+
+        audio.onended = () => {
+          setIsTTSPlaying(false);
+        };
+
+        audio.onerror = () => {
+          setIsTTSPlaying(false);
+          showToast({
+            title: '播放失败',
+            message: '音频播放出错',
+            type: 'error'
+          });
+        };
+
+        await audio.play();
+      } else {
+        throw new Error(result.error || '合成失败');
+      }
+    } catch (error) {
+      console.error('TTS error:', error);
+      setIsTTSPlaying(false);
+      showToast({
+        title: '语音合成失败',
+        message: error instanceof Error ? error.message : '未知错误',
+        type: 'error'
+      });
+    }
+  };
+
   const tts = useVolcengineTTS({
     voice: voiceStatus?.speakerId || null,
     onStart: () => setIsTTSPlaying(true),
@@ -566,28 +630,24 @@ export default function VoiceTrainingPage() {
           <div className="flex items-center gap-3">
             <Button
               onPress={() => {
-                if (tts.isPlaying) {
-                  tts.stop();
+                if (isTTSPlaying) {
+                  // Stop is handled by audio element ending
+                  return;
                 } else {
-                  tts.speak(testText);
+                  handleTestSpeak(testText);
                 }
               }}
               className={`${
-                tts.isPlaying
+                isTTSPlaying
                   ? 'bg-red-600 hover:bg-red-700'
                   : 'bg-green-600 hover:bg-green-700'
               } min-w-[120px]`}
-              disabled={tts.isLoading || !testText.trim()}
+              disabled={isTTSPlaying || !testText.trim()}
             >
-              {tts.isLoading ? (
+              {isTTSPlaying ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  加载中...
-                </>
-              ) : tts.isPlaying ? (
-                <>
-                  <Square className="h-4 w-4 mr-2" />
-                  停止播放
+                  播放中...
                 </>
               ) : (
                 <>
@@ -596,6 +656,52 @@ export default function VoiceTrainingPage() {
                 </>
               )}
             </Button>
+
+            {/* Download Button */}
+            {latestAudioData && (
+              <Button
+                mode="secondary"
+                onPress={() => {
+                  try {
+                    // Convert base64 to blob
+                    const byteCharacters = atob(latestAudioData);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                      byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'audio/mp3' });
+
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    a.download = `voice_test_${voiceStatus?.speakerId}_${timestamp}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    showToast({
+                      title: '下载成功',
+                      message: '音频文件已下载',
+                      type: 'success'
+                    });
+                  } catch (error) {
+                    console.error('Download error:', error);
+                    showToast({
+                      title: '下载失败',
+                      message: '无法下载音频文件',
+                      type: 'error'
+                    });
+                  }
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                下载音频
+              </Button>
+            )}
 
             {voiceStatus?.speakerId && (
               <div className="text-sm text-gray-600 dark:text-gray-400">

@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useCallback, useState } from 'react';
 import ActionsPlus from '@/svg_components/ActionsPlus';
 import HamburgerMenu from '@/svg_components/HamburgerMenu';
-import { NavigationSidebar } from '@/components/NavigationSidebar';
+import { ProfileSidebar } from '@/components/ProfileSidebar';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -58,10 +58,11 @@ export default function Page() {
         </div>
       </div>
         
-        <NavigationSidebar
+        <ProfileSidebar
           isOpen={isSidebarOpen}
           onClose={handleCloseSidebar}
-          currentPage="feed"
+          isOwnProfile={true}
+          username={session?.user?.username || ''}
         />
         
         <BottomNavigation />
@@ -136,10 +137,11 @@ export default function Page() {
       )}
       </div>
 
-      <NavigationSidebar
+      <ProfileSidebar
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
-        currentPage="feed"
+        isOwnProfile={true}
+        username={session?.user?.username || ''}
       />
 
       <BottomNavigation />

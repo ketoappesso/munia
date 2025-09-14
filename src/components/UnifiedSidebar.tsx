@@ -389,19 +389,19 @@ export function UnifiedSidebar({
                   </div>
                 )}
 
-                {/* AI Assistant Section */}
+                {/* My AI Section */}
                 {isOwnProfile && (
                   <div className="mb-4">
                     <ButtonNaked
-                      onPress={() => handleNavigation('/messages/xiaoyuan_ai')}
+                      onPress={() => handleNavigation('/my-ai/voice-training')}
                       className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 p-4 transition-all hover:from-cyan-500/20 hover:to-blue-500/20">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-500">
                           <Bot className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-foreground">AI 助手</p>
-                          <p className="text-xs text-muted-foreground">智能对话助手</p>
+                          <p className="text-sm font-medium text-foreground">我的AI</p>
+                          <p className="text-xs text-muted-foreground">AI语音训练</p>
                         </div>
                       </div>
                     </ButtonNaked>
