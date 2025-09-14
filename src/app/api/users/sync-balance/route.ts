@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // For testing, directly look up the user
     const testUser = await prisma.user.findFirst({
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const { forceUsername = '14474744444' } = body;

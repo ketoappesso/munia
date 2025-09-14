@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ResponsiveContainer } from '@/components/ui/ResponsiveContainer';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
+import VoiceManagement from '@/components/admin/VoiceManagement';
 import {
   ChevronLeft,
   Shield,
@@ -55,7 +56,7 @@ export default function BackofficePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'devices' | 'schedules' | 'persons'>('devices');
+  const [activeTab, setActiveTab] = useState<'devices' | 'schedules' | 'persons' | 'voices'>('devices');
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [newDevice, setNewDevice] = useState({ deviceId: '', deviceName: '', location: '' });
   const [editingDevice, setEditingDevice] = useState<string | null>(null);
@@ -177,6 +178,16 @@ export default function BackofficePage() {
               }`}
             >
               人员管理
+            </button>
+            <button
+              onClick={() => setActiveTab('voices')}
+              className={`whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium ${
+                activeTab === 'voices'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              }`}
+            >
+              音色管理
             </button>
         </nav>
       </div>
@@ -524,6 +535,12 @@ export default function BackofficePage() {
         <div className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold">人员管理</h2>
           <p className="text-gray-500">人员管理功能开发中...</p>
+        </div>
+      )}
+
+      {activeTab === 'voices' && (
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
+          <VoiceManagement />
         </div>
       )}
     </ResponsiveContainer>

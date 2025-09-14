@@ -3,14 +3,14 @@
  * - Returns task posts (public endpoint)
  * - Authentication optional - used only for like status
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import { selectPost } from '@/lib/prisma/selectPost';
 import { toGetPost } from '@/lib/prisma/toGetPost';
 import { GetPost } from '@/types/definitions';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     // Tasks are public - get user if available for like status
     const [user] = await getServerUser();

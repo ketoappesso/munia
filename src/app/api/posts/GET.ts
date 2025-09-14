@@ -2,13 +2,13 @@
  * GET /api/posts
  * - Returns public posts for unauthenticated users
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 import { selectPost } from '@/lib/prisma/selectPost';
 import { toGetPost } from '@/lib/prisma/toGetPost';
 import { GetPost } from '@/types/definitions';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const cursor = parseInt(searchParams.get('cursor') || '0', 10);

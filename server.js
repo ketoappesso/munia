@@ -3,7 +3,6 @@ const { parse } = require('url');
 const next = require('next');
 const express = require('express');
 const path = require('path');
-const { WebSocketServer } = require('ws');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOST || 'localhost';
@@ -15,88 +14,39 @@ const port = Number.isFinite(envPort) ? envPort : defaultPort;
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-// Initialize Facegate modules (will be created)
-let gateway;
-let scheduler;
-
-async function initializeFacegate() {
-  // These modules will be created in subsequent steps
-  try {
-    const { FacegateGateway } = require('./src/lib/facegate/ws-gateway');
-    const { FacegateScheduler } = require('./src/lib/facegate/scheduler');
-
-    gateway = new FacegateGateway();
-    scheduler = new FacegateScheduler(gateway);
-
-    return { gateway, scheduler };
-  } catch (err) {
-    console.log('Facegate modules not yet created, running in basic mode');
-    return { gateway: null, scheduler: null };
-  }
-}
-
-app.prepare().then(async () => {
+app.prepare().then(() => {
   const expressApp = express();
   const server = createServer(expressApp);
 
-  // Parse JSON bodies (exclude Next.js API routes)
+  // Parse JSON bodies only for specific non-API routes that need it
+  // This prevents conflicts with Next.js API route handling
   expressApp.use((req, res, next) => {
-    // Skip JSON parsing for Next.js API routes
-    if (req.url.startsWith('/api/')) {
+    // Skip JSON parsing for all Next.js routes (API and pages)
+    if (req.url.startsWith('/api/') ||
+        req.url.startsWith('/_next/') ||
+        req.url.startsWith('/facegate/') ||
+        req.url.startsWith('/uploads/') ||
+        req.method === 'GET') {
       return next();
     }
-    express.json({ limit: '10mb' })(req, res, next);
+
+    // Only parse JSON for specific POST/PUT requests if needed
+    // Currently no Express-handled routes need JSON parsing
+    // If needed in future, add specific route checks here
+    next();
   });
 
-  // Serve static files for Facegate images
+  // Note: Facegate WebSocket service has been moved to a separate microservice
+  // Run the WebSocket server separately on port 3003:
+  // cd ws-server && npm start
+
+  // Serve static files for Facegate images (still served by main app for now)
   const facegateImagesPath = path.join(__dirname, 'facegate-data', 'images');
   expressApp.use('/facegate/images', express.static(facegateImagesPath));
 
   // Serve static files for Facegate uploads (legacy compatibility)
   const facegateUploadsPath = path.join(__dirname, 'facegate-data', 'uploads');
   expressApp.use('/uploads', express.static(facegateUploadsPath));
-
-  // Initialize Facegate components
-  const facegate = await initializeFacegate();
-
-  // Setup WebSocket server for Facegate devices
-  if (facegate.gateway) {
-    const wss = new WebSocketServer({
-      server,
-      path: '/ws',
-      maxPayload: 32 * 1024 * 1024 // 32MB max payload as per device spec
-    });
-
-    wss.on('connection', (ws) => {
-      console.log('New WebSocket connection');
-
-      ws.on('message', async (data) => {
-        try {
-          await facegate.gateway.handleMessage(ws, data.toString());
-        } catch (err) {
-          console.error('Error handling WebSocket message:', err);
-        }
-      });
-
-      ws.on('close', () => {
-        if (ws.deviceId) {
-          facegate.gateway.removeConnection(ws.deviceId);
-        }
-      });
-
-      ws.on('error', (err) => {
-        console.error('WebSocket error:', err);
-      });
-    });
-
-    // Start scheduler for Facegate jobs
-    if (facegate.scheduler) {
-      facegate.scheduler.start();
-      console.log('Facegate scheduler started');
-    }
-
-    console.log('Facegate WebSocket gateway initialized on /ws');
-  }
 
   // Handle all other routes with Next.js
   expressApp.use((req, res) => {
@@ -129,9 +79,7 @@ app.prepare().then(async () => {
 
     server.listen(p, () => {
       console.log(`> Ready on http://${hostname}:${p}`);
-      if (facegate.gateway) {
-        console.log(`> WebSocket ready on ws://${hostname}:${p}/ws`);
-      }
+      console.log(`> Note: WebSocket service runs separately on port 3003`);
     });
   };
 
@@ -143,9 +91,6 @@ app.prepare().then(async () => {
     console.log('SIGTERM signal received: closing HTTP server');
     server.close(() => {
       console.log('HTTP server closed');
-      if (facegate.scheduler) {
-        facegate.scheduler.stop();
-      }
       process.exit(0);
     });
   });

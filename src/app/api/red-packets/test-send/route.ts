@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 
 // WARNING: This is for testing only - it bypasses authentication!
 // Remove this in production!
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const { recipientId, amount, message, conversationId, senderId } = await request.json();
 

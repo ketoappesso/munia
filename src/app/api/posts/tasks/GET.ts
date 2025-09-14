@@ -2,12 +2,12 @@
  * GET /api/posts/tasks
  * - Returns task posts for authenticated users
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import { selectPost } from '@/lib/prisma/selectPost';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const [user] = await getServerUser();
     if (!user) return NextResponse.json({}, { status: 401 });

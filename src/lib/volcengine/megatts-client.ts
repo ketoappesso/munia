@@ -101,12 +101,11 @@ export enum Language {
 
 /**
  * Phone number to SpeakerID mapping
- * This should ideally be stored in database
+ * DEPRECATED: Now using database User.ttsVoiceId field instead
+ * Kept for backwards compatibility only
  */
 const PHONE_TO_SPEAKER_MAP: Record<string, string> = {
-  '18874747888': 'S_r3YGBCoB1',
-  '188747478888': 'S_r3YGBCoB1',
-  '18874748888': 'S_r3YGBCoB1',
+  // Legacy mappings - use database instead
 };
 
 export class MegaTTSClient {
@@ -129,9 +128,12 @@ export class MegaTTSClient {
   
   /**
    * Get SpeakerID from phone number
+   * @deprecated Use database User.ttsVoiceId field directly instead
    */
   getSpeakerIdFromPhone(phoneNumber: string): string | null {
-    // Remove any formatting from phone number
+    // This method is deprecated - use database User.ttsVoiceId field instead
+    // Only kept for backwards compatibility
+    console.warn('getSpeakerIdFromPhone is deprecated. Use database User.ttsVoiceId field directly.');
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     return PHONE_TO_SPEAKER_MAP[cleanPhone] || null;
   }
@@ -182,26 +184,29 @@ export class MegaTTSClient {
     remainingTrainings?: number;
   }> {
     const result = await this.checkTrainingStatus(speakerId);
-    
+
     // Map training status to expected format
     return {
       status: result.status,
       hasVoice: result.status === TrainingStatus.Success || result.status === TrainingStatus.Active,
-      // For existing voices, assume 8 remaining trainings as per user requirement
-      remainingTrainings: result.status === TrainingStatus.Success || result.status === TrainingStatus.Active ? 8 : 10
+      // Use the actual remaining trainings from API response
+      remainingTrainings: result.remainingTrainings
     };
   }
   
   /**
    * Get voice status by phone number
+   * @deprecated Use database User.ttsVoiceId field and query by speakerId directly
    */
   async getStatusByPhone(phoneNumber: string): Promise<VoiceStatus | null> {
+    // This method is deprecated - use database User.ttsVoiceId field instead
+    console.warn('getStatusByPhone is deprecated. Use database User.ttsVoiceId and query by speakerId directly.');
     const speakerId = this.getSpeakerIdFromPhone(phoneNumber);
     if (!speakerId) {
       console.log('No speaker ID found for phone:', phoneNumber);
       return null;
     }
-    
+
     const statuses = await this.listTrainStatus([speakerId]);
     return statuses[0] || null;
   }
@@ -305,8 +310,13 @@ export class MegaTTSClient {
       });
       
       const result = await response.json();
-      console.log('MegaTTS upload response:', result);
-      
+      console.log('MegaTTS upload response:', {
+        fullResponse: result,
+        statusCode: result.BaseResp?.StatusCode,
+        statusMessage: result.BaseResp?.StatusMessage,
+        speakerId: result.speaker_id
+      });
+
       if (result.BaseResp?.StatusCode === 0) {
         return {
           success: true,
@@ -378,18 +388,54 @@ export class MegaTTSClient {
       });
       
       const result = await response.json();
-      console.log('MegaTTS status response:', result);
-      
+
+      // Log ALL fields to find the correct field name
+      console.log('MegaTTS status FULL response:', JSON.stringify(result, null, 2));
+      console.log('MegaTTS status fields:', {
+        hasRemainingTrainingTimes: 'remaining_training_times' in result,
+        hasAvailableTrainingTimes: 'available_training_times' in result,
+        hasTrainingTimes: 'training_times' in result,
+        hasRemainingTimes: 'remaining_times' in result,
+        allKeys: Object.keys(result)
+      });
+
       if (result.BaseResp?.StatusCode === 0) {
-        // The API returns remaining_training_times in the response
+        // Try multiple possible field names
+        let remainingCount;
+
+        // Check various possible field names for remaining trainings
+        if (result.remaining_training_times !== undefined) {
+          remainingCount = result.remaining_training_times;
+          console.log('Using remaining_training_times:', remainingCount);
+        } else if (result.available_training_times !== undefined) {
+          remainingCount = result.available_training_times;
+          console.log('Using available_training_times:', remainingCount);
+        } else if (result.training_times !== undefined) {
+          remainingCount = result.training_times;
+          console.log('Using training_times:', remainingCount);
+        } else if (result.remaining_times !== undefined) {
+          remainingCount = result.remaining_times;
+          console.log('Using remaining_times:', remainingCount);
+        } else {
+          // Check if the count is embedded in data field
+          if (result.data?.remaining_training_times !== undefined) {
+            remainingCount = result.data.remaining_training_times;
+            console.log('Using data.remaining_training_times:', remainingCount);
+          } else {
+            // If API doesn't provide the count, we can't know the real value
+            console.log('WARNING: API did not return remaining trainings count!');
+            remainingCount = undefined; // Don't assume any value
+          }
+        }
+
+        console.log('Final calculated remaining trainings:', remainingCount);
+
         return {
           status: result.status || TrainingStatus.Success,
           createTime: result.create_time,
           version: result.version,
           demoAudio: result.demo_audio,
-          remainingTrainings: result.remaining_training_times !== undefined ? 
-            result.remaining_training_times : 
-            (result.available_training_times || 8) // Fallback to available_training_times or 8
+          remainingTrainings: remainingCount
         };
       } else {
         return {

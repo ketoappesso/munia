@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 
@@ -109,7 +109,7 @@ const generateAIResponse = (message: string): string => {
 请告诉我具体需要什么帮助？`;
 };
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     // Check authentication
     const session = await auth();

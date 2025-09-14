@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 
 // GET /api/user/[userId] - Get user profile
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { userId: string } }
 ) {
   try {
@@ -49,8 +49,7 @@ export async function GET(
 }
 
 // PATCH /api/user/[userId] - Update user profile
-export async function PATCH(
-  request: NextRequest,
+export async function PATCH(request: Request,
   { params }: { params: { userId: string } }
 ) {
   try {

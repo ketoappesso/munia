@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { WebSocketServer, WebSocket } from 'ws';
 
 // In-memory store for WebSocket connections
 const connections = new Map<string, WebSocket>();
 
 // Handle WebSocket upgrade request
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const conversationId = searchParams.get('conversationId');
 

@@ -3,10 +3,10 @@
  * - Automatically releases remaining commission after 7 days
  * - This should be called by a cron job every hour or day
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Optional: Add authentication for cron job
     const authHeader = request.headers.get('authorization');

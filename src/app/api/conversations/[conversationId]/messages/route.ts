@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import punkAIService from '@/lib/llm/punk-ai-service';
 
-export async function GET(request: NextRequest, { params }: { params: { conversationId: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { conversationId: string } }
+) {
   try {
     const [user] = await getServerUser();
 
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest, { params }: { params: { conversa
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { conversationId: string } }) {
+export async function POST(request: Request, { params }: { params: { conversationId: string } }) {
   try {
     const [user] = await getServerUser();
 

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
-export async function PATCH(request: NextRequest, { params }: { params: { conversationId: string } }) {
+export async function PATCH(request: Request, { params }: { params: { conversationId: string } }) {
   try {
     const [user] = await getServerUser();
 

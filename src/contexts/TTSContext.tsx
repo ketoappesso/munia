@@ -76,13 +76,18 @@ export function TTSContextProvider({ children }: { children: React.ReactNode }) 
     // Save to database if user is logged in
     if (session?.user?.id) {
       try {
-        await fetch('/api/user/tts-settings', {
+        const response = await fetch('/api/user/tts-settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ playbackSpeed: clampedSpeed }),
         });
+
+        if (!response.ok) {
+          console.warn('Failed to save TTS settings to server:', response.status);
+        }
       } catch (error) {
-        console.error('Failed to save TTS settings:', error);
+        // Silently fail - localStorage is the main source of truth
+        console.warn('Failed to save TTS settings to server:', error);
       }
     }
   }, [session?.user?.id]);

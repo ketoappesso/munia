@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { megaTTSClient } from '@/lib/volcengine/megatts-client';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -13,15 +13,20 @@ export async function GET(request: NextRequest) {
     // Get speaker ID from user or query params
     const { searchParams } = new URL(request.url);
     const phoneNumber = searchParams.get('phone');
-    
+
     // First try to get speaker ID from database
+    const whereClause = phoneNumber
+      ? { phoneNumber: phoneNumber }
+      : { id: session.user.id };
+
     const user = await prisma.user.findUnique({
-      where: phoneNumber ? { phoneNumber } : { id: session.user.id },
-      select: { 
+      where: whereClause,
+      select: {
         id: true,
-        phoneNumber: true, 
+        phoneNumber: true,
         ttsVoiceId: true,
-        punked: true 
+        punked: true,
+        ttsRemainingTrainings: true
       }
     });
 
@@ -29,105 +34,60 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check if the ttsVoiceId is a custom voice (starts with S_)
-    const speakerId = user.ttsVoiceId?.startsWith('S_') ? user.ttsVoiceId : null;
-    
-    if (!speakerId) {
-      // Try to get speaker ID from phone mapping
-      const mappedSpeakerId = user.phoneNumber ? 
-        megaTTSClient.getSpeakerIdFromPhone(user.phoneNumber) : null;
-      
-      if (!mappedSpeakerId) {
-        return NextResponse.json({
-          hasCustomVoice: false,
-          message: 'No custom voice found for this user'
-        });
-      }
-      
-      // Update user's ttsVoiceId if we found a mapping
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { ttsVoiceId: mappedSpeakerId }
-      });
-    }
+    // Check if the user has a voice ID configured
+    const speakerId = user.ttsVoiceId;
 
-    // Fetch status from Volcengine API
-    const finalSpeakerId = speakerId || megaTTSClient.getSpeakerIdFromPhone(user.phoneNumber || '');
-    
-    if (!finalSpeakerId) {
+    if (!speakerId || !speakerId.startsWith('S_')) {
+      // User doesn't have a custom voice configured
       return NextResponse.json({
         hasCustomVoice: false,
-        message: 'No speaker ID found'
+        message: 'No custom voice found for this user'
       });
     }
 
     // For users with custom voices (S_ prefix), return voice info
-    if (finalSpeakerId.startsWith('S_')) {
-      // Try to get status from MegaTTS API first
-      let remainingTrainings = 8; // Default fallback
-      
+    if (speakerId.startsWith('S_')) {
+      // Use database for remaining trainings count
+      const remainingTrainings = user.ttsRemainingTrainings ?? 5; // Default to 5 for existing users
+      let trainingStatus = 'Active';
+      let stateText = '已激活';
+
+      // Still check MegaTTS for training status, but not for count
       try {
-        const megaStatus = await megaTTSClient.checkTrainingStatus(finalSpeakerId);
-        if (megaStatus.remainingTrainings !== undefined) {
-          remainingTrainings = megaStatus.remainingTrainings;
-        } else {
-          // Fallback to database count if API doesn't return remaining trainings
-          const aiProfile = await prisma.aIProfile.findFirst({
-            where: { userId: user.id }
-          });
-          
-          if (aiProfile) {
-            const voiceTraining = await prisma.voiceTraining.findFirst({
-              where: {
-                userId: user.id,
-                profileId: aiProfile.id,
-                status: { in: ['pending', 'training', 'completed'] }
-              }
-            });
-            
-            if (voiceTraining && voiceTraining.sampleKeys) {
-              const usedTrainings = JSON.parse(voiceTraining.sampleKeys).length;
-              // Calculate remaining trainings (10 total - used)
-              remainingTrainings = Math.max(0, 10 - usedTrainings);
-            }
-          }
+        const megaStatus = await megaTTSClient.checkTrainingStatus(speakerId);
+        console.log('MegaTTS API response for status (ignoring count):', megaStatus.status);
+
+        // Map status codes to user-friendly states
+        if (megaStatus.status === 1) {
+          trainingStatus = 'Training';
+          stateText = '训练中';
+        } else if (megaStatus.status === 2 || megaStatus.status === 4) {
+          trainingStatus = 'Active';
+          stateText = '已激活';
+        } else if (megaStatus.status === 3) {
+          trainingStatus = 'Failed';
+          stateText = '训练失败';
         }
       } catch (error) {
-        console.log('Failed to get status from MegaTTS, using database fallback');
-        // Use database count as fallback
-        const aiProfile = await prisma.aIProfile.findFirst({
-          where: { userId: user.id }
-        });
-        
-        if (aiProfile) {
-          const voiceTraining = await prisma.voiceTraining.findFirst({
-            where: {
-              userId: user.id,
-              profileId: aiProfile.id,
-              status: { in: ['pending', 'training', 'completed'] }
-            }
-          });
-          
-          if (voiceTraining && voiceTraining.sampleKeys) {
-            const usedTrainings = JSON.parse(voiceTraining.sampleKeys).length;
-            remainingTrainings = Math.max(0, 10 - usedTrainings);
-          }
-        }
+        console.log('Failed to get status from MegaTTS, defaulting to Active:', error);
       }
       
       return NextResponse.json({
         hasCustomVoice: true,
-        speakerId: finalSpeakerId,
-        status: 'Active',
-        stateText: '已激活',
-        stateColor: 'purple',
+        speakerId: speakerId,
+        status: trainingStatus,
+        stateText,
+        stateColor: trainingStatus === 'Active' ? 'purple' : trainingStatus === 'Training' ? 'blue' : 'red',
         trainingVersion: 'V2',
         remainingTrainings,
-        isActive: true,
+        isActive: trainingStatus === 'Active',
         canTrain: remainingTrainings > 0,
         createTime: Date.now(),
         demoAudio: null,
-        message: '您的专属语音模型已激活'
+        message: trainingStatus === 'Active' ?
+                 `您的专属语音模型已激活，剩余训练次数：${remainingTrainings}` :
+                 trainingStatus === 'Training' ? '您的语音模型正在训练中' :
+                 '语音模型训练失败，请重新上传'
       });
     }
     

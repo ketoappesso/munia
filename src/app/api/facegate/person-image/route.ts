@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import fs from 'fs/promises';
@@ -12,7 +12,7 @@ if (typeof global !== 'undefined') {
   (global as any).getFacegateGateway = () => gateway;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const [user] = await getServerUser();
     if (!user) {
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to retrieve user's current image
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const [user] = await getServerUser();
     if (!user) {

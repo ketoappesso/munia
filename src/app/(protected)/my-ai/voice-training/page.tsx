@@ -9,10 +9,12 @@ import Button from '@/components/ui/Button';
 import { useSession } from 'next-auth/react';
 import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
 import { useTTSContext } from '@/contexts/TTSContext';
+import { useToast } from '@/hooks/useToast';
 
 export default function VoiceTrainingPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { showToast } = useToast();
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,6 +26,7 @@ export default function VoiceTrainingPage() {
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [testText, setTestText] = useState('你好，我是你的AI助理，很高兴为你服务。');
   const [isTTSPlaying, setIsTTSPlaying] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -105,13 +108,18 @@ export default function VoiceTrainingPage() {
       setError('请先录制音频');
       return;
     }
-    
+
+    if (isUploading) {
+      return; // Prevent duplicate uploads
+    }
+
     try {
+      setIsUploading(true);
       setUploadProgress(30);
       const formData = new FormData();
       formData.append('file', recordedBlob, 'recording.wav');
       formData.append('text', sampleTexts[selectedTextIndex]);
-      formData.append('modelType', '1'); // V2_ICL
+      formData.append('modelType', '3'); // DiT还原版效果（音色、还原用户口音、语速等风格）
       formData.append('language', '0'); // Chinese
       
       setUploadProgress(60);
@@ -125,16 +133,31 @@ export default function VoiceTrainingPage() {
       
       if (response.ok) {
         setUploadProgress(100);
-        alert(`上传成功！已上传 ${data.sampleCount} 个样本`);
+        showToast({
+          title: '上传成功',
+          message: data.message || `已上传 ${data.sampleCount} 个样本，剩余训练次数：${data.remainingTrainings !== undefined ? data.remainingTrainings : (10 - data.sampleCount)}`,
+          type: 'success'
+        });
         setRecordedBlob(null);
-        fetchVoiceStatus(); // Refresh status
+        // Delay refresh to ensure server has updated
+        setTimeout(() => {
+          fetchVoiceStatus(); // Refresh status
+        }, 500);
       } else {
-        throw new Error(data.error || '上传失败');
+        // Upload failed - show error with remaining count unchanged
+        showToast({
+          title: '上传失败',
+          message: data.message || data.error || '上传失败，请重试',
+          type: 'error'
+        });
+        // DO NOT clear the recorded blob so user can retry
+        // DO NOT change remaining trainings count
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '上传失败');
     } finally {
       setUploadProgress(0);
+      setIsUploading(false);
     }
   };
   
@@ -258,7 +281,7 @@ export default function VoiceTrainingPage() {
             <div>
               <span className="text-sm text-purple-600 dark:text-purple-300">剩余训练次数</span>
               <div className="font-semibold text-2xl text-purple-600">
-                {voiceStatus.remainingTrainings !== undefined ? voiceStatus.remainingTrainings : '8'}
+                {voiceStatus.remainingTrainings !== undefined ? voiceStatus.remainingTrainings : '加载中...'}
               </div>
             </div>
           </div>
@@ -304,12 +327,17 @@ export default function VoiceTrainingPage() {
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
+                  if (isUploading) {
+                    return; // Prevent duplicate uploads
+                  }
+
                   const formData = new FormData();
                   formData.append('file', file);
-                  formData.append('modelType', '1');
+                  formData.append('modelType', '3'); // DiT还原版效果（音色、还原用户口音、语速等风格）
                   formData.append('language', '0');
-                  
+
                   try {
+                    setIsUploading(true);
                     setUploadProgress(30);
                     const response = await fetch('/api/ai/voice-training/upload-audio', {
                       method: 'POST',
@@ -320,17 +348,33 @@ export default function VoiceTrainingPage() {
                     if (response.ok) {
                       setUploadProgress(100);
                       setTimeout(() => {
-                        alert(data.message || '音频上传成功，模型已训练完成！');
-                        fetchVoiceStatus();
+                        showToast({
+                          title: '上传成功',
+                          message: data.message || `已上传 ${data.sampleCount || 1} 个样本，剩余训练次数：${data.remainingTrainings !== undefined ? data.remainingTrainings : (10 - (data.sampleCount || 1))}`,
+                          type: 'success'
+                        });
                         setUploadProgress(0);
+                        // Reset file input
+                        e.target.value = '';
+                        // Refresh voice status
+                        fetchVoiceStatus();
                       }, 1000);
                     } else {
-                      setError(data.error);
+                      // Upload failed - show detailed error
+                      showToast({
+                        title: '上传失败',
+                        message: data.message || data.error || '上传失败，请重试',
+                        type: 'error'
+                      });
                       setUploadProgress(0);
+                      // Reset file input so user can try again
+                      e.target.value = '';
                     }
                   } catch (err) {
                     setError('上传失败');
                     setUploadProgress(0);
+                  } finally {
+                    setIsUploading(false);
                   }
                 }
               }}
@@ -384,7 +428,7 @@ export default function VoiceTrainingPage() {
                 <Button
                   onPress={uploadRecording}
                   className="bg-green-600 hover:bg-green-700"
-                  disabled={uploadProgress > 0}
+                  disabled={uploadProgress > 0 || isUploading}
                 >
                   {uploadProgress > 0 ? (
                     <>
@@ -441,19 +485,41 @@ export default function VoiceTrainingPage() {
                 max="2.00"
                 step="0.01"
                 value={playbackSpeed || 1.00}
-                onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
+                onChange={(e) => {
+                  if (tts.isPlaying) {
+                    // Show friendly toast message instead of allowing change during playback
+                    showToast({
+                      title: '提示',
+                      message: '请先停止播放再调整速度',
+                      type: 'warning'
+                    });
+                    return;
+                  }
+                  setPlaybackSpeed(parseFloat(e.target.value));
+                }}
+                disabled={tts.isPlaying}
+                className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none ${
+                  tts.isPlaying ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                } dark:bg-gray-700 accent-blue-600`}
+                title={tts.isPlaying ? "请先停止播放再调整速度" : ""}
               />
               <span className="text-xs text-gray-500">2.00x</span>
             </div>
-            <div className="flex justify-center mt-2">
-              <button
-                onClick={() => setPlaybackSpeed(1.00)}
-                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                重置为正常速度
-              </button>
-            </div>
+            {tts.isPlaying && (
+              <div className="text-xs text-amber-600 dark:text-amber-400 text-center mt-2">
+                请先停止播放再调整速度
+              </div>
+            )}
+            {!tts.isPlaying && (
+              <div className="flex justify-center mt-2">
+                <button
+                  onClick={() => setPlaybackSpeed(1.00)}
+                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  重置为正常速度
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Test Text Input */}

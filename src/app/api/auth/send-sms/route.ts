@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 import { smsCodeStore } from '@/lib/auth/smsVerification';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const { phoneNumber, mode } = await request.json();
 

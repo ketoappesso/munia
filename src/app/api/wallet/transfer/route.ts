@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import { createPospalClient } from '@/lib/pospal/client';
@@ -11,7 +11,7 @@ const transferSchema = z.object({
   description: z.string().optional(),
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const [user] = await getServerUser();
 
@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to check transfer eligibility (uses cached balance)
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const [user] = await getServerUser();
 

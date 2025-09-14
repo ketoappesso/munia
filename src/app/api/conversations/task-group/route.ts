@@ -2,13 +2,13 @@
  * POST /api/conversations/task-group
  * - Creates a three-way conversation for task collaboration
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
 const APPESSO_BOT_ID = 'appesso-assistant'; // Special ID for the Appesso assistant
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const [user] = await getServerUser();
     if (!user) return NextResponse.json({}, { status: 401 });

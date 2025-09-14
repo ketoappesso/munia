@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { createPospalClient } from '@/lib/pospal/client';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Check if we should force refresh
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = new URL(request.url);
     const forceRefresh = searchParams.get('refresh') === 'true';
     
     try {
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST endpoint to query any phone number (for admin use)
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await auth();
     

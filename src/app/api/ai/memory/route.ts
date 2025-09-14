@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 import { z } from 'zod';
@@ -16,7 +16,7 @@ const MemorySchema = z.object({
 });
 
 // GET /api/ai/memory - Get user's AI memories
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/ai/memory - Create a new memory
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH /api/ai/memory - Update a memory
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -264,7 +264,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 // DELETE /api/ai/memory - Delete a memory
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {

@@ -1,11 +1,11 @@
-datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
-}
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Account {
@@ -21,8 +21,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -36,66 +35,52 @@ model Session {
 }
 
 model User {
-  // Do not change the `id` field, it must be permanent and immutable.
-  id                          String         @id @default(cuid())
-  // The `username` can be updated anytime by the user.
-  // It will acquire the `id` as its default value.
-  username                    String?        @unique
-  email                       String?        @unique
+  id                          String              @id @default(cuid())
+  username                    String?             @unique
+  email                       String?             @unique
   name                        String?
   gender                      String?
   birthDate                   DateTime?
-  phoneNumber                 String?        @unique
+  phoneNumber                 String?             @unique
   address                     String?
   bio                         String?
   website                     String?
   relationshipStatus          String?
   emailVerified               DateTime?
   image                       String?
-  accounts                    Account[]
-  sessions                    Session[]
   profilePhoto                String?
   coverPhoto                  String?
-  post                        Post[]
-  visualMedia                 VisualMedia[]
-  postLikes                   PostLike[]
+  passwordHash                String?
+  walletAddress               String?             @unique
+  apeBalance                  Float               @default(0)
+  walletCreatedAt             DateTime?
+  featured                    Boolean             @default(false)
+  ttsModelId                  String?
+  ttsVoiceId                  String?
+  punked                      Boolean             @default(false)
+  appessoBalance              Float?
+  appessoBalanceUpdatedAt     DateTime?
+  ttsPlaybackSpeed            Float?              @default(1.0)
+  ttsRemainingTrainings       Int?                @default(5)
+  aiMemories                  AIMemory[]
+  aiProfile                   AIProfile?
+  accounts                    Account[]
+  notifications               Activity[]          @relation("notification")
+  activities                  Activity[]          @relation("activity")
   comments                    Comment[]
   commentLikes                CommentLike[]
-  followers                   Follow[]       @relation("following")
-  following                   Follow[]       @relation("follower")
-  activities                  Activity[]     @relation("activity")
-  notifications               Activity[]     @relation("notification")
-  passwordHash                String? // For phone+password authentication
-  conversationsAsParticipant1 Conversation[] @relation("ConversationParticipant1")
-  conversationsAsParticipant2 Conversation[] @relation("ConversationParticipant2")
+  conversationsAsParticipant2 Conversation[]      @relation("ConversationParticipant2")
+  conversationsAsParticipant1 Conversation[]      @relation("ConversationParticipant1")
+  facegatePerson              FacegatePerson?
+  followers                   Follow[]            @relation("following")
+  following                   Follow[]            @relation("follower")
   messages                    Message[]
-
-  // Wallet fields
-  walletAddress        String?             @unique
-  apeBalance           Float               @default(0)
-  walletCreatedAt      DateTime?
-  sentTransactions     WalletTransaction[] @relation("sender")
-  receivedTransactions WalletTransaction[] @relation("receiver")
-
-  // TTS fields for featured users
-  featured     Boolean @default(false)
-  ttsModelId   String?
-  ttsVoiceId   String?
-  ttsPlaybackSpeed Float? @default(1.0)
-
-  // Punked member status - members with custom voices who can override public voices
-  punked       Boolean @default(false)
-
-  // Pospal balance caching fields
-  appessoBalance          Float?    // Cached Appesso balance
-  appessoBalanceUpdatedAt DateTime? // When the balance was last fetched from Pospal
-
-  // AI Profile relation
-  aiProfile               AIProfile?
-  aiMemories              AIMemory[]
-
-  // Facegate relation
-  facegatePerson          FacegatePerson?
+  post                        Post[]
+  postLikes                   PostLike[]
+  sessions                    Session[]
+  visualMedia                 VisualMedia[]
+  receivedTransactions        WalletTransaction[] @relation("receiver")
+  sentTransactions            WalletTransaction[] @relation("sender")
 }
 
 model VerificationToken {
@@ -108,48 +93,44 @@ model VerificationToken {
 
 model Follow {
   id          Int    @id @default(autoincrement())
-  follower    User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
   followerId  String
-  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
   followingId String
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  follower    User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
 
 model Post {
-  id           Int           @id @default(autoincrement())
-  content      String?
-  createdAt    DateTime      @default(now())
-  visualMedia  VisualMedia[]
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  postLikes    PostLike[]
-  comments     Comment[]
-  isTask       Boolean       @default(false)
-  rewardAmount Float         @default(0)
-  taskStatus   String? // OPEN, IN_PROGRESS, COMPLETION_REQUESTED, COMPLETED, REJECTED
-  completedBy  String? // UserId who accepted the task
-  completedAt  DateTime? // When task was accepted
-
-  // Commission payment tracking
-  initialPaymentAmount  Float? // 50% paid on acceptance
-  initialPaymentAt      DateTime? // When initial payment was made
-  finalPaymentAmount    Float? // Remaining 50%
-  finalPaymentAt        DateTime? // When final payment was made
-  completionRequestedAt DateTime? // When acceptor requested completion
-  completionConfirmedAt DateTime? // When owner confirmed completion
-
-  // TTS audio field
-  audioUrl String?
+  id                    Int           @id @default(autoincrement())
+  content               String?
+  createdAt             DateTime      @default(now())
+  userId                String
+  isTask                Boolean       @default(false)
+  rewardAmount          Float         @default(0)
+  taskStatus            String?
+  completedBy           String?
+  completedAt           DateTime?
+  completionConfirmedAt DateTime?
+  completionRequestedAt DateTime?
+  finalPaymentAmount    Float?
+  finalPaymentAt        DateTime?
+  initialPaymentAmount  Float?
+  initialPaymentAt      DateTime?
+  audioUrl              String?
+  comments              Comment[]
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postLikes             PostLike[]
+  visualMedia           VisualMedia[]
 }
 
 model PostLike {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
 }
@@ -158,29 +139,23 @@ model Comment {
   id           Int           @id @default(autoincrement())
   content      String
   createdAt    DateTime      @default(now())
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
+  postId       Int
+  parentId     Int?
+  parent       Comment?      @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]     @relation("Replies")
+  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   commentLikes CommentLike[]
-
-  // If there is a `postId`, it is a comment
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId Int
-
-  // If there is a `parentId`, it is a reply
-  parent   Comment? @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
-  parentId Int?
-
-  // Self-referential relation
-  replies Comment[] @relation("Replies")
 }
 
 model CommentLike {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   commentId Int
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
 }
@@ -190,34 +165,24 @@ model VisualMedia {
   type       String   @default("PHOTO")
   fileName   String
   uploadedAt DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId     Int
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// This Activity model is similar to this approach: https://stackoverflow.com/a/1766371/8434369
-// Example:
-// * If the activity type is 'CREATE_COMMENT', the `sourceId` must be the `id` of the Comment and
-// its `targetId` must be the `id` of the Post that was commented on.
-//
-// * If the activity type is 'POST_LIKE', the `sourceId` must be the `id` of the PostLike and
-// its `targetId` must be the `id` of the liked Post.
-//
-// * If the activity type is 'COMMENT_MENTION', the `sourceId` must be the `id` of the Comment and
-// its `targetId` must be the `id` of the Post that was commented on.
 model Activity {
   id                   Int      @id @default(autoincrement())
   createdAt            DateTime @default(now())
   type                 String
   sourceId             Int
   targetId             Int?
-  sourceUser           User     @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
   sourceUserId         String
-  targetUser           User     @relation("notification", fields: [targetUserId], references: [id], onDelete: Cascade)
   targetUserId         String
   isNotificationActive Boolean  @default(true)
   isNotificationRead   Boolean  @default(false)
+  targetUser           User     @relation("notification", fields: [targetUserId], references: [id], onDelete: Cascade)
+  sourceUser           User     @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
 }
 
 model ActivityType {
@@ -241,43 +206,37 @@ model RelationshipStatus {
 }
 
 model Conversation {
-  id             String    @id // Format: userId1_userId2 (sorted)
-  participant1   User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  id             String    @id
   participant1Id String
-  participant2   User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
   participant2Id String
-  messages       Message[]
   createdAt      DateTime  @default(now())
   lastMessageAt  DateTime  @default(now())
+  participant2   User      @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  participant1   User      @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  messages       Message[]
 
   @@unique([participant1Id, participant2Id])
   @@index([lastMessageAt])
 }
 
 model Message {
-  id             String       @id @default(cuid())
-  content        String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  conversationId String
-  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  senderId       String
-  createdAt      DateTime     @default(now())
-  isRead         Boolean      @default(false)
-
-  // Red packet fields
-  type               String    @default("TEXT") // TEXT, RED_PACKET, SYSTEM, TASK_COMPLETION_REQUEST
-  redPacketAmount    Float?
-  redPacketMessage   String?
-  redPacketStatus    String? // PENDING, CLAIMED
-  redPacketClaimedAt DateTime?
-
-  // Task completion fields
+  id                   String       @id @default(cuid())
+  content              String
+  conversationId       String
+  senderId             String
+  createdAt            DateTime     @default(now())
+  isRead               Boolean      @default(false)
+  type                 String       @default("TEXT")
+  redPacketAmount      Float?
+  redPacketMessage     String?
+  redPacketStatus      String?
+  redPacketClaimedAt   DateTime?
   taskPostId           Int?
   taskFinalAmount      Float?
-  taskCompletionStatus String? // pending, completed, rejected, failed
-
-  // AI response field
-  isAIResponse         Boolean  @default(false)
+  taskCompletionStatus String?
+  isAIResponse         Boolean      @default(false)
+  sender               User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation         Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
   @@index([senderId])
@@ -285,146 +244,121 @@ model Message {
 }
 
 model WalletTransaction {
-  id          String  @id @default(cuid())
-  type        String // DEPOSIT, WITHDRAW, TRANSFER, REWARD
+  id          String    @id @default(cuid())
+  type        String
   amount      Float
-  status      String  @default("PENDING") // PENDING, COMPLETED, FAILED
+  status      String    @default("PENDING")
   description String?
-
-  fromUser   User?   @relation("sender", fields: [fromUserId], references: [id], onDelete: SetNull)
-  fromUserId String?
-
-  toUser   User?   @relation("receiver", fields: [toUserId], references: [id], onDelete: SetNull)
-  toUserId String?
-
-  txHash      String?   @unique // Blockchain transaction hash
+  fromUserId  String?
+  toUserId    String?
+  txHash      String?   @unique
   createdAt   DateTime  @default(now())
   completedAt DateTime?
+  toUser      User?     @relation("receiver", fields: [toUserId], references: [id])
+  fromUser    User?     @relation("sender", fields: [fromUserId], references: [id])
 
   @@index([fromUserId])
   @@index([toUserId])
   @@index([createdAt])
 }
 
-// AI Profile configuration for each user
 model AIProfile {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Model configuration
-  llmProvider   String   @default("deepseek")
-  llmModel      String   @default("deepseek-chat")
-  temperature   Float    @default(0.7)
-  maxTokens     Int      @default(2000)
-  topP          Float    @default(0.9)
-  
-  // Prompt configuration
-  systemPrompt  String?
-  roleTemplate  String   @default("assistant")
-  contextPrompts String? // JSON string for scene prompts
-  
-  // Voice configuration
-  voiceTrainings VoiceTraining[]
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  llmProvider    String          @default("deepseek")
+  llmModel       String          @default("deepseek-chat")
+  temperature    Float           @default(0.7)
+  maxTokens      Int             @default(2000)
+  topP           Float           @default(0.9)
+  systemPrompt   String?
+  roleTemplate   String          @default("assistant")
+  contextPrompts String?
   activeVoiceId  String?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voiceTrainings VoiceTraining[]
 }
 
-// AI Memory system for personalization
 model AIMemory {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // long_term, short_term
-  category  String   // personal, preferences, history
+  type      String
+  category  String
   title     String
   content   String
-  tags      String   // Comma-separated tags
-  score     Float    @default(1.0) // Weight score for importance
-  
-  metadata  String?  // JSON string for extra metadata
-  expiresAt DateTime? // Expiration for short-term memories
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  tags      String
+  score     Float     @default(1.0)
+  metadata  String?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, type, category])
   @@index([userId, score])
 }
 
-// Voice training records
 model VoiceTraining {
-  id          String   @id @default(cuid())
-  userId      String
-  profileId   String
-  profile     AIProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  
-  name        String
-  version     String
-  status      String   @default("pending") // pending, training, completed, failed
-  progress    Int      @default(0)
-  
-  // TOS storage references
-  sampleKeys  String   // JSON array of TOS storage keys
-  modelKey    String?  // Trained model key in TOS
-  
-  sampleCount Int      @default(0)
-  duration    Int      @default(0) // Total duration in seconds
-  accuracy    Float?   // Similarity score
-  
-  trainingStartedAt  DateTime?
+  id                  String    @id @default(cuid())
+  userId              String
+  profileId           String
+  name                String
+  version             String
+  status              String    @default("pending")
+  progress            Int       @default(0)
+  sampleKeys          String
+  modelKey            String?
+  sampleCount         Int       @default(0)
+  duration            Int       @default(0)
+  accuracy            Float?
+  trainingStartedAt   DateTime?
   trainingCompletedAt DateTime?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  profile             AIProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
-// Facegate Models - Face Recognition Access Control System
 model FacegateDevice {
-  id         String   @id @default(cuid())
-  deviceId   String   @unique
-  prodType   String?
-  prodName   String?
-  relaySlots Int      @default(0)
-  lastSeenTs BigInt?
-  fwVersion  String?
-  status     Int      @default(1)
-  online     Boolean  @default(false)
-  tz         String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id              String                   @id @default(cuid())
+  deviceId        String                   @unique
+  prodType        String?
+  prodName        String?
+  relaySlots      Int                      @default(0)
+  lastSeenTs      BigInt?
+  fwVersion       String?
+  status          Int                      @default(1)
+  online          Boolean                  @default(false)
+  tz              String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  jobs            FacegateJob[]
   records         FacegateRecord[]
   scheduleTargets FacegateScheduleTarget[]
-  jobs            FacegateJob[]
 
   @@index([deviceId])
   @@index([online])
 }
 
 model FacegatePerson {
-  id             String    @id @default(cuid())
-  userId         String?   @unique
-  phone          String    @unique
+  id             String           @id @default(cuid())
+  userId         String?          @unique
+  phone          String           @unique
   personName     String
-  localImagePath String? // Local storage path for device sync
-  imageChecksum  String? // MD5 hash to detect changes
+  localImagePath String?
+  imageChecksum  String?
   icCardId       String?
   idCardNo       String?
   memberLevel    String?
   memberExpiry   DateTime?
-  isApeLord      Boolean   @default(false)
-  passPlans      String? // JSON array of plan IDs
-  syncStatus     Int       @default(0) // 0-pending, 1-synced, 2-failed
-  extInfo        String? // Additional custom fields as JSON string
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  user    User?            @relation(fields: [userId], references: [id])
-  records FacegateRecord[]
+  isApeLord      Boolean          @default(false)
+  passPlans      String?
+  syncStatus     Int              @default(0)
+  extInfo        String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User?            @relation(fields: [userId], references: [id])
+  records        FacegateRecord[]
 
   @@index([phone])
   @@index([userId])
@@ -432,24 +366,23 @@ model FacegatePerson {
 }
 
 model FacegateRecord {
-  id              String    @id @default(cuid())
+  id              String          @id @default(cuid())
   deviceId        String
   recordId        BigInt
   personPhone     String?
   recordTime      BigInt
-  recordType      Int // See record_type_t enum
-  recordPass      Int // See record_pass_t enum
+  recordType      Int
+  recordPass      Int
   similarity      Float?
   temperature     Float?
   qrcode          String?
   healthCodeColor String?
   recordPicUrl    String?
   idCardPicUrl    String?
-  raw             String? // Raw record data as JSON string
-  createdAt       DateTime  @default(now())
-
-  device FacegateDevice  @relation(fields: [deviceId], references: [deviceId])
-  person FacegatePerson? @relation(fields: [personPhone], references: [phone])
+  raw             String?
+  createdAt       DateTime        @default(now())
+  person          FacegatePerson? @relation(fields: [personPhone], references: [phone])
+  device          FacegateDevice  @relation(fields: [deviceId], references: [deviceId])
 
   @@unique([deviceId, recordId])
   @@index([personPhone])
@@ -458,20 +391,19 @@ model FacegateRecord {
 }
 
 model FacegateSchedule {
-  id          String    @id @default(cuid())
+  id          String                   @id @default(cuid())
   userPhone   String
   imageId     String?
-  payloadType String    @default("image") // image or face
+  payloadType String                   @default("image")
   startAt     DateTime
   endAt       DateTime?
-  cron        String? // Cron expression for recurring
-  status      Int       @default(0) // 0-active, 1-paused, 2-completed
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  image   FacegateImage?           @relation(fields: [imageId], references: [id])
-  targets FacegateScheduleTarget[]
-  jobs    FacegateJob[]
+  cron        String?
+  status      Int                      @default(0)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  jobs        FacegateJob[]
+  image       FacegateImage?           @relation(fields: [imageId], references: [id])
+  targets     FacegateScheduleTarget[]
 
   @@index([userPhone])
   @@index([status])
@@ -479,25 +411,23 @@ model FacegateSchedule {
 }
 
 model FacegateImage {
-  id        String   @id @default(cuid())
+  id        String             @id @default(cuid())
   userPhone String
-  localPath String // Local file path
+  localPath String
   fileName  String
-  url       String? // Optional URL for web access
-  createdAt DateTime @default(now())
-
+  url       String?
+  createdAt DateTime           @default(now())
   schedules FacegateSchedule[]
 
   @@index([userPhone])
 }
 
 model FacegateScheduleTarget {
-  id         String @id @default(cuid())
+  id         String           @id @default(cuid())
   scheduleId String
   deviceId   String
-
-  schedule FacegateSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  device   FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+  device     FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+  schedule   FacegateSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 
   @@unique([scheduleId, deviceId])
   @@index([scheduleId])
@@ -505,17 +435,16 @@ model FacegateScheduleTarget {
 }
 
 model FacegateJob {
-  id         String   @id @default(cuid())
+  id         String           @id @default(cuid())
   scheduleId String
   deviceId   String
-  state      String   @default("pending") // pending, sent, failed, completed
-  retryCount Int      @default(0)
+  state      String           @default("pending")
+  retryCount Int              @default(0)
   lastError  String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  schedule FacegateSchedule @relation(fields: [scheduleId], references: [id])
-  device   FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  device     FacegateDevice   @relation(fields: [deviceId], references: [deviceId])
+  schedule   FacegateSchedule @relation(fields: [scheduleId], references: [id])
 
   @@index([scheduleId, deviceId])
   @@index([state])

@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 import { nanoid } from 'nanoid';
 import { megaTTSClient, ModelType, Language } from '@/lib/volcengine/megatts-client';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -34,18 +34,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File size must be less than 10MB' }, { status: 400 });
     }
 
-    // Get user info
+    // Get user info including remaining trainings
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { 
+      select: {
         id: true,
         phoneNumber: true,
-        ttsVoiceId: true 
+        ttsVoiceId: true,
+        ttsRemainingTrainings: true
       }
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Check remaining trainings
+    const remainingTrainings = user.ttsRemainingTrainings ?? 5; // Default to 5 for existing users
+    if (remainingTrainings <= 0) {
+      return NextResponse.json({
+        error: '您的训练次数已用完',
+        remainingTrainings: 0
+      }, { status: 400 });
     }
 
     // Get or generate speaker ID
@@ -88,13 +98,15 @@ export async function POST(request: NextRequest) {
     );
 
     if (uploadResult.success && uploadResult.speakerId) {
-      // Update user's voice ID if new
-      if (user.ttsVoiceId !== uploadResult.speakerId) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { ttsVoiceId: uploadResult.speakerId }
-        });
-      }
+      // Only decrease training count on successful upload (StatusCode === 0)
+      // Update user's voice ID and decrease remaining trainings
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          ttsVoiceId: uploadResult.speakerId,
+          ttsRemainingTrainings: remainingTrainings - 1
+        }
+      });
       speakerId = uploadResult.speakerId || speakerId;
 
       // Save training record in database (for tracking)
@@ -160,42 +172,53 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Get training status from MegaTTS
-      let trainingStatus = 'completed'; // MegaTTS is instant
-      try {
-        const status = await megaTTSClient.getVoiceStatus(speakerId);
-        if (status.status === 2 || status.status === 4) {
-          trainingStatus = 'completed';
-        }
-      } catch (statusError) {
-        console.error('Failed to get MegaTTS status:', statusError);
-      }
+      // Get the updated remaining trainings from database
+      const updatedRemainingTrainings = remainingTrainings - 1;
 
       return NextResponse.json({
         success: true,
         speakerId: speakerId,
         trainingId: voiceTraining.id,
         sampleCount: JSON.parse(voiceTraining.sampleKeys).length,
+        remainingTrainings: updatedRemainingTrainings,
         fileName,
-        status: trainingStatus,
-        message: '音频上传成功，模型已训练完成！'
+        status: 'completed',
+        message: `音频上传成功！剩余训练次数：${updatedRemainingTrainings}`
       });
     } else {
-      // Upload failed
-      console.error('MegaTTS upload failed:', uploadResult.error);
-      
-      // Return specific error message
-      if (uploadResult.statusCode === 1123) {
-        return NextResponse.json({ 
-          error: uploadResult.error || '已达到训练次数上限（10次）',
-          code: 1123
-        }, { status: 400 });
-      }
-      
-      return NextResponse.json({ 
-        error: uploadResult.error || 'Failed to upload audio to voice training service',
-        code: uploadResult.statusCode
-      }, { status: 500 });
+      // Upload failed - DO NOT decrease training count
+      console.error('MegaTTS upload failed:', uploadResult.error, 'StatusCode:', uploadResult.statusCode);
+
+      // Map specific error codes to user-friendly messages
+      const errorMessages: Record<number, string> = {
+        1001: '请求参数有误，请重新上传',
+        1101: '音频上传失败，请重试',
+        1102: '语音识别失败，请确保音频清晰',
+        1103: '声纹检测失败，请重新录制',
+        1104: '声纹与名人相似度过高，请使用您自己的声音',
+        1105: '获取音频数据失败，请重试',
+        1106: '音色ID重复，请刷新页面重试',
+        1107: '音色ID未找到，请刷新页面重试',
+        1108: '音频转码失败，请检查音频格式',
+        1109: '音频与文本不匹配，请重新录制',
+        1111: '未检测到说话声，请重新录制',
+        1112: '音频噪音过大，请在安静环境录制',
+        1113: '降噪处理失败，请重新录制',
+        1114: '音频质量过低，请在安静环境重新录制',
+        1122: '未检测到人声，请对着麦克风说话',
+        1123: '已达到训练次数上限（每个音色最多10次）'
+      };
+
+      const statusCode = uploadResult.statusCode || 500;
+      const errorMessage = errorMessages[statusCode] || uploadResult.error || '上传失败，请重试';
+
+      // DO NOT decrease remainingTrainings on failure
+      return NextResponse.json({
+        error: errorMessage,
+        code: statusCode,
+        remainingTrainings: remainingTrainings, // Keep the same count
+        message: `上传失败：${errorMessage}。剩余训练次数：${remainingTrainings}（未扣除）`
+      }, { status: 400 });
     }
   } catch (error) {
     console.error('Error uploading training audio:', error);

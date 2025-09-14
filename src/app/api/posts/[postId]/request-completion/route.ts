@@ -2,12 +2,11 @@
  * POST /api/posts/[postId]/request-completion
  * - Allows task acceptor to request completion and remaining payment
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
-export async function POST(
-  request: NextRequest,
+export async function POST(request: Request,
   { params }: { params: { postId: string } }
 ) {
   try {

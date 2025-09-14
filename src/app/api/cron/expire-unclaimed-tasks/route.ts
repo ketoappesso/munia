@@ -3,10 +3,10 @@
  * - Cron job to expire unclaimed tasks after 30 days and refund the poster
  * - Should be run daily
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Verify this is called by a cron job (you can add additional security here)
     const authHeader = request.headers.get('authorization');
@@ -115,6 +115,6 @@ export async function GET(request: NextRequest) {
 }
 
 // Also support POST for some cron services
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   return GET(request);
 }

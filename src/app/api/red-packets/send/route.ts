@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import authConfig from '@/auth.config';
 import prisma from '@/lib/prisma/prisma';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authConfig);
     console.log('Session in red packet send:', session);

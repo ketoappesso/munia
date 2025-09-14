@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 import { z } from 'zod';
 
@@ -20,7 +19,7 @@ const AIProfileSchema = z.object({
 // GET /api/ai/profile - Get user's AI profile
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -70,9 +69,9 @@ export async function GET() {
 }
 
 // PATCH /api/ai/profile - Update user's AI profile
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -130,7 +129,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE /api/ai/profile - Delete user's AI profile
 export async function DELETE() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

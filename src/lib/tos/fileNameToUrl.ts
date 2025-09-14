@@ -1,4 +1,3 @@
-import 'server-only';
 /**
  * The database only stores the `fileName` of the files (image/video),
  * use this function to get the full TOS URL of the file.

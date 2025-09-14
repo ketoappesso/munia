@@ -208,6 +208,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
       audio.onplay = () => {
         setIsPlaying(true);
         setIsPaused(false);
+        setError(null); // Clear any previous errors when playback starts successfully
         options.onStart?.();
         
         // Fallback: if duration wasn't available in onloadedmetadata, try again
@@ -257,6 +258,13 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
       };
 
       audio.onerror = (e) => {
+        // Check if this is a real error or just cleanup
+        // If audio.src is empty or audio was already playing, ignore the error
+        if (!audio.src || audio.src === '' || audio.readyState === 0) {
+          console.log('[useVolcengineTTS] Ignoring audio error during cleanup');
+          return;
+        }
+
         console.error('[useVolcengineTTS] Audio playback error:', e);
         const errorMsg = 'Failed to play custom voice audio';
         setError(errorMsg);

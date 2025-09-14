@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
+import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 import { z } from 'zod';
 
@@ -22,9 +21,9 @@ const VoiceTrainingUpdateSchema = z.object({
 });
 
 // GET /api/ai/voice-training - Get user's voice training records
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -85,9 +84,9 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/ai/voice-training - Create a new voice training record
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -145,9 +144,9 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH /api/ai/voice-training - Update voice training status
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -243,9 +242,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 // DELETE /api/ai/voice-training - Delete a voice training record
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

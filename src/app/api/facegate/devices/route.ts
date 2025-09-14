@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 
 const ADMIN_PHONE = '18874748888';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const [user] = await getServerUser();
     if (!user) {
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Add new device
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const [user] = await getServerUser();
     if (!user || (user.username !== ADMIN_PHONE && user.phoneNumber !== ADMIN_PHONE)) {

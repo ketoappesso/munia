@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { uploadObject } from '@/lib/tos/uploadObject';
 import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
 import { nanoid } from 'nanoid';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const session = await auth();
     
