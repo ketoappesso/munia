@@ -1,14 +1,16 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Settings, LogOut, Wallet, Edit, Coins, QrCode, Home, Camera, Smartphone, Gamepad2 } from 'lucide-react';
+import { X, Settings, LogOut, Wallet, Edit, Coins, QrCode, Home, Camera, Smartphone, Gamepad2, Shield } from 'lucide-react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState, useEffect } from 'react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useDialogs } from '@/hooks/useDialogs';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const ADMIN_PHONE = '18874748888';
 
 interface ProfileSidebarProps {
   isOpen: boolean;
@@ -17,17 +19,24 @@ interface ProfileSidebarProps {
   username: string;
 }
 
-export function ProfileSidebar({ 
-  isOpen, 
-  onClose, 
+export function ProfileSidebar({
+  isOpen,
+  onClose,
   isOwnProfile,
   username
 }: ProfileSidebarProps) {
   const router = useRouter();
+  const { data: session } = useSession();
   const { confirm } = useDialogs();
   const { data: wallet } = useWalletQuery();
   const { t } = useLanguage();
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+
+  // Check if current user is admin
+  const isAdmin = session?.user && (
+    session.user.username === ADMIN_PHONE ||
+    session.user.phoneNumber === ADMIN_PHONE
+  );
 
   // Lock body scroll when sidebar is open
   useEffect(() => {
@@ -144,6 +153,16 @@ export function ProfileSidebar({
                       <span className="text-foreground">{t('nav.settings')}</span>
                     </ButtonNaked>
 
+                    {/* Admin Backoffice Link - Only for admin users */}
+                    {isAdmin && (
+                      <ButtonNaked
+                        onPress={() => handleNavigation('/backoffice')}
+                        className="flex w-full items-center gap-3 rounded-lg p-3 bg-gradient-to-r from-red-500/10 to-orange-500/10 transition-all hover:from-red-500/20 hover:to-orange-500/20">
+                        <Shield className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <span className="font-medium text-red-600 dark:text-red-400">后台管理</span>
+                      </ButtonNaked>
+                    )}
+
                     {/* Divider */}
                     <div className="my-4 border-t border-border" />
                   </>
@@ -177,10 +196,10 @@ export function ProfileSidebar({
                       </ButtonNaked>
                     </div>
 
-                    {/* My Space Section with Selfie Button */}
+                    {/* My Space Section */}
                     <div className="mb-4">
                       <ButtonNaked
-                        onPress={handleSelfieCapture}
+                        onPress={() => handleNavigation('/my-space')}
                         className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-green-500/10 to-teal-500/10 p-4 transition-all hover:from-green-500/20 hover:to-teal-500/20">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-500">
@@ -188,7 +207,7 @@ export function ProfileSidebar({
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{t('nav.mySpace')}</p>
-                            <p className="text-xs text-muted-foreground">{t('nav.takeSelfie')}</p>
+                            <p className="text-xs text-muted-foreground">{t('nav.enterSpace')}</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-center">

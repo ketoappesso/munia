@@ -2,7 +2,6 @@ import { Posts } from '@/components/Posts';
 import { CreatePostModalLauncher } from '@/components/CreatePostModalLauncher';
 import { getServerUser } from '@/lib/getServerUser';
 import { getProfile } from '../getProfile';
-import AIControlFab from '@/components/AIControlFab';
 
 export async function generateMetadata({ params }: { params: { username: string } }) {
   const profile = await getProfile(params.username);
@@ -24,8 +23,6 @@ export default async function Page({ params }: { params: { username: string } })
         </div>
       )}
       {profile && <Posts type="profile" userId={profile.id} />}
-      {/* AI 控制入口（仅本人页面显示） */}
-      <AIControlFab visible={user?.id === profile?.id} />
     </div>
   );
 }

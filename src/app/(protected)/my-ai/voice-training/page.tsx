@@ -12,6 +12,13 @@ import { useTTSContext } from '@/contexts/TTSContext';
 import { useToast } from '@/hooks/useToast';
 
 export default function VoiceTrainingPage() {
+  // Custom triangle play icon for better visibility
+  const PlayTriangle = () => (
+    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 4L20 12L6 20V4Z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+    </svg>
+  );
+
   const router = useRouter();
   const { data: session } = useSession();
   const { showToast } = useToast();
@@ -175,11 +182,19 @@ export default function VoiceTrainingPage() {
   };
 
   const sampleTexts = [
-    '你好，我是你的AI助理，很高兴为你服务。',
-    '今天天气不错，我们可以聊聊你感兴趣的话题。',
-    '人工智能的发展正在改变我们的生活方式。',
-    '学习新技能需要持续的练习和耐心。',
-    '创新思维能够帮助我们解决复杂的问题。',
+    '哇！太棒了！我简直不敢相信这是真的！今天真是让人兴奋的一天，每一刻都充满了惊喜和快乐！',
+    '今天心情真好啊，阳光明媚，微风轻拂，一切都是那么美好，让人忍不住想要微笑。',
+    '各位听众朋友，欢迎收听今天的新闻节目。接下来为您播报今日要闻，请注意收听。',
+    '静静地坐在这里，感受时光慢慢流淌，内心如此平静安详，没有波澜，只有宁静。',
+    '有些回忆，像秋天的落叶，飘零在记忆的长河里，让人不禁感到一丝淡淡的忧伤。',
+  ];
+
+  const emotionLabels = [
+    '兴奋',
+    '高兴',
+    '播音朗读',
+    '平和',
+    '一些伤感',
   ];
   
   // Poll for training status updates
@@ -411,18 +426,25 @@ export default function VoiceTrainingPage() {
                 <div className="text-xs text-gray-500">录制状态</div>
               </div>
 
-              <Button
-                mode="secondary"
-                onPress={playRecording}
-                className="rounded-full w-12 h-12 flex items-center justify-center"
+              <button
+                onClick={playRecording}
+                className="rounded-full w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-2 border-gray-400 dark:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 disabled={!recordedBlob}
+                aria-label={recordedBlob ? (isPlaying ? '暂停播放' : '播放录音') : '请先录制音频'}
+                title={recordedBlob ? (isPlaying ? '暂停播放' : '播放录音') : '请先录制音频'}
+                type="button"
               >
                 {isPlaying ? (
-                  <Pause className="h-5 w-5" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" />
+                    <rect x="14" y="4" width="4" height="16" />
+                  </svg>
                 ) : (
-                  <Play className="h-5 w-5" fill="currentColor" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill={recordedBlob ? "currentColor" : "#9CA3AF"}>
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
                 )}
-              </Button>
+              </button>
               
               {recordedBlob && (
                 <Button
@@ -606,7 +628,9 @@ export default function VoiceTrainingPage() {
               <div key={index} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                 <p className="text-gray-800 dark:text-gray-200 mb-3">{text}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">样本 {index + 1}</span>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                    {emotionLabels[index]}
+                  </span>
                   <Button 
                     size="sm"
                     mode="secondary"

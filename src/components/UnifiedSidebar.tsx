@@ -311,15 +311,8 @@ export function UnifiedSidebar({
                     <ButtonNaked
                       onPress={() => {
                         console.log('My Space clicked, memberStatus:', memberStatus);
-                        // Route based on member status
-                        if (memberStatus === null) {
-                          // If member status not loaded yet, go to my-space by default
-                          handleNavigation('/my-space');
-                        } else if (memberStatus?.isApeLord) {
-                          handleNavigation('/my-space');
-                        } else {
-                          handleNavigation('/membership/upgrade');
-                        }
+                        // Always navigate to my-space
+                        handleNavigation('/my-space');
                       }}
                       className="flex w-full items-center justify-between rounded-lg bg-gradient-to-r from-green-500/10 to-teal-500/10 p-4 transition-all hover:from-green-500/20 hover:to-teal-500/20">
                       <div className="flex items-center gap-3">
