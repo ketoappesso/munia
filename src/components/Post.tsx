@@ -108,17 +108,18 @@ export const Post = memo(
       return null; // Will trigger browser TTS fallback
     }, [data?.user]);
     
-    const { 
-      speak, 
-      stop, 
+    const {
+      speak,
+      stop,
       pause,
       resume,
-      isPlaying, 
+      isPlaying,
       isPaused,
       isLoading,
       isSupported,
       progress,
       isFallback,
+      audioData,
     } = useVolcengineTTS({
       voice: authorVoice,
       speed: 1.1,
@@ -448,7 +449,7 @@ export const Post = memo(
               />
             )}
           </div>
-          {isOwnPost && <PostOptions postId={postId} content={content} visualMedia={visualMedia} />}
+          {isOwnPost && <PostOptions postId={postId} content={content} visualMedia={visualMedia} audioData={audioData} />}
         </div>
         {isTask && (
           <div className="mt-4 flex items-center gap-2">

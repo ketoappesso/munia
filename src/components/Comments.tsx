@@ -56,7 +56,7 @@ export function Comments({ postId }: { postId: number }) {
     <div>
       <div className="flex flex-col pt-2">
         {isPending ? (
-          <p className="py-2 text-muted-foreground">Loading comments.</p>
+          <p className="py-2 text-muted-foreground">评论加载中...</p>
         ) : isError ? (
           <p className="py-2 text-muted-foreground">{error.message}</p>
         ) : (
@@ -80,7 +80,7 @@ export function Comments({ postId }: { postId: number }) {
                 </motion.div>
               ))
             ) : (
-              <p className="py-2 text-muted-foreground">Be the first to comment.</p>
+              <p className="py-2 text-muted-foreground">抢头条评论。</p>
             )}
           </AnimatePresence>
         )}

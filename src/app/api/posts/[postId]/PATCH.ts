@@ -8,7 +8,7 @@ export async function PATCH(request: Request, { params }: { params: { postId: st
   const postId = parseInt(params.postId, 10);
 
   const formData = await request.formData();
-  return serverWritePost({
+  return await serverWritePost({
     formData,
     type: 'edit',
     postId,

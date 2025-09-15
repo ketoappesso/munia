@@ -24,6 +24,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [audioData, setAudioData] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isSupported, setIsSupported] = useState(true);
@@ -170,6 +171,9 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
       // Remove incorrect silence detection - //PkxAAAA is just a normal MP3 header pattern
       // The API returns valid audio data even when it starts with this pattern
+
+      // Store the audio data for potential download
+      setAudioData(result.audio);
 
       const audio = new Audio(`data:audio/mp3;base64,${result.audio}`);
       audioRef.current = audio;
@@ -417,5 +421,6 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
     error,
     progress,
     isFallback: !audioRef.current && browserTTS.isPlaying,
+    audioData,
   };
 }

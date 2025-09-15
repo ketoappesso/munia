@@ -102,9 +102,9 @@ export function DialogsContextProvider({ children }: { children: React.ReactNode
   }, [dialog, hide, promptValue]);
 
   const affirmativeTexts = {
-    alert: 'Okay',
-    confirm: 'Confirm',
-    prompt: 'Submit',
+    alert: '好的',
+    confirm: '确认',
+    prompt: '提交',
   };
 
   // This prevents unncessesary rerenders of the `DialogsContext` consumers
@@ -153,7 +153,7 @@ export function DialogsContextProvider({ children }: { children: React.ReactNode
               </Button>
               {dialog.type !== 'alert' && (
                 <Button onPress={hide} shape="pill" mode="ghost">
-                  Cancel
+                  取消
                 </Button>
               )}
             </AlertDialog>

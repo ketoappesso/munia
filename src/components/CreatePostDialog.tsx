@@ -15,6 +15,8 @@ import { CreatePostOptions } from './CreatePostOptions';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
 import { RewardModal } from './RewardModal';
 
+const MAX_CONTENT_LENGTH = 2000;
+
 export function CreatePostDialog({
   toEditValues,
   shouldOpenFileInputOnMount,
@@ -34,6 +36,7 @@ export function CreatePostDialog({
   const [rewardAmount, setRewardAmount] = useState<number>(initialRewardAmount);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [isTaskPost, setIsTaskPost] = useState(isTaskInitial);
+  const [contentExceedsLimit, setContentExceedsLimit] = useState(false);
   const exitCreatePostModal = useCallback(() => setShown(false), [setShown]);
   const { data: wallet } = useWalletQuery();
   const { createPostMutation, updatePostMutation } = useWritePostMutations({
@@ -62,18 +65,29 @@ export function CreatePostDialog({
   }, []);
 
   const handleClickPostButton = useCallback(() => {
+    if (content.length > MAX_CONTENT_LENGTH) return;
     if (mode === 'create') {
       createPostMutation.mutate();
     } else {
       if (!toEditValues) return;
       updatePostMutation.mutate({ postId: toEditValues.postId });
     }
-  }, [createPostMutation, mode, toEditValues, updatePostMutation]);
+  }, [createPostMutation, mode, toEditValues, updatePostMutation, content]);
 
   const handleRewardSelect = useCallback((amount: number) => {
     setRewardAmount(amount);
     setIsTaskPost(true);
     setShowRewardModal(false);
+  }, []);
+
+  const handleContentChange = useCallback((newContent: string) => {
+    if (newContent.length > MAX_CONTENT_LENGTH) {
+      setContent(newContent.slice(0, MAX_CONTENT_LENGTH));
+      setContentExceedsLimit(true);
+    } else {
+      setContent(newContent);
+      setContentExceedsLimit(false);
+    }
   }, []);
 
   const handleRemoveReward = useCallback(() => {
@@ -89,8 +103,8 @@ export function CreatePostDialog({
 
   const confirmExit = useCallback(() => {
     confirm({
-      title: 'Unsaved Changes',
-      message: 'Do you really wish to exit?',
+      title: '未保存的更改',
+      message: '确定要退出吗？未保存的内容将丢失。',
       onConfirm: () => setTimeout(() => exit(), 300),
     });
   }, [confirm, exit]);
@@ -142,7 +156,7 @@ export function CreatePostDialog({
   }, []);
 
   return (
-    <GenericDialog title={`${capitalize(mode)} Post`} handleClose={handleClose}>
+    <GenericDialog title={mode === 'create' ? '创建帖子' : '编辑帖子'} handleClose={handleClose}>
       <div className="mb-[18px] flex flex-row gap-3 px-4">
         <div className="h-11 w-11">
           <ProfilePhotoOwn />
@@ -160,18 +174,26 @@ export function CreatePostDialog({
           )}
           <TextAreaWithMentionsAndHashTags
             content={content}
-            setContent={setContent}
+            setContent={handleContentChange}
             placeholder={isTaskPost ? '求助任务描述...' : "说些啥?"}
           />
+          <div className="mt-1 flex items-center justify-between">
+            <span className={`text-xs ${content.length > MAX_CONTENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-400'}`}>
+              {content.length}/{MAX_CONTENT_LENGTH}
+            </span>
+            {contentExceedsLimit && (
+              <span className="text-xs text-red-500">内容已超过2000字限制，超出部分已被截断</span>
+            )}
+          </div>
         </div>
         <div>
           <Button
             onPress={handleClickPostButton}
             size="small"
-            isDisabled={content === '' && visualMedia.length === 0}
+            isDisabled={(content === '' && visualMedia.length === 0) || content.length > MAX_CONTENT_LENGTH}
             loading={createPostMutation.isPending || updatePostMutation.isPending}
             className={isTaskPost ? 'bg-gradient-to-r from-purple-600 to-blue-600' : ''}>
-            {isTaskPost ? '悬赏' : 'Post'}
+            {isTaskPost ? '悬赏' : '发帖'}
           </Button>
         </div>
       </div>

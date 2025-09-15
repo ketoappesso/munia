@@ -3,7 +3,7 @@ import { getServerUser } from '@/lib/getServerUser';
 import { createPospalClient } from '@/lib/pospal/client';
 import prisma from '@/lib/prisma/prisma';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const [user] = await getServerUser();
 
@@ -23,7 +23,7 @@ export async function GET() {
     });
 
     if (!userInfo?.phoneNumber) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         balance: 0,
         message: 'Phone number not found. Please update your profile.',
         store: null,
@@ -32,7 +32,8 @@ export async function GET() {
     }
 
     // Check if we should force refresh (manual refresh from UI)
-    const searchParams = request.nextUrl.searchParams;
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
     const forceRefresh = searchParams.get('refresh') === 'true';
     
     // Check if cached balance is still fresh (less than 1 hour old)

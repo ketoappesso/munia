@@ -27,14 +27,16 @@ export function ProfileHeader({
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), []);
   const { isPunkedActive } = usePunk();
   const [punkedCount, setPunkedCount] = useState<number>(0);
-  
-  // Fetch punked users count
+
+  // Fetch punked followers count for this specific user
   useEffect(() => {
-    fetch('/api/users/punked-count')
-      .then(res => res.json())
-      .then(data => setPunkedCount(data.count || 0))
-      .catch(err => console.error('Failed to fetch punked count:', err));
-  }, []);
+    if (initialProfileData?.id) {
+      fetch(`/api/users/${initialProfileData.id}/punked-followers`)
+        .then(res => res.json())
+        .then(data => setPunkedCount(data.count || 0))
+        .catch(err => console.error('Failed to fetch punked followers count:', err));
+    }
+  }, [initialProfileData?.id]);
   
   // If there is no query of the user data yet, use the
   // `initialProfileData` that was fetched on server.
@@ -99,9 +101,9 @@ export function ProfileHeader({
           <Link
             href={`/${profile.username}/punked`}
             className="link"
-            title="定制语音用户">
+            title="punk我 用户">
             <span className="font-semibold">{punkedCount}</span>{' '}
-            <span className="font-medium text-muted-foreground">定制语音</span>
+            <span className="font-medium text-muted-foreground">punk我</span>
           </Link>
         </div>
         <Tabs isOwnProfile={isOwnProfile} />

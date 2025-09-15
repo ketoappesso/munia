@@ -10,10 +10,10 @@ export default function Tabs({ isOwnProfile }: { isOwnProfile: boolean }) {
   return (
     <div className="mt-4 inline-flex flex-row gap-6 overflow-x-auto border-b-[1px] border-muted">
       {[
-        { title: 'Posts', segment: parentLayoutSegment },
-        { title: 'Photos', segment: `${parentLayoutSegment}/photos` },
-        { title: 'About', segment: `${parentLayoutSegment}/about` },
-        ...[isOwnProfile ? { title: 'Activity', segment: `${parentLayoutSegment}/activity` } : undefined],
+        { title: '帖子', segment: parentLayoutSegment },
+        { title: '图片', segment: `${parentLayoutSegment}/photos` },
+        { title: '关于', segment: `${parentLayoutSegment}/about` },
+        ...[isOwnProfile ? { title: '动态', segment: `${parentLayoutSegment}/activity` } : undefined],
       ].map((item) => {
         if (!item) return null;
         const { title, segment } = item;

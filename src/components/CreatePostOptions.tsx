@@ -32,15 +32,15 @@ export const CreatePostOptions = forwardRef<
   return (
     <div className="flex flex-row justify-center px-4 pb-5">
       <div className="flex gap-6">
-        <ButtonNaked aria-label="Upload an image or video" className="flex gap-4" onPress={onUploadImageOrVideoPress}>
+        <ButtonNaked aria-label="上传图片或视频" className="flex gap-4" onPress={onUploadImageOrVideoPress}>
           <SvgImage className="h-6 w-6 text-muted-foreground" />
           <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
-            Image / Video
+            图片 / 视频
           </p>
         </ButtonNaked>
         {onRewardClick && (
           <ButtonNaked 
-            aria-label="Add reward" 
+            aria-label="添加悬赏" 
             className="flex gap-4" 
             onPress={onRewardClick}>
             <Coins className={`h-6 w-6 ${hasReward ? 'text-purple-600' : 'text-muted-foreground'}`} />
