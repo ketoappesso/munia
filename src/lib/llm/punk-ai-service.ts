@@ -2,6 +2,7 @@ import 'server-only';
 import LLMClient, { LLMMessage, getCachedResponse, setCachedResponse } from './llm-client';
 import prisma from '@/lib/prisma/prisma';
 import { createVolcengineTTSClient } from '@/lib/volcengine/tts-client';
+import { isUserAFK, getUserActivityStatus } from '@/lib/activity-tracker';
 
 export interface PunkAIConfig {
   personality?: string;
@@ -121,19 +122,34 @@ class PunkAIService {
     punkUserId: string
   ): Promise<PunkAIResponse> {
     try {
+      console.log('[PunkAI] Starting response generation', {
+        conversationId,
+        userMessage: userMessage.slice(0, 50),
+        punkUserId
+      });
+
       // Check cache first
       const cacheKey = `punk_${punkUserId}_${userMessage.slice(0, 50)}`;
       const cached = getCachedResponse(cacheKey);
       if (cached) {
-        console.log('Returning cached punk response');
+        console.log('[PunkAI] Returning cached response');
         return { text: cached, cached: true };
       }
 
       // Get punk user config
       const config = await this.getPunkUserConfig(punkUserId);
+      console.log('[PunkAI] User config loaded', {
+        hasPersonality: !!config.personality,
+        model: config.model,
+        ttsVoiceId: config.ttsVoiceId
+      });
 
       // Get conversation history
       const history = await this.getConversationHistory(conversationId, config.maxHistoryMessages);
+      console.log('[PunkAI] Conversation history fetched', {
+        historyLength: history.length,
+        lastMessages: history.slice(-2).map(m => ({ role: m.role, content: m.content.slice(0, 30) }))
+      });
 
       // Generate system prompt
       const systemPrompt = `${config.personality}
@@ -146,12 +162,23 @@ ${config.promptTemplate}
 3. 根据上下文提供相关回应
 4. 可以使用表情符号增加亲和力`;
 
+      console.log('[PunkAI] Calling LLM with prompt', {
+        systemPromptLength: systemPrompt.length,
+        userMessage: userMessage,
+        historyCount: history.length
+      });
+
       // Generate AI response
       const aiResponse = await this.llmClient.generateResponse(
         userMessage,
         systemPrompt,
         history
       );
+
+      console.log('[PunkAI] LLM response received', {
+        responseLength: aiResponse.length,
+        response: aiResponse.slice(0, 100)
+      });
 
       // Cache the response
       setCachedResponse(cacheKey, aiResponse);
@@ -180,7 +207,13 @@ ${config.promptTemplate}
         cached: false,
       };
     } catch (error) {
-      console.error('Error generating punk response:', error);
+      console.error('[PunkAI] Error generating response:', {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        conversationId,
+        userMessage: userMessage.slice(0, 50),
+        punkUserId
+      });
       
       // Fallback response
       const fallbackResponses = [
@@ -211,6 +244,14 @@ ${config.promptTemplate}
       return null;
     }
 
+    // Check if recipient is AFK (15 minutes of inactivity)
+    const isAFK = await isUserAFK(recipientUserId);
+    if (!isAFK) {
+      console.log(`Punk user ${recipientUserId} is not AFK, no AI response`);
+      return null;
+    }
+
+    console.log(`Punk user ${recipientUserId} is AFK, generating AI response`);
     // Generate AI response
     return await this.generatePunkResponse(conversationId, message, recipientUserId);
   }

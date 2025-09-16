@@ -6,11 +6,11 @@ type Themes = 'system' | 'light' | 'dark';
 export const ThemeContext = createContext<{
   theme: Themes;
   handleThemeChange: (theme: Themes) => void;
-}>({ theme: 'system', handleThemeChange: () => {} });
+}>({ theme: 'light', handleThemeChange: () => {} });
 
 const LS_THEME_KEY = 'theme';
 export function ThemeContextProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Themes>('system');
+  const [theme, setTheme] = useState<Themes>('light');
 
   const setToDarkTheme = useCallback(() => {
     document.documentElement.classList.add('dark');
@@ -37,8 +37,8 @@ export function ThemeContextProvider({ children }: { children: React.ReactNode }
   const value = useMemo(() => ({ theme, handleThemeChange }), [theme, handleThemeChange]);
 
   useEffect(() => {
-    // Defaults to 'system' if there's no saved theme
-    const savedTheme = (localStorage.getItem(LS_THEME_KEY) || 'system') as Themes;
+    // Defaults to 'light' if there's no saved theme
+    const savedTheme = (localStorage.getItem(LS_THEME_KEY) || 'light') as Themes;
     handleThemeChange(savedTheme);
   }, [handleThemeChange]);
 

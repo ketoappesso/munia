@@ -4,6 +4,9 @@
  */
 import { serverWritePost } from '@/hooks/serverWritePost';
 
+export const runtime = 'nodejs';
+export const maxDuration = 60; // Maximum allowed duration: 60 seconds
+
 export async function PATCH(request: Request, { params }: { params: { postId: string } }) {
   const postId = parseInt(params.postId, 10);
 

@@ -39,7 +39,7 @@ export async function useUpdateProfileAndCoverPhoto({
     // Upload image to TOS
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${uuid()}.${fileExtension}`;
-    await uploadObject(buffer, fileName, file.type);
+    await uploadObject({ key: fileName, body: buffer, contentType: file.type });
 
     await prisma.user.update({
       where: {
@@ -53,7 +53,7 @@ export async function useUpdateProfileAndCoverPhoto({
     await prisma.post.create({
       data: {
         userId,
-        content: toUpdate === 'profilePhoto' ? '#NewProfilePhoto' : '#NewCoverPhoto',
+        content: toUpdate === 'profilePhoto' ? '我有新的头像啦！' : '新背景图酷不酷啊？',
         visualMedia: {
           create: [
             {
@@ -70,6 +70,8 @@ export async function useUpdateProfileAndCoverPhoto({
 
     return NextResponse.json({ uploadedTo });
   } catch (error) {
-    return NextResponse.json({ error: 'Server error.' }, { status: 500 });
+    console.error(`Error updating ${toUpdate}:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Server error.';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

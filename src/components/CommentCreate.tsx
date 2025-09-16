@@ -6,10 +6,12 @@ import { useCreateCommentMutations } from '@/hooks/mutations/useCreateCommentMut
 import Button from './ui/Button';
 import { ProfilePhotoOwn } from './ui/ProfilePhotoOwn';
 import { TextAreaWithMentionsAndHashTags } from './TextAreaWithMentionsAndHashTags';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function CommentCreate({ postId }: { postId: number }) {
   const [content, setContent] = useState('');
   const { createCommentMutation } = useCreateCommentMutations();
+  const { t } = useLanguage();
 
   const handleCreate = useCallback(() => {
     createCommentMutation.mutate(
@@ -37,7 +39,7 @@ export function CommentCreate({ postId }: { postId: number }) {
           <TextAreaWithMentionsAndHashTags
             content={content}
             setContent={setContent}
-            placeholder="写下评论。"
+            placeholder={t('comment.writeComment')}
             shouldFocusOnMount={false}
           />
         </div>

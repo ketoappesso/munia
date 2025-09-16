@@ -13,6 +13,7 @@ import { mentionsActivityLogger } from '@/lib/mentionsActivityLogger';
 import { deleteObject } from '@/lib/tos/deleteObject';
 import { savePostFiles } from '@/lib/tos/savePostFiles';
 import { verifyAccessToPost } from '@/app/api/posts/[postId]/verifyAccessToPost';
+import { updateUserActivity } from '@/lib/activity-tracker';
 // import { generateTtsAudio } from '@/lib/tts';
 // import { uploadAudio } from '@/lib/tos';
 
@@ -39,6 +40,9 @@ export async function serverWritePost({ formData, type, postId }: Props) {
   }
   const userId = user.id;
   console.log('[serverWritePost] User ID:', userId);
+
+  // Update user activity
+  await updateUserActivity(userId);
 
   if (type === 'edit') {
     if (!verifyAccessToPost(postId)) {

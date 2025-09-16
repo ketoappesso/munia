@@ -17,6 +17,7 @@ import { TextAreaWithMentionsAndHashTags } from '@/components/TextAreaWithMentio
 import { AnimatePresence } from 'framer-motion';
 import { AlertDialog } from '../components/AlertDialog';
 import { Modal } from '../components/Modal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface BasicDialogType {
   type: 'alert' | 'confirm' | 'prompt';
@@ -38,6 +39,7 @@ export const DialogsContext = createContext<{
 });
 
 export function DialogsContextProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useLanguage();
   const state = useOverlayTriggerState({});
   const [dialog, setDialog] = useState<BasicDialogType>({
     type: 'alert',
@@ -102,10 +104,10 @@ export function DialogsContextProvider({ children }: { children: React.ReactNode
   }, [dialog, hide, promptValue]);
 
   const affirmativeTexts = {
-    alert: '好的',
-    confirm: '确认',
-    prompt: '提交',
-  };
+    alert: t('common.ok'),
+    confirm: t('common.confirm'),
+    prompt: t('common.submit'),
+  } as const;
 
   // This prevents unncessesary rerenders of the `DialogsContext` consumers
   // Even if the states change, the consumers will not rerender
@@ -153,7 +155,7 @@ export function DialogsContextProvider({ children }: { children: React.ReactNode
               </Button>
               {dialog.type !== 'alert' && (
                 <Button onPress={hide} shape="pill" mode="ghost">
-                  取消
+                  {t('common.cancel')}
                 </Button>
               )}
             </AlertDialog>

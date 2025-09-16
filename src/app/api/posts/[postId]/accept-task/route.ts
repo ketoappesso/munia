@@ -61,33 +61,13 @@ export async function POST(request: Request,
           completedAt: new Date(), // Set the timestamp when task is accepted
           initialPaymentAmount: initialPayment,
           finalPaymentAmount: finalPayment,
-          initialPaymentAt: new Date(), // Mark initial payment as made
+          // Don't mark initial payment as made here - it's handled by send-commission-simple
         },
       });
-      
-      // Transfer 50% initial payment to acceptor
-      // Note: The full amount was already deducted from task owner when creating the task
-      await tx.user.update({
-        where: { id: user.id },
-        data: {
-          apeBalance: {
-            increment: initialPayment,
-          },
-        },
-      });
-      
-      // Create wallet transaction for initial payment
-      await tx.walletTransaction.create({
-        data: {
-          type: 'REWARD',
-          amount: initialPayment,
-          status: 'COMPLETED',
-          description: `任务佣金（首付50%） - ${post.content?.substring(0, 50)}`,
-          fromUserId: post.userId,
-          toUserId: user.id,
-          completedAt: new Date(),
-        },
-      });
+
+      // NOTE: Payment transfer and wallet transaction are handled by the
+      // /api/red-packets/send-commission-simple endpoint called from the frontend
+      // to avoid duplicate payments
       
       return updatedPost;
     });

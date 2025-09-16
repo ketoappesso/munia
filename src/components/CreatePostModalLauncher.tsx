@@ -9,11 +9,13 @@ import { ProfilePhotoOwn } from './ui/ProfilePhotoOwn';
 import { ButtonNaked } from './ui/ButtonNaked';
 import { RewardModal } from './RewardModal';
 import { useWalletQuery } from '@/hooks/queries/useWalletQuery';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function CreatePostModalLauncher() {
   const { data: session } = useSession();
   const { launchCreatePost } = useCreatePostModal();
   const { data: wallet } = useWalletQuery();
+  const { t } = useLanguage();
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [pendingRewardAmount, setPendingRewardAmount] = useState<number>(0);
   
@@ -51,7 +53,7 @@ export function CreatePostModalLauncher() {
           <ProfilePhotoOwn />
         </div>
         <ButtonNaked onPress={launcCreatePostFinderClosed} className="flex flex-grow flex-col justify-center">
-          <p className="text-muted-foreground/70">想到啥说啥</p>
+          <p className="text-muted-foreground/70">{t('post.placeholder')}</p>
         </ButtonNaked>
       </div>
       <div className="flex flex-row justify-center">
@@ -61,7 +63,7 @@ export function CreatePostModalLauncher() {
             className="group flex cursor-pointer flex-row items-center gap-4">
             <SvgImage className="h-6 w-6 text-muted-foreground" />
             <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
-              图片 / 视频
+              {t('post.imageVideo')}
             </p>
           </ButtonNaked>
           <ButtonNaked
@@ -69,7 +71,7 @@ export function CreatePostModalLauncher() {
             className="group flex cursor-pointer flex-row items-center gap-4">
             <Coins className="h-6 w-6 text-muted-foreground" />
             <p className="text-base font-semibold text-muted-foreground group-hover:text-muted-foreground/80">
-              悬赏
+              {t('task.rewardAction')}
             </p>
           </ButtonNaked>
         </div>

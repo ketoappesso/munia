@@ -68,6 +68,14 @@ export async function POST(request: Request) {
         },
       });
 
+      // Update the post to mark initial payment as made
+      await tx.post.update({
+        where: { id: postId },
+        data: {
+          initialPaymentAt: new Date(),
+        },
+      });
+
       // Create wallet transaction record for initial payment
       const transaction = await tx.walletTransaction.create({
         data: {

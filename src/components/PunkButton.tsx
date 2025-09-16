@@ -24,7 +24,12 @@ export default function PunkButton({
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleClick = () => {
-    if (!disabled && !isAnimating) {
+    if (disabled) {
+      // Redirect to login if disabled (usually means not logged in)
+      window.location.href = '/login';
+      return;
+    }
+    if (!isAnimating) {
       setIsAnimating(true);
       onPunk();
       setTimeout(() => setIsAnimating(false), 800);

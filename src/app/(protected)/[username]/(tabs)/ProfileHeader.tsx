@@ -14,6 +14,7 @@ import { ProfileSidebar } from '@/components/ProfileSidebar';
 import { useState, useCallback, useEffect } from 'react';
 import ProfilePunkIndicator from '@/components/ProfilePunkIndicator';
 import { usePunk } from '@/contexts/PunkContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function ProfileHeader({
   isOwnProfile,
@@ -27,6 +28,7 @@ export function ProfileHeader({
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), []);
   const { isPunkedActive } = usePunk();
   const [punkedCount, setPunkedCount] = useState<number>(0);
+  const { t } = useLanguage();
 
   // Fetch punked followers count for this specific user
   useEffect(() => {
@@ -103,7 +105,7 @@ export function ProfileHeader({
             className="link"
             title="punk我 用户">
             <span className="font-semibold">{punkedCount}</span>{' '}
-            <span className="font-medium text-muted-foreground">punk我</span>
+            <span className="font-medium text-muted-foreground">{t('profile.punkMe')}</span>
           </Link>
         </div>
         <Tabs isOwnProfile={isOwnProfile} />

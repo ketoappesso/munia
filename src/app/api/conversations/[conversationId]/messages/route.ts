@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerUser } from '@/lib/getServerUser';
 import prisma from '@/lib/prisma/prisma';
 import punkAIService from '@/lib/llm/punk-ai-service';
+import { updateUserActivity } from '@/lib/activity-tracker';
 
 export async function GET(
   request: Request,
@@ -82,6 +83,9 @@ export async function POST(request: Request, { params }: { params: { conversatio
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Update user activity
+    await updateUserActivity(user.id);
+
     const { conversationId } = params;
     const { content } = await request.json();
 
@@ -150,8 +154,8 @@ export async function POST(request: Request, { params }: { params: { conversatio
     });
 
     // Check if the recipient is a punk user and generate AI response
-    const recipientId = conversation.participant1Id === user.id 
-      ? conversation.participant2Id 
+    const recipientId = conversation.participant1Id === user.id
+      ? conversation.participant2Id
       : conversation.participant1Id;
 
     const aiResponse = await punkAIService.processPunkUserMessage(
@@ -162,32 +166,30 @@ export async function POST(request: Request, { params }: { params: { conversatio
     );
 
     if (aiResponse) {
-      // Create AI response message after a short delay
-      setTimeout(async () => {
-        try {
-          const aiMessage = await prisma.message.create({
-            data: {
-              conversationId,
-              senderId: recipientId,
-              content: aiResponse.text,
-              type: 'TEXT',
-              isAIResponse: true,
-            },
-          });
+      // Create AI response message immediately (user requested no delay for AI avatar)
+      try {
+        const aiMessage = await prisma.message.create({
+          data: {
+            conversationId,
+            senderId: recipientId,
+            content: aiResponse.text,
+            type: 'TEXT',
+            isAIResponse: true,
+          },
+        });
 
-          // Update conversation's last message time again
-          await prisma.conversation.update({
-            where: { id: conversationId },
-            data: {
-              lastMessageAt: new Date(),
-            },
-          });
+        // Update conversation's last message time again
+        await prisma.conversation.update({
+          where: { id: conversationId },
+          data: {
+            lastMessageAt: new Date(),
+          },
+        });
 
-          console.log('AI response created for punk user:', recipientId);
-        } catch (error) {
-          console.error('Error creating AI response message:', error);
-        }
-      }, 1000 + Math.random() * 2000); // 1-3 second delay for more natural feel
+        console.log('AI response created immediately for AFK punk user:', recipientId);
+      } catch (error) {
+        console.error('Error creating AI response message:', error);
+      }
     }
 
     return NextResponse.json(message, { status: 201 });

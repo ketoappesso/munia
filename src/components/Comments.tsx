@@ -10,10 +10,12 @@ import { useShouldAnimate } from '@/hooks/useShouldAnimate';
 import { commentFramerVariants } from '@/lib/framerVariants';
 import { CommentCreate } from './CommentCreate';
 import { Comment } from './Comment';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Comments({ postId }: { postId: number }) {
   const qc = useQueryClient();
   const queryKey = useMemo(() => ['posts', postId, 'comments'], [postId]);
+  const { t } = useLanguage();
 
   const { data: session } = useSession();
   const { shouldAnimate } = useShouldAnimate();
@@ -56,7 +58,7 @@ export function Comments({ postId }: { postId: number }) {
     <div>
       <div className="flex flex-col pt-2">
         {isPending ? (
-          <p className="py-2 text-muted-foreground">评论加载中...</p>
+          <p className="py-2 text-muted-foreground">{t('comment.loading')}</p>
         ) : isError ? (
           <p className="py-2 text-muted-foreground">{error.message}</p>
         ) : (
@@ -80,7 +82,7 @@ export function Comments({ postId }: { postId: number }) {
                 </motion.div>
               ))
             ) : (
-              <p className="py-2 text-muted-foreground">抢头条评论。</p>
+              <p className="py-2 text-muted-foreground">{t('comment.beFirst')}</p>
             )}
           </AnimatePresence>
         )}

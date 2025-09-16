@@ -1,0 +1,138 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - button "Feed" [ref=e4] [cursor=pointer]:
+        - img [ref=e6] [cursor=pointer]
+      - button "Messages" [ref=e8] [cursor=pointer]:
+        - img [ref=e10] [cursor=pointer]
+      - button "My Profile" [ref=e12] [cursor=pointer]:
+        - img [ref=e14] [cursor=pointer]
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - img [ref=e21]
+        - textbox "搜索用户" [ref=e23]
+        - generic [ref=e24]: 搜索用户
+      - generic [ref=e25]:
+        - generic [ref=e27]:
+          - button "按性别筛选" [ref=e28] [cursor=pointer]
+          - generic [ref=e29]:
+            - textbox [ref=e30]
+            - generic [ref=e31]:
+              - text: 按性别筛选
+              - listbox [ref=e32]:
+                - option [selected] [ref=e33]
+                - option [ref=e34]: 男
+                - option [ref=e35]: 女
+                - option [ref=e36]: 非二元
+          - button "Select an option 按性别筛选" [ref=e37] [cursor=pointer]:
+            - generic [ref=e38] [cursor=pointer]: Select an option
+            - img [ref=e40] [cursor=pointer]
+        - generic [ref=e43]:
+          - button "按状态筛选" [ref=e44] [cursor=pointer]
+          - generic [ref=e45]:
+            - textbox [ref=e46]
+            - generic [ref=e47]:
+              - text: 按状态筛选
+              - listbox [ref=e48]:
+                - option [selected] [ref=e49]
+                - option [ref=e50]: 单身
+                - option [ref=e51]: 恋爱中
+                - option [ref=e52]: 订婚
+                - option [ref=e53]: 已婚
+          - button "Select an option 按状态筛选" [ref=e54] [cursor=pointer]:
+            - generic [ref=e55] [cursor=pointer]: Select an option
+            - img [ref=e57] [cursor=pointer]
+      - generic [ref=e59]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - link "Natasha Collier's avatar" [ref=e64] [cursor=pointer]:
+              - /url: /natasha_collier71
+              - img "Natasha Collier's avatar" [ref=e65] [cursor=pointer]
+            - generic [ref=e66]:
+              - button "关注" [ref=e67] [cursor=pointer]
+              - button "私信" [ref=e68] [cursor=pointer]:
+                - img [ref=e69] [cursor=pointer]
+          - generic [ref=e71]:
+            - heading "Natasha Collier" [level=2] [ref=e72] [cursor=pointer]:
+              - link "Natasha Collier" [ref=e73] [cursor=pointer]:
+                - /url: /natasha_collier71
+            - paragraph [ref=e74]: person
+            - generic [ref=e75]:
+              - paragraph [ref=e76]:
+                - generic [ref=e77]: "0"
+                - generic [ref=e78]: 粉丝
+              - paragraph [ref=e79]:
+                - generic [ref=e80]: "0"
+                - generic [ref=e81]: 关注
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - link "Luz Orn's avatar" [ref=e86] [cursor=pointer]:
+              - /url: /luz_orn62
+              - img "Luz Orn's avatar" [ref=e87] [cursor=pointer]
+            - generic [ref=e88]:
+              - button "关注" [ref=e89] [cursor=pointer]
+              - button "私信" [ref=e90] [cursor=pointer]:
+                - img [ref=e91] [cursor=pointer]
+          - generic [ref=e93]:
+            - heading "Luz Orn" [level=2] [ref=e94] [cursor=pointer]:
+              - link "Luz Orn" [ref=e95] [cursor=pointer]:
+                - /url: /luz_orn62
+            - paragraph [ref=e96]: afoul lover 🍭
+            - generic [ref=e97]:
+              - paragraph [ref=e98]:
+                - generic [ref=e99]: "0"
+                - generic [ref=e100]: 粉丝
+              - paragraph [ref=e101]:
+                - generic [ref=e102]: "0"
+                - generic [ref=e103]: 关注
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - link "Alyssa Torphy's avatar" [ref=e108] [cursor=pointer]:
+              - /url: /alyssa90
+              - img "Alyssa Torphy's avatar" [ref=e109] [cursor=pointer]
+            - generic [ref=e110]:
+              - button "关注" [ref=e111] [cursor=pointer]
+              - button "私信" [ref=e112] [cursor=pointer]:
+                - img [ref=e113] [cursor=pointer]
+          - generic [ref=e115]:
+            - heading "Alyssa Torphy" [level=2] [ref=e116] [cursor=pointer]:
+              - link "Alyssa Torphy" [ref=e117] [cursor=pointer]:
+                - /url: /alyssa90
+            - paragraph [ref=e118]: inventor, gamer, friend 🙋🏻‍♂️
+            - generic [ref=e119]:
+              - paragraph [ref=e120]:
+                - generic [ref=e121]: "0"
+                - generic [ref=e122]: 粉丝
+              - paragraph [ref=e123]:
+                - generic [ref=e124]: "0"
+                - generic [ref=e125]: 关注
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - link "Ervin Padberg's avatar" [ref=e130] [cursor=pointer]:
+              - /url: /ervin_padberg
+              - img "Ervin Padberg's avatar" [ref=e131] [cursor=pointer]
+            - generic [ref=e132]:
+              - button "关注" [ref=e133] [cursor=pointer]
+              - button "私信" [ref=e134] [cursor=pointer]:
+                - img [ref=e135] [cursor=pointer]
+          - generic [ref=e137]:
+            - heading "Ervin Padberg" [level=2] [ref=e138] [cursor=pointer]:
+              - link "Ervin Padberg" [ref=e139] [cursor=pointer]:
+                - /url: /ervin_padberg
+            - paragraph [ref=e140]: symmetry advocate
+            - generic [ref=e141]:
+              - paragraph [ref=e142]:
+                - generic [ref=e143]: "0"
+                - generic [ref=e144]: 粉丝
+              - paragraph [ref=e145]:
+                - generic [ref=e146]: "0"
+                - generic [ref=e147]: 关注
+  - generic [ref=e149]:
+    - img [ref=e151]
+    - button "Open Tanstack query devtools" [ref=e199] [cursor=pointer]:
+      - img [ref=e200] [cursor=pointer]
+  - alert [ref=e248]
+```

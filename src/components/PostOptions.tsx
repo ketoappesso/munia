@@ -9,6 +9,7 @@ import { DropdownMenuButton } from './ui/DropdownMenuButton';
 import { useToast } from '@/hooks/useToast';
 import { usePunk } from '@/contexts/PunkContext';
 import { useTTSContext } from '@/contexts/TTSContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function PostOptions({
   postId,
@@ -28,6 +29,7 @@ export function PostOptions({
   const { showToast } = useToast();
   const { punkedVoiceId, isPunkedActive } = usePunk();
   const { playbackSpeed } = useTTSContext();
+  const { t } = useLanguage();
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDeleteClick = useCallback(() => {
@@ -184,7 +186,7 @@ export function PostOptions({
   );
 
   return (
-    <DropdownMenuButton key={`posts-${postId}-options`} label="帖子操作" onAction={handleOptionClick}>
+    <DropdownMenuButton key={`posts-${postId}-options`} label={t('post.postOptions') || '帖子操作'} onAction={handleOptionClick}>
       <Section>
         <Item key="edit">编辑帖子</Item>
         <Item key="delete">删除帖子</Item>

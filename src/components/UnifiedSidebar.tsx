@@ -26,6 +26,7 @@ import { useSession } from 'next-auth/react';
 import { useUserQuery } from '@/hooks/queries/useUserQuery';
 import Link from 'next/link';
 import { fileNameToUrl } from '@/lib/tos/fileNameToUrl';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface UnifiedSidebarProps {
   isOpen: boolean;
@@ -59,6 +60,7 @@ export function UnifiedSidebar({
   const { data: wallet } = useWalletQuery();
   const { data: session } = useSession();
   const { data: user } = useUserQuery(session?.user?.id);
+  const { t } = useLanguage();
   
   // State for member status
   const [memberStatus, setMemberStatus] = useState<{ isApeLord: boolean } | null>(null);
@@ -138,12 +140,12 @@ export function UnifiedSidebar({
     
     setTimeout(() => {
       confirm({
-        title: 'Confirm Logout',
-        message: 'Do you really wish to logout?',
+        title: t('nav.confirmLogout'),
+        message: t('nav.confirmLogoutMessage'),
         onConfirm: () => signOut({ callbackUrl: '/' }),
       });
     }, 300);
-  }, [confirm, onClose]);
+  }, [confirm, onClose, t]);
 
   // Tab configuration based on current page
   const getTabsForPage = (): Array<{id: string; label: string; description: string}> => {

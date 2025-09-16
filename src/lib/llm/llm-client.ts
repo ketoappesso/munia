@@ -126,13 +126,24 @@ class LLMClient {
   }
 
   async chat(messages: LLMMessage[]): Promise<LLMResponse> {
+    console.log('[LLMClient] Starting chat request', {
+      provider: this.config.provider,
+      model: this.config.model,
+      apiUrl: this.config.apiUrl,
+      messageCount: messages.length,
+      hasApiKey: !!this.config.apiKey
+    });
+
     // For custom provider with mock mode, return intelligent mock responses
     if (this.config.provider === 'custom' && this.config.apiKey === 'mock-key') {
+      console.log('[LLMClient] Using mock response mode');
       return this.generateMockResponse(messages);
     }
 
     if (!this.config.apiKey && this.config.provider !== 'custom') {
-      throw new Error(`API key required for ${this.config.provider} provider`);
+      const error = `API key required for ${this.config.provider} provider`;
+      console.error('[LLMClient] Missing API key', { provider: this.config.provider });
+      throw new Error(error);
     }
 
     try {
@@ -150,24 +161,54 @@ class LLMClient {
         headers['Authorization'] = `Bearer ${this.config.apiKey}`;
       }
 
+      const requestBody = {
+        model: this.config.model,
+        messages,
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature,
+        top_p: this.config.topP,
+      };
+
+      console.log('[LLMClient] Sending request to API', {
+        url: this.config.apiUrl,
+        model: this.config.model,
+        messagesPreview: messages.map(m => ({
+          role: m.role,
+          contentLength: m.content.length,
+          contentPreview: m.content.slice(0, 50)
+        }))
+      });
+
       const response = await fetch(this.config.apiUrl!, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          model: this.config.model,
-          messages,
-          max_tokens: this.config.maxTokens,
-          temperature: this.config.temperature,
-          top_p: this.config.topP,
-        }),
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('[LLMClient] API response status', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
       });
 
       if (!response.ok) {
         const error = await response.text();
+        console.error('[LLMClient] API error response', {
+          status: response.status,
+          error: error.slice(0, 500),
+          url: this.config.apiUrl,
+          model: this.config.model
+        });
         throw new Error(`LLM API error: ${response.status} - ${error}`);
       }
 
       const data = await response.json();
+      console.log('[LLMClient] API response data', {
+        hasChoices: !!data.choices,
+        choicesCount: data.choices?.length,
+        hasContent: !!data.choices?.[0]?.message?.content,
+        contentLength: data.choices?.[0]?.message?.content?.length
+      });
 
       return {
         content: data.choices[0]?.message?.content || '',
@@ -178,7 +219,13 @@ class LLMClient {
         } : undefined,
       };
     } catch (error) {
-      console.error('LLM chat error:', error);
+      console.error('[LLMClient] Chat error', {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        provider: this.config.provider,
+        apiUrl: this.config.apiUrl,
+        model: this.config.model
+      });
       throw error;
     }
   }

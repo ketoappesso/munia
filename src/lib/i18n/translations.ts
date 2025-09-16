@@ -71,8 +71,16 @@ export const translations = {
       codeError: "发送验证码失败"
     },
     post: {
-      createPost: "发布帖子",
-      writePost: "写点什么...",
+      createPost: "创建帖子",
+      editPost: "编辑帖子",
+      writePost: "想到啥说啥",
+      placeholder: "想到啥说啥",
+      saySomething: "说些啥?",
+      taskPlaceholder: "求助任务描述...",
+      post: "发帖",
+      imageVideo: "图片 / 视频",
+      uploadImageVideoAria: "上传图片或视频",
+      addRewardAria: "添加悬赏",
       publish: "发布",
       cancel: "取消",
       uploading: "上传中...",
@@ -94,10 +102,13 @@ export const translations = {
       loading: "加载中...",
       postDeleted: "帖子已删除",
       postUpdated: "帖子已更新",
-      postPublished: "帖子已发布"
+      postPublished: "帖子已发布",
+      postOptions: "帖子操作"
     },
     comment: {
-      writeComment: "写评论...",
+      writeComment: "写下评论。",
+      beFirst: "抢头条评论。",
+      loading: "评论加载中...",
       reply: "回复",
       viewReplies: "查看回复",
       hideReplies: "隐藏回复",
@@ -108,6 +119,10 @@ export const translations = {
     },
     profile: {
       posts: "帖子",
+      photos: "图片",
+      about: "关于",
+      activity: "动态",
+      punkMe: "punk我",
       followers: "粉丝",
       following: "关注",
       follow: "关注",
@@ -124,6 +139,10 @@ export const translations = {
       userNotFound: "用户不存在",
       userNotFoundDesc: "该用户不存在或已更改用户名",
       backToHome: "返回首页"
+    },
+    dialog: {
+      unsavedTitle: "未保存的更改",
+      unsavedMessage: "确定要退出吗？未保存的内容将丢失。"
     },
     settings: {
       title: "设置",
@@ -175,6 +194,8 @@ export const translations = {
       refreshing: "刷新中..."
     },
     task: {
+      rewardAction: "悬赏",
+      rewardAmountLabel: "悬赏金额",
       availableTasks: "可用任务",
       myTasks: "我的任务",
       completedTasks: "已完成任务",
@@ -381,7 +402,15 @@ export const translations = {
     },
     post: {
       createPost: "Create Post",
-      writePost: "说些啥?",
+      editPost: "Edit Post",
+      writePost: "What's on your mind?",
+      placeholder: "What's on your mind?",
+      saySomething: "Say something?",
+      taskPlaceholder: "Describe your task...",
+      post: "Post",
+      imageVideo: "Image / Video",
+      uploadImageVideoAria: "Upload an image or video",
+      addRewardAria: "Add reward",
       publish: "Publish",
       cancel: "Cancel",
       uploading: "Uploading...",
@@ -403,10 +432,13 @@ export const translations = {
       loading: "Loading...",
       postDeleted: "Post deleted",
       postUpdated: "Post updated",
-      postPublished: "Post published"
+      postPublished: "Post published",
+      postOptions: "Post options"
     },
     comment: {
       writeComment: "Write a comment...",
+      beFirst: "Be the first to comment.",
+      loading: "Loading comments...",
       reply: "Reply",
       viewReplies: "View replies",
       hideReplies: "Hide replies",
@@ -417,6 +449,10 @@ export const translations = {
     },
     profile: {
       posts: "Posts",
+      photos: "Photos",
+      about: "About",
+      activity: "Activity",
+      punkMe: "Punk me",
       followers: "Followers",
       following: "Following",
       follow: "Follow",
@@ -484,6 +520,8 @@ export const translations = {
       refreshing: "Refreshing..."
     },
     task: {
+      rewardAction: "Reward",
+      rewardAmountLabel: "Reward amount",
       availableTasks: "Available Tasks",
       myTasks: "My Tasks",
       completedTasks: "Completed Tasks",

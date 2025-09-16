@@ -62,6 +62,7 @@ model User {
   appessoBalanceUpdatedAt     DateTime?
   ttsPlaybackSpeed            Float?              @default(1.0)
   ttsRemainingTrainings       Int?                @default(5)
+  lastActivityAt              DateTime?
   aiMemories                  AIMemory[]
   aiProfile                   AIProfile?
   accounts                    Account[]

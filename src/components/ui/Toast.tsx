@@ -38,6 +38,8 @@ export function Toast<T extends ToastType>({ state, ...props }: ToastProps<T>) {
   const { toastProps, titleProps, descriptionProps, closeButtonProps } = useToast(props, state, ref);
 
   const { title, message, type = 'default' } = props.toast.content;
+  // Ensure type is valid, fallback to 'default' if not
+  const safeType = (type && toastColors[type]) ? type : 'default';
 
   return (
     <div
@@ -45,27 +47,27 @@ export function Toast<T extends ToastType>({ state, ...props }: ToastProps<T>) {
       ref={ref}
       className={cn(
         'flex items-center justify-between gap-4 rounded-xl border p-6',
-        toastColors[type].bg,
-        toastColors[type].border,
+        toastColors[safeType].bg,
+        toastColors[safeType].border,
       )}>
       <div>
         <div className="flex items-center gap-4">
-          {toastIcons[type].renderComponent({
+          {toastIcons[safeType] && toastIcons[safeType].renderComponent({
             width: 24,
             height: 24,
-            className: toastColors[type].icon,
+            className: toastColors[safeType].icon,
           })}
-          <h4 {...titleProps} className={cn('text-lg font-semibold', toastColors[type].text)}>
+          <h4 {...titleProps} className={cn('text-lg font-semibold', toastColors[safeType].text)}>
             {title}
           </h4>
         </div>
         {message !== undefined && message !== '' && (
-          <p {...descriptionProps} className={cn('ml-10 text-sm', toastColors[type].text)}>
+          <p {...descriptionProps} className={cn('ml-10 text-sm', toastColors[safeType].text)}>
             {message}
           </p>
         )}
       </div>
-      <Button {...closeButtonProps} mode="ghost" size="small" Icon={Close} iconClassName={toastColors[type].icon} />
+      <Button {...closeButtonProps} mode="ghost" size="small" Icon={Close} iconClassName={toastColors[safeType].icon} />
     </div>
   );
 }

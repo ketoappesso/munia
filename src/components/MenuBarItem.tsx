@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import React, { SVGProps, useCallback, useEffect } from 'react';
 import { Badge } from './ui/Badge';
 import { ButtonNaked } from './ui/ButtonNaked';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function MenuBarItem({
   children,
@@ -24,6 +25,7 @@ export function MenuBarItem({
   const { data: session } = useSession();
   const [isActive] = useActiveRouteChecker(route);
   const { confirm } = useDialogs();
+  const { t } = useLanguage();
 
   const onItemClick = useCallback(() => {
     // Check if user needs to login for protected routes
@@ -34,8 +36,8 @@ export function MenuBarItem({
     
     if (route === '/api/auth/signout') {
       confirm({
-        title: 'Confirm Logout',
-        message: 'Do you really wish to logout?',
+        title: t('nav.confirmLogout'),
+        message: t('nav.confirmLogoutMessage'),
         onConfirm: () => signOut({ callbackUrl: '/' }),
       });
     } else {
