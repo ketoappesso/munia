@@ -70,6 +70,7 @@ class TencentSmsClient {
 
     try {
       console.log('DEBUG: SMS Params:', JSON.stringify(params, null, 2));
+      console.log('DEBUG: Using signature:', this.config.signName);
 
       const response = await this.client.SendSms(params);
 
@@ -95,7 +96,8 @@ class TencentSmsClient {
   // 发送验证码短信
   async sendVerificationCode(phoneNumber: string, code: string): Promise<boolean> {
     try {
-      const response = await this.sendSms(phoneNumber, [code], `verify_${Date.now()}`);
+      // Template expects: {1} = verification code, {2} = expiry time in minutes
+      const response = await this.sendSms(phoneNumber, [code, '5'], `verify_${Date.now()}`);
 
       // 检查发送状态
       if (response.SendStatusSet && response.SendStatusSet.length > 0) {
