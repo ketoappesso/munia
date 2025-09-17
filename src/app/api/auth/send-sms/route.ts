@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma/prisma';
 import { smsCodeStore } from '@/lib/auth/smsVerification';
+import { getVerificationService } from '@/lib/sms/verificationService';
 
 export async function POST(request: Request) {
   try {
@@ -54,34 +55,34 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generate 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Store code with 5-minute expiry
-    smsCodeStore.set(cleanPhone, {
-      code,
-      expiry: Date.now() + 5 * 60 * 1000, // 5 minutes
-      attempts: (existingCode?.attempts || 0) + 1,
-    });
+    // Try to send SMS using Tencent Cloud SMS service
+    const verificationService = getVerificationService();
+    const smsResult = await verificationService.sendVerificationCode(cleanPhone);
 
-    // In production, send actual SMS here
-    // For development, log the code
-    console.log(`[SMS] Verification code for ${cleanPhone}: ${code}`);
+    if (!smsResult.success) {
+      return NextResponse.json(
+        { error: smsResult.message },
+        { status: 429 }
+      );
+    }
 
-    // In development environment, also return the code for testing
-    // Remove this in production!
+    // For development environment, also return the code for testing
     if (process.env.NODE_ENV === 'development') {
+      // Get the verification info for dev mode
+      const verificationInfo = verificationService.getVerificationInfo(cleanPhone);
       return NextResponse.json({
         success: true,
-        message: '验证码已发送',
+        message: smsResult.message,
         // Only for development - remove in production
-        devCode: code,
+        devCode: verificationInfo?.code,
+        canResendAt: smsResult.canResendAt,
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: '验证码已发送',
+      message: smsResult.message,
+      canResendAt: smsResult.canResendAt,
     });
   } catch (error) {
     console.error('[SMS] Error sending code:', error);

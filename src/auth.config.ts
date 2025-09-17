@@ -46,19 +46,23 @@ export default {
         const { PrismaClient } = await import('@prisma/client');
         const prisma = new PrismaClient();
 
-        // Import SMS verification helper
-        const { verifySmsCode } = await import('@/lib/auth/smsVerification');
+        // Import SMS verification service
+        const { getVerificationService } = await import('@/lib/sms/verificationService');
 
         // Handle SMS code verification
         if (smsCode) {
           console.log('Verifying SMS code for phone:', cleanPhone);
-          
-          // Verify the SMS code
-          const isValidCode = verifySmsCode(cleanPhone, smsCode);
-          if (!isValidCode) {
-            console.log('Invalid SMS code');
+
+          // Verify the SMS code using new verification service
+          const verificationService = getVerificationService();
+          const verificationResult = verificationService.verifyCode(cleanPhone, smsCode);
+          if (!verificationResult.success) {
+            console.log('Invalid SMS code:', verificationResult.message);
             return null;
           }
+
+          // Clear the verification after successful use
+          verificationService.clearVerification(cleanPhone);
 
           // Get or create user
           let user = await prisma.user.findUnique({
@@ -101,12 +105,30 @@ export default {
           });
 
           if (mode === 'register') {
-            // Registration with password
+            // Registration with password requires SMS verification
             console.log('Registration attempt for phone:', cleanPhone);
             if (user) {
               console.log('Phone number already registered:', user.id);
               return null; // Phone already exists
             }
+
+            // Verify SMS code is required for registration
+            if (!smsCode) {
+              console.log('SMS code required for registration');
+              return null;
+            }
+
+            // Verify the SMS code using verification service
+            const { getVerificationService } = await import('@/lib/sms/verificationService');
+            const verificationService = getVerificationService();
+            const verificationResult = verificationService.verifyCode(cleanPhone, smsCode);
+            if (!verificationResult.success) {
+              console.log('Invalid SMS code for registration:', verificationResult.message);
+              return null;
+            }
+
+            // Clear the verification after successful use
+            verificationService.clearVerification(cleanPhone);
 
             console.log('Creating new user for phone:', cleanPhone);
             try {
@@ -116,7 +138,6 @@ export default {
                   phoneNumber: cleanPhone,
                   passwordHash: hashedPassword,
                   username: cleanPhone, // Use phone as default username
-                  // Note: phoneVerified field doesn't exist in the schema
                 },
               });
               console.log('New user created successfully:', newUser.id, newUser.phoneNumber);

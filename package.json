@@ -86,7 +86,8 @@
     "typescript": "5.0.4",
     "uuid": "^9.0.0",
     "ws": "^8.18.3",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "tencentcloud-sdk-nodejs-sms": "^4.1.71"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",

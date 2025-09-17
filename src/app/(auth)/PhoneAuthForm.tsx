@@ -80,12 +80,18 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
       return;
     }
 
+    if (mode === 'register' && smsCode.length !== 6) {
+      setInputError('请输入6位短信验证码');
+      return;
+    }
+
     setLoading((prev) => ({ ...prev, password: true }));
 
     try {
       const signInResult = await signIn('credentials', {
         phoneNumber: phoneNumber.replace(/\D/g, ''),
         password,
+        smsCode: mode === 'register' ? smsCode : undefined,
         mode,
         redirect: false,
         callbackUrl,
@@ -314,9 +320,8 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
             </div>
           )}
 
-          {/* SMS Verification for Register - DISABLED FOR TESTING PHASE */}
-          {/* Uncomment this section when SMS verification is needed */}
-          {/* {mode === 'register' && (
+          {/* SMS Verification for Register */}
+          {mode === 'register' && (
             <>
               <div className="flex gap-2">
                 <div className="flex-1">
@@ -344,7 +349,7 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
                 </div>
               </div>
             </>
-          )} */}
+          )}
 
           {/* Password Submit Button */}
           <Button
