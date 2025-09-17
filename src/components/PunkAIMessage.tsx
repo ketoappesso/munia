@@ -41,15 +41,25 @@ export function PunkAIMessage({
     // Start TTS and character display only once
     if (!hasStartedRef.current && content) {
       hasStartedRef.current = true;
-      
-      // Start playback with character-by-character reveal
-      const textLength = content.length;
-      speak(content, (charIndex) => {
-        // Update displayed text character by character
-        setDisplayedText(content.slice(0, charIndex + 1));
-      }, textLength);
+
+      // Use a small timeout to ensure we only trigger once even in StrictMode
+      const timeoutId = setTimeout(() => {
+        // Double check the ref in case of race conditions
+        if (hasStartedRef.current && content) {
+          // Start playback with character-by-character reveal
+          const textLength = content.length;
+          speak(content, (charIndex) => {
+            // Update displayed text character by character
+            setDisplayedText(content.slice(0, charIndex + 1));
+          }, textLength);
+        }
+      }, 0);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
-  }, [content, speak]);
+  }, [content, speak]); // Include speak but protected by hasStartedRef
 
   return (
     <div

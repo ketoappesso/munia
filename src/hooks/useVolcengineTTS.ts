@@ -57,11 +57,17 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   }, []);
 
   const speak = useCallback(async (
-    text: string, 
+    text: string,
     onCharacter?: (charIndex: number) => void,
     textLength?: number
   ) => {
     if (!text) return;
+
+    // Prevent multiple simultaneous playback attempts
+    if (isPlaying || isLoading) {
+      console.log('[useVolcengineTTS] Already playing or loading, ignoring duplicate call');
+      return;
+    }
 
     // Reset state
     setError(null);
@@ -151,8 +157,15 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
 
       // Clean up any existing audio before creating new one
       if (audioRef.current) {
+        console.log('[useVolcengineTTS] Cleaning up existing audio element');
         audioRef.current.pause();
         audioRef.current.src = '';
+        // Remove all event listeners to prevent memory leaks
+        audioRef.current.onloadedmetadata = null;
+        audioRef.current.onplay = null;
+        audioRef.current.onended = null;
+        audioRef.current.onpause = null;
+        audioRef.current.onerror = null;
         audioRef.current = null;
         // Small delay to ensure cleanup
         await new Promise(resolve => setTimeout(resolve, 50));
@@ -361,7 +374,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         options.onEnd?.(); // Reset UI state
       }
     }
-  }, [options, browserTTS, isPunkedActive, punkedVoiceId]);
+  }, [options, browserTTS, isPunkedActive, punkedVoiceId, isPlaying, isLoading]);
 
   const pause = useCallback(() => {
     if (audioRef.current && isPlaying && !isPaused) {
