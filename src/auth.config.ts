@@ -173,7 +173,6 @@ export default {
       const isOnUnprotectedPage =
         pathname === '/' || // The root page '/' is also an unprotected page
         pathname === '/feed' || // Feed page is now public
-        pathname.match(/^\/[^\/]+$/) || // User profiles like /username are public
         unProtectedPages.some((page) => pathname.startsWith(page));
       const isProtectedPage = !isOnUnprotectedPage;
 

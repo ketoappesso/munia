@@ -13,9 +13,9 @@ export default async function Layout({
 }) {
   const [user] = await getServerUser();
 
-  // Redirect non-authenticated users to login
+  // Redirect non-authenticated users to login with return path
   if (!user) {
-    redirect('/login');
+    redirect(`/login?from=${encodeURIComponent(`/${params.username}`)}`);
   }
 
   // Only fetch profile if user is authenticated
