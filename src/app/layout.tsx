@@ -20,6 +20,22 @@ import React from 'react';
 export const metadata = {
   title: 'Appesso',
   description: 'A social media web app, built with Next.js 13.',
+  manifest: '/manifest.json',
+  themeColor: '#000000',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Appesso',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
@@ -28,6 +44,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
     <html lang="en" className="dark overflow-y-scroll">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        {/* PWA预加载关键资源 */}
+        <link rel="preload" href="/icons/icon-192x192.png" as="image" />
+        <link rel="preconnect" href="https://assets.xyuan.chat" />
+        <link rel="preconnect" href="https://appesso-s3-bucket.s3.us-east-1.amazonaws.com" />
+        <link rel="dns-prefetch" href="https://xiaoyuan-chat.tos-cn-guangzhou.volces.com" />
       </head>
       <body className={cn('bg-background text-foreground')}>
         <Providers session={session}>{children}</Providers>
