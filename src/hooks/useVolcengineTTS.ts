@@ -63,12 +63,6 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
   ) => {
     if (!text) return;
 
-    // Prevent multiple simultaneous playback attempts
-    if (isPlaying || isLoading) {
-      console.log('[useVolcengineTTS] Already playing or loading, ignoring duplicate call');
-      return;
-    }
-
     // Reset state
     setError(null);
     setIsLoading(true);
@@ -374,7 +368,7 @@ export function useVolcengineTTS(options: UseVolcengineTTSOptions = {}) {
         options.onEnd?.(); // Reset UI state
       }
     }
-  }, [options, browserTTS, isPunkedActive, punkedVoiceId, isPlaying, isLoading]);
+  }, [options, browserTTS, isPunkedActive, punkedVoiceId, playbackSpeed]);
 
   const pause = useCallback(() => {
     if (audioRef.current && isPlaying && !isPaused) {

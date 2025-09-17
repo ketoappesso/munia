@@ -66,7 +66,17 @@ export default function BackofficePage() {
   useEffect(() => {
     if (status === 'loading') return;
 
-    if (!session?.user || session.user.username !== ADMIN_PHONE) {
+    const isAdmin = session?.user && (
+      session.user.username === ADMIN_PHONE ||
+      session.user.phoneNumber === ADMIN_PHONE
+    );
+
+    if (!isAdmin) {
+      console.log('Admin check failed:', {
+        username: session?.user?.username,
+        phoneNumber: session?.user?.phoneNumber,
+        expectedPhone: ADMIN_PHONE
+      });
       router.push('/');
     }
   }, [session, status, router]);
@@ -126,7 +136,12 @@ export default function BackofficePage() {
     return <div className="p-6">Loading...</div>;
   }
 
-  if (!session?.user || session.user.username !== ADMIN_PHONE) {
+  const isAdmin = session?.user && (
+    session.user.username === ADMIN_PHONE ||
+    session.user.phoneNumber === ADMIN_PHONE
+  );
+
+  if (!isAdmin) {
     return null;
   }
 

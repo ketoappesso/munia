@@ -1,12 +1,13 @@
 'use client';
 
 import { ResponsiveContainer } from '@/components/ui/ResponsiveContainer';
-import { ChevronLeft, MessageSquare, Wand2, User, Bot, Copy, RotateCcw } from 'lucide-react';
+import { ChevronLeft, MessageSquare, Wand2, User, Bot, Copy, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
+import { useVolcengineTTS } from '@/hooks/useVolcengineTTS';
 
 export default function PromptOptimizationPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function PromptOptimizationPage() {
   const [testResponse, setTestResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [userVoiceId, setUserVoiceId] = useState<string | null>(null);
+  const [displayedText, setDisplayedText] = useState('');
 
   const roleTemplates = [
     {
@@ -68,6 +71,34 @@ export default function PromptOptimizationPage() {
     },
   ];
 
+  // Initialize TTS with user's custom voice
+  const { speak, stop, isPlaying } = useVolcengineTTS({
+    voice: userVoiceId,
+    speed: 1.0,
+    onEnd: () => {
+      setDisplayedText(testResponse);
+    }
+  });
+
+  // Fetch user's TTS settings on mount
+  useEffect(() => {
+    const fetchTTSSettings = async () => {
+      try {
+        const response = await fetch('/api/user/tts-settings');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.voiceId) {
+            setUserVoiceId(data.voiceId);
+            console.log('[PromptOptimization] User voice ID loaded:', data.voiceId);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch TTS settings:', error);
+      }
+    };
+    fetchTTSSettings();
+  }, []);
+
   const handleRoleChange = (role: typeof roleTemplates[0]) => {
     setSelectedRole(role.id);
     setSystemPrompt(role.prompt);
@@ -101,6 +132,19 @@ export default function PromptOptimizationPage() {
 
       const data = await response.json();
       setTestResponse(data.response);
+
+      // Use the voice ID from the response if available, otherwise use the fetched one
+      const voiceToUse = data.ttsVoiceId || userVoiceId;
+      console.log('[PromptOptimization] Using voice for TTS:', voiceToUse);
+
+      // Start TTS playback with typewriter effect
+      if (data.response) {
+        setDisplayedText('');
+        const textLength = data.response.length;
+        speak(data.response, (charIndex) => {
+          setDisplayedText(data.response.slice(0, charIndex + 1));
+        }, textLength);
+      }
     } catch (error) {
       console.error('Error testing prompt:', error);
       setTestResponse('测试失败，请检查网络连接后重试');
@@ -284,8 +328,24 @@ export default function PromptOptimizationPage() {
             
             {testResponse && (
               <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                <label className="block text-sm font-medium mb-2">AI回复</label>
-                <p className="text-gray-700 dark:text-gray-300">{testResponse}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">AI回复</label>
+                  <ButtonNaked
+                    onPress={() => isPlaying ? stop() : speak(testResponse, (charIndex) => {
+                      setDisplayedText(testResponse.slice(0, charIndex + 1));
+                    }, testResponse.length)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    title={isPlaying ? '停止播放' : '播放语音'}>
+                    {isPlaying ? (
+                      <VolumeX className="h-5 w-5 text-red-500" />
+                    ) : (
+                      <Volume2 className="h-5 w-5 text-green-600" />
+                    )}
+                  </ButtonNaked>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {isPlaying ? displayedText : testResponse}
+                </p>
               </div>
             )}
           </div>

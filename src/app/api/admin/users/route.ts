@@ -29,14 +29,20 @@ export async function GET(request: Request) {
       phoneNumber: session?.user?.phoneNumber
     });
 
-    // Check if user is authorized admin
+    // Check if user is authorized admin - check all possible fields
     const isAdmin = session?.user && (
       session.user.username === ADMIN_PHONE ||
-      session.user.phoneNumber === ADMIN_PHONE
+      session.user.phoneNumber === ADMIN_PHONE ||
+      session.user.name === ADMIN_PHONE
     );
 
     if (!isAdmin) {
-      console.log('Admin users API: Unauthorized access attempt');
+      console.log('Admin users API: Unauthorized access attempt', {
+        username: session?.user?.username,
+        phoneNumber: session?.user?.phoneNumber,
+        name: session?.user?.name,
+        expectedPhone: ADMIN_PHONE
+      });
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 401 }
@@ -122,10 +128,11 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    // Check if user is authorized admin
+    // Check if user is authorized admin - check all possible fields
     const isAdmin = session?.user && (
       session.user.username === ADMIN_PHONE ||
-      session.user.phoneNumber === ADMIN_PHONE
+      session.user.phoneNumber === ADMIN_PHONE ||
+      session.user.name === ADMIN_PHONE
     );
 
     if (!isAdmin) {

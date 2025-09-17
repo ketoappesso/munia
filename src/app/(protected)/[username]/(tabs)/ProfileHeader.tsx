@@ -15,6 +15,7 @@ import { useState, useCallback, useEffect } from 'react';
 import ProfilePunkIndicator from '@/components/ProfilePunkIndicator';
 import { usePunk } from '@/contexts/PunkContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuthErrorHandler } from '@/hooks/useAuthErrorHandler';
 
 export function ProfileHeader({
   isOwnProfile,
@@ -29,16 +30,20 @@ export function ProfileHeader({
   const { isPunkedActive } = usePunk();
   const [punkedCount, setPunkedCount] = useState<number>(0);
   const { t } = useLanguage();
+  const { checkResponseAuth } = useAuthErrorHandler();
 
   // Fetch punked followers count for this specific user
   useEffect(() => {
     if (initialProfileData?.id) {
       fetch(`/api/users/${initialProfileData.id}/punked-followers`)
-        .then(res => res.json())
+        .then(async res => {
+          await checkResponseAuth(res);
+          return res.json();
+        })
         .then(data => setPunkedCount(data.count || 0))
         .catch(err => console.error('Failed to fetch punked followers count:', err));
     }
-  }, [initialProfileData?.id]);
+  }, [initialProfileData?.id, checkResponseAuth]);
   
   // If there is no query of the user data yet, use the
   // `initialProfileData` that was fetched on server.

@@ -91,7 +91,9 @@ export class VolcengineTTSClient {
       // Determine resource ID based on voice type
       let resourceId: string;
       if (isCustomVoice) {
-        resourceId = RESOURCE_IDS.MEGATTS;  // Custom voices use MegaTTS
+        // Custom voices use MegaTTS resource
+        resourceId = RESOURCE_IDS.MEGATTS;
+        console.log('Using MegaTTS for custom voice:', params.voiceType);
       } else if (isBigTTSVoice) {
         resourceId = RESOURCE_IDS.BIGTTS;  // BigTTS voices
       } else {

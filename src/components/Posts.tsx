@@ -231,7 +231,7 @@ export function Posts({ type, hashtag, userId }: PostsProps) {
               initial="hidden"
               animate="visible"
               exit="hidden"
-              className="sticky top-5 z-10 mx-auto overflow-hidden">
+              className="sticky top-5 z-10 mx-auto overflow-hidden lg:col-span-2">
               <ButtonNaked
                 onPress={viewNewlyLoadedPosts}
                 className="mt-4 inline-flex cursor-pointer select-none items-center gap-3 rounded-full bg-primary px-4 py-2 hover:bg-primary-accent">
@@ -248,26 +248,29 @@ export function Posts({ type, hashtag, userId }: PostsProps) {
         {isPending ? (
           <GenericLoading>Loading posts</GenericLoading>
         ) : (
-          <AnimatePresence>
-            {data?.pages.map((page) =>
-              page.map((post, i) => (
-                <motion.div
-                  variants={postFramerVariants}
-                  initial={shouldAnimate ? 'start' : false}
-                  animate="animate"
-                  exit="exit"
-                  transition={postTransition(i)}
-                  key={post.id}>
-                  <Post id={post.id} commentsShown={post.commentsShown} toggleComments={toggleComments} />
-                </motion.div>
-              )),
-            )}
-          </AnimatePresence>
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4">
+            <AnimatePresence>
+              {data?.pages.map((page) =>
+                page.map((post, i) => (
+                  <motion.div
+                    variants={postFramerVariants}
+                    initial={shouldAnimate ? 'start' : false}
+                    animate="animate"
+                    exit="exit"
+                    transition={postTransition(i)}
+                    key={post.id}
+                    className="col-span-1">
+                    <Post id={post.id} commentsShown={post.commentsShown} toggleComments={toggleComments} />
+                  </motion.div>
+                )),
+              )}
+            </AnimatePresence>
+          </div>
         )}
       </div>
 
       <div
-        className="min-h-[16px]"
+        className="min-h-[16px] lg:col-span-2"
         ref={bottomElRef}
         /**
          * The first page will be initially loaded by React Query

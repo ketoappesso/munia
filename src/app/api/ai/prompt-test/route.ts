@@ -15,10 +15,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'System prompt and test message are required' }, { status: 400 });
     }
 
-    // Check if user is punked (has AI features)
+    // Check if user is punked (has AI features) and get their TTS voice ID
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { punked: true, phoneNumber: true }
+      select: { punked: true, phoneNumber: true, ttsVoiceId: true }
     });
 
     if (!user?.punked) {
@@ -96,10 +96,11 @@ export async function POST(request: Request) {
     
     const aiResponse = data.choices?.[0]?.message?.content || 'No response generated';
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       response: aiResponse,
       model: process.env.LLM_MODEL || 'deepseek-chat',
-      tokensUsed: data.usage?.total_tokens || 0
+      tokensUsed: data.usage?.total_tokens || 0,
+      ttsVoiceId: user.ttsVoiceId || null
     });
   } catch (error) {
     console.error('Error testing prompt:', {
