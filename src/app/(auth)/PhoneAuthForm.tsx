@@ -161,11 +161,25 @@ export function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
         startCountdown();
       } else {
         const error = await response.json();
-        showToast({ 
-          type: 'error', 
-          title: '发送失败', 
-          message: error.message || '请稍后重试' 
-        });
+
+        // Handle rate limiting (429) specifically
+        if (response.status === 429) {
+          showToast({
+            type: 'warning',
+            title: '发送过于频繁',
+            message: error.error || '请稍后重试'
+          });
+          // Start countdown if not already running
+          if (smsCountdown === 0) {
+            startCountdown();
+          }
+        } else {
+          showToast({
+            type: 'error',
+            title: '发送失败',
+            message: error.error || '请稍后重试'
+          });
+        }
       }
     } catch (error) {
       showToast({ 
