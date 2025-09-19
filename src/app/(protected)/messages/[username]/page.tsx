@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { ButtonNaked } from '@/components/ui/ButtonNaked';
-import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon, Gift, Bot, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, Plus, Camera, Image as ImageIcon, Gift, Bot, Sparkles, Mic, MicOff } from 'lucide-react';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetcher } from '@/lib/fetcher';
 import { useMessaging } from '@/hooks/useMessaging';
@@ -48,6 +49,43 @@ export default function MessagesPage({ params }: { params: { username: string } 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Voice input integration
+  const {
+    isRecording,
+    isConnecting,
+    partialTranscript,
+    toggleRecording
+  } = useVoiceInput({
+    onPartialResult: (text) => {
+      setMessage(text);
+      // Auto-focus the input field when receiving text
+      if (textareaRef.current && text) {
+        textareaRef.current.focus();
+      }
+    },
+    onAutoSend: (text) => {
+      if (text.trim() && conversation?.id && !sendMessageMutation.isPending) {
+        setMessage("");
+        sendMessageMutation.mutate(text.trim());
+      }
+    },
+    onError: (error) => {
+      console.error('Voice input error:', error);
+    },
+    wsUrl: 'wss://xyuan.chat/voice-ws'
+  });
+
+  // Auto-focus and enlarge input when recording starts
+  useEffect(() => {
+    if (isRecording && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.rows = 3; // Enlarge the input field
+    } else if (!isRecording && textareaRef.current) {
+      textareaRef.current.rows = 1; // Reset size
+    }
+  }, [isRecording]);
 
   // Fetch conversation and other user info
   const { data: otherUser } = useQuery({
@@ -458,15 +496,37 @@ export default function MessagesPage({ params }: { params: { username: string } 
 
           <div className="relative flex-1">
             <textarea
-              value={message}
+              ref={textareaRef}
+              value={message || partialTranscript}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="发个消息吧~"
+              placeholder={isRecording ? "正在听..." : "发个消息吧~"}
               className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm placeholder-gray-400 focus:border-gray-300 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:placeholder-gray-500 dark:focus:border-gray-600 dark:focus:bg-gray-900"
               onKeyDown={handleKeyDown}
               aria-label="消息输入框"
               rows={1}
+              style={{
+                transition: 'all 0.2s ease',
+                minHeight: isRecording ? '80px' : '36px'
+              }}
             />
           </div>
+
+          {/* Microphone button */}
+          <ButtonNaked
+            onPress={toggleRecording}
+            isDisabled={isConnecting}
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+              isRecording
+                ? 'animate-pulse bg-red-100 dark:bg-red-900/20'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+            aria-label={isRecording ? "停止录音" : "开始录音"}>
+            {isRecording ? (
+              <MicOff className="h-5 w-5 text-red-600 dark:text-red-400" />
+            ) : (
+              <Mic className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            )}
+          </ButtonNaked>
 
           {message.trim() ? (
             <ButtonNaked
@@ -477,13 +537,13 @@ export default function MessagesPage({ params }: { params: { username: string } 
             </ButtonNaked>
           ) : (
             <div className="flex gap-1">
-              <ButtonNaked 
+              <ButtonNaked
                 onPress={() => cameraInputRef.current?.click()}
                 isDisabled={uploadingImage}
                 className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">
                 <Camera className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </ButtonNaked>
-              <ButtonNaked 
+              <ButtonNaked
                 onPress={() => imageInputRef.current?.click()}
                 isDisabled={uploadingImage}
                 className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-gray-100 dark:hover:bg-gray-800">

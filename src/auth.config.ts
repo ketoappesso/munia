@@ -96,10 +96,65 @@ export default {
           return null;
         }
 
+        // Handle auto mode - check if user exists and login/register accordingly
+        if (mode === 'auto' && password) {
+          console.log('Auto mode authentication for phone:', cleanPhone);
+
+          const user = await prisma.user.findUnique({
+            where: { phoneNumber: cleanPhone },
+          });
+
+          if (user) {
+            // User exists, try to login
+            console.log('User exists, attempting login for:', cleanPhone);
+            if (user.passwordHash) {
+              const isValid = await bcrypt.compare(password, user.passwordHash);
+              console.log('Password validation result:', isValid);
+              if (isValid) {
+                return {
+                  id: user.id,
+                  name: user.name || user.username || user.phoneNumber,
+                  username: user.username,
+                  phoneNumber: user.phoneNumber,
+                };
+              } else {
+                console.log('Invalid password for existing user');
+                return null;
+              }
+            } else {
+              console.log('User exists but has no password hash');
+              return null;
+            }
+          } else {
+            // User doesn't exist, auto-register
+            console.log('User does not exist, auto-registering for:', cleanPhone);
+            try {
+              const hashedPassword = await bcrypt.hash(password, 12);
+              const newUser = await prisma.user.create({
+                data: {
+                  phoneNumber: cleanPhone,
+                  passwordHash: hashedPassword,
+                  username: cleanPhone, // Use phone as default username
+                },
+              });
+              console.log('Auto-registration successful:', newUser.id, newUser.phoneNumber);
+              return {
+                id: newUser.id,
+                name: newUser.name || newUser.username || newUser.phoneNumber,
+                username: newUser.username,
+                phoneNumber: newUser.phoneNumber,
+              };
+            } catch (error) {
+              console.error('Error auto-creating user:', error);
+              return null;
+            }
+          }
+        }
+
         // Handle password authentication
         if (password) {
           console.log('Password authentication for phone:', cleanPhone, 'Mode:', mode);
-          
+
           const user = await prisma.user.findUnique({
             where: { phoneNumber: cleanPhone },
           });

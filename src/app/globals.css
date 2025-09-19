@@ -99,3 +99,59 @@
     @apply rounded-sm decoration-blue-500 decoration-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500;
   }
 }
+
+/* Voice Assistant Animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Custom Scrollbar Styles for Voice Assistant */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-gray-700 {
+  scrollbar-color: #374151 transparent;
+}
+
+.scrollbar-track-gray-900 {
+  scrollbar-color: #374151 #111827;
+}
+
+/* WebKit Scrollbars for Voice Assistant */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thumb-gray-700::-webkit-scrollbar-thumb {
+  background-color: #374151;
+  border-radius: 4px;
+}
+
+.scrollbar-track-gray-900::-webkit-scrollbar-track {
+  background-color: #111827;
+}

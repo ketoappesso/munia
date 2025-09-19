@@ -82,6 +82,8 @@ model User {
   visualMedia                 VisualMedia[]
   receivedTransactions        WalletTransaction[] @relation("receiver")
   sentTransactions            WalletTransaction[] @relation("sender")
+  voiceDevices                VoiceDevice[]
+  clonedVoices                ClonedVoice[]
 }
 
 model VerificationToken {
@@ -450,4 +452,90 @@ model FacegateJob {
   @@index([scheduleId, deviceId])
   @@index([state])
   @@index([deviceId])
+}
+
+// Voice Assistant Models
+model VoiceDevice {
+  id              String   @id
+  name            String
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String?
+  status          String   @default("offline")
+  roleId          Int?
+  functionNames   String?  // Comma-separated function names
+  ip              String?
+  wifiName        String?
+  chipModelName   String?
+  version         String?
+  lastLogin       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sessions        VoiceSession[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model VoiceSession {
+  id          String   @id @default(cuid())
+  deviceId    String
+  device      VoiceDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  userId      String
+  startTime   DateTime @default(now())
+  endTime     DateTime?
+  messages    VoiceMessage[]
+
+  @@index([deviceId])
+  @@index([userId])
+  @@index([startTime])
+}
+
+model VoiceMessage {
+  id          Int      @id @default(autoincrement())
+  sessionId   String
+  session     VoiceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sender      String   // "user" or "assistant"
+  roleId      Int?
+  content     String?
+  messageType String?
+  audioPath   String?
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([sender])
+  @@index([createdAt])
+}
+
+model VoiceRole {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  avatar      String?
+  ttsVoiceId  String?
+  systemPrompt String?
+  userId      String?  // null for system roles, userId for custom roles
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+model ClonedVoice {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  voiceId     String   @unique
+  status      String   @default("pending") // pending, processing, completed, failed
+  audioSamplePath String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([voiceId])
 }
