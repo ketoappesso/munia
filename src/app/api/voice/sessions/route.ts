@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth.config';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma/prisma';
 
 // GET /api/voice/sessions - Get voice sessions for current user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -64,7 +63,7 @@ export async function GET(request: NextRequest) {
 // POST /api/voice/sessions - Start a new voice session
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(

@@ -1,0 +1,185 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "Appesso" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e5] [cursor=pointer]
+        - heading "Appesso" [level=1] [ref=e7] [cursor=pointer]
+      - button "Feed" [ref=e8] [cursor=pointer]:
+        - img [ref=e11] [cursor=pointer]
+        - paragraph [ref=e13] [cursor=pointer]: Feed
+      - button "Messages" [ref=e14] [cursor=pointer]:
+        - img [ref=e16] [cursor=pointer]
+        - paragraph [ref=e18] [cursor=pointer]: Messages
+      - button "My Profile" [ref=e19] [cursor=pointer]:
+        - img [ref=e21] [cursor=pointer]
+        - paragraph [ref=e23] [cursor=pointer]: My Profile
+    - generic [ref=e24]:
+      - generic [ref=e27]:
+        - button "关注" [ref=e28] [cursor=pointer]
+        - button "发现" [ref=e29] [cursor=pointer]
+        - button "任务" [ref=e30] [cursor=pointer]
+      - generic [ref=e32]:
+        - generic [ref=e34]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - link "1" [ref=e39] [cursor=pointer]:
+                - /url: /18674881384
+                - generic [ref=e40] [cursor=pointer]: "1"
+              - generic [ref=e41]:
+                - heading "18674881384" [level=2] [ref=e43] [cursor=pointer]:
+                  - link "18674881384" [ref=e44] [cursor=pointer]:
+                    - /url: /18674881384
+                - heading "5 days ago" [level=2] [ref=e45]
+            - button "PUNK IT" [disabled] [ref=e47]:
+              - generic [ref=e48]:
+                - img [ref=e49]
+                - generic [ref=e51]: PUNK IT
+          - generic [ref=e52]:
+            - generic [ref=e54]: 9:41
+            - button "Play" [ref=e56] [cursor=pointer]:
+              - img [ref=e57] [cursor=pointer]
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - button "0" [disabled] [ref=e61] [cursor=pointer]:
+                - img [ref=e62] [cursor=pointer]
+                - paragraph [ref=e64] [cursor=pointer]: "0"
+              - button "0" [disabled] [ref=e65] [cursor=pointer]:
+                - img [ref=e66] [cursor=pointer]
+                - paragraph [ref=e68] [cursor=pointer]: "0"
+            - button "关注" [ref=e70] [cursor=pointer]
+        - generic [ref=e72]:
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - link "Keto's avatar" [ref=e77] [cursor=pointer]:
+                - /url: /18874748888
+                - img "Keto's avatar" [ref=e78] [cursor=pointer]
+              - generic [ref=e79]:
+                - heading "Keto" [level=2] [ref=e81] [cursor=pointer]:
+                  - link "Keto" [ref=e82] [cursor=pointer]:
+                    - /url: /18874748888
+                - heading "5 days ago" [level=2] [ref=e83]
+            - button "PUNK IT" [disabled] [ref=e85]:
+              - generic [ref=e86]:
+                - img [ref=e87]
+                - generic [ref=e89]: PUNK IT
+          - generic [ref=e90]:
+            - generic [ref=e92]: 6:22
+            - button "Play" [ref=e94] [cursor=pointer]:
+              - img [ref=e95] [cursor=pointer]
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - button "0" [disabled] [ref=e99] [cursor=pointer]:
+                - img [ref=e100] [cursor=pointer]
+                - paragraph [ref=e102] [cursor=pointer]: "0"
+              - button "0" [disabled] [ref=e103] [cursor=pointer]:
+                - img [ref=e104] [cursor=pointer]
+                - paragraph [ref=e106] [cursor=pointer]: "0"
+            - button "关注" [ref=e108] [cursor=pointer]
+        - generic [ref=e110]:
+          - generic [ref=e112]:
+            - generic [ref=e113]:
+              - link "Keto's avatar" [ref=e115] [cursor=pointer]:
+                - /url: /18874748888
+                - img "Keto's avatar" [ref=e116] [cursor=pointer]
+              - generic [ref=e117]:
+                - heading "Keto" [level=2] [ref=e119] [cursor=pointer]:
+                  - link "Keto" [ref=e120] [cursor=pointer]:
+                    - /url: /18874748888
+                - heading "5 days ago" [level=2] [ref=e121]
+            - button "PUNK IT" [disabled] [ref=e123]:
+              - generic [ref=e124]:
+                - img [ref=e125]
+                - generic [ref=e127]: PUNK IT
+          - generic [ref=e128]:
+            - generic [ref=e130]: 0:02
+            - button "Play" [ref=e132] [cursor=pointer]:
+              - img [ref=e133] [cursor=pointer]
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - button "0" [disabled] [ref=e137] [cursor=pointer]:
+                - img [ref=e138] [cursor=pointer]
+                - paragraph [ref=e140] [cursor=pointer]: "0"
+              - button "0" [disabled] [ref=e141] [cursor=pointer]:
+                - img [ref=e142] [cursor=pointer]
+                - paragraph [ref=e144] [cursor=pointer]: "0"
+            - button "关注" [ref=e146] [cursor=pointer]
+        - generic [ref=e148]:
+          - generic [ref=e151]:
+            - link "15574745555's avatar" [ref=e153] [cursor=pointer]:
+              - /url: /15574745555
+              - img "15574745555's avatar" [ref=e154] [cursor=pointer]
+            - generic [ref=e155]:
+              - heading "15574745555" [level=2] [ref=e157] [cursor=pointer]:
+                - link "15574745555" [ref=e158] [cursor=pointer]:
+                  - /url: /15574745555
+              - heading "10 days ago" [level=2] [ref=e159]
+          - generic [ref=e160]:
+            - generic [ref=e162]: 0:06
+            - button "Play" [ref=e164] [cursor=pointer]:
+              - img [ref=e165] [cursor=pointer]
+          - button [ref=e169] [cursor=pointer]
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - button "0" [disabled] [ref=e172] [cursor=pointer]:
+                - img [ref=e173] [cursor=pointer]
+                - paragraph [ref=e175] [cursor=pointer]: "0"
+              - button "0" [disabled] [ref=e176] [cursor=pointer]:
+                - img [ref=e177] [cursor=pointer]
+                - paragraph [ref=e179] [cursor=pointer]: "0"
+            - button "关注" [ref=e181] [cursor=pointer]
+        - generic [ref=e183]:
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - link "Keto's avatar" [ref=e188] [cursor=pointer]:
+                - /url: /18874748888
+                - img "Keto's avatar" [ref=e189] [cursor=pointer]
+              - generic [ref=e190]:
+                - heading "Keto" [level=2] [ref=e192] [cursor=pointer]:
+                  - link "Keto" [ref=e193] [cursor=pointer]:
+                    - /url: /18874748888
+                - heading "10 days ago" [level=2] [ref=e194]
+            - button "PUNK IT" [disabled] [ref=e196]:
+              - generic [ref=e197]:
+                - img [ref=e198]
+                - generic [ref=e200]: PUNK IT
+          - button [ref=e203] [cursor=pointer]
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - button "0" [disabled] [ref=e206] [cursor=pointer]:
+                - img [ref=e207] [cursor=pointer]
+                - paragraph [ref=e209] [cursor=pointer]: "0"
+              - button "0" [disabled] [ref=e210] [cursor=pointer]:
+                - img [ref=e211] [cursor=pointer]
+                - paragraph [ref=e213] [cursor=pointer]: "0"
+            - button "关注" [ref=e215] [cursor=pointer]
+        - generic [ref=e217]:
+          - generic [ref=e219]:
+            - generic [ref=e220]:
+              - link "Keto's avatar" [ref=e222] [cursor=pointer]:
+                - /url: /18874748888
+                - img "Keto's avatar" [ref=e223] [cursor=pointer]
+              - generic [ref=e224]:
+                - heading "Keto" [level=2] [ref=e226] [cursor=pointer]:
+                  - link "Keto" [ref=e227] [cursor=pointer]:
+                    - /url: /18874748888
+                - heading "10 days ago" [level=2] [ref=e228]
+            - button "PUNK IT" [disabled] [ref=e230]:
+              - generic [ref=e231]:
+                - img [ref=e232]
+                - generic [ref=e234]: PUNK IT
+          - button [ref=e237] [cursor=pointer]
+          - generic [ref=e238]:
+            - generic [ref=e239]:
+              - button "1" [disabled] [pressed] [ref=e240] [cursor=pointer]:
+                - img [ref=e241] [cursor=pointer]
+                - paragraph [ref=e243] [cursor=pointer]: "1"
+              - button "0" [disabled] [ref=e244] [cursor=pointer]:
+                - img [ref=e245] [cursor=pointer]
+                - paragraph [ref=e247] [cursor=pointer]: "0"
+            - button "关注" [ref=e249] [cursor=pointer]
+  - alert [ref=e251]
+```

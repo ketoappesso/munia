@@ -4,11 +4,11 @@ import prisma from '@/lib/prisma/prisma';
 
 interface Params {
   params: {
-    sessionId: string;
+    deviceId: string;
   };
 }
 
-// GET /api/voice/sessions/[sessionId] - Get a specific session with messages
+// GET /api/voice/devices/[deviceId] - Get a specific device
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -20,39 +20,39 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
 
-    const voiceSession = await prisma.voiceSession.findFirst({
+    const device = await prisma.voiceDevice.findFirst({
       where: {
-        id: params.sessionId,
+        id: params.deviceId,
         userId: session.user.id
       },
       include: {
-        device: true,
-        messages: {
+        sessions: {
+          take: 5,
           orderBy: {
-            createdAt: 'asc'
+            startTime: 'desc'
           }
         }
       }
     });
 
-    if (!voiceSession) {
+    if (!device) {
       return NextResponse.json(
-        { error: 'Session not found' },
+        { error: 'Device not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ session: voiceSession });
+    return NextResponse.json({ device });
   } catch (error) {
-    console.error('Error fetching voice session:', error);
+    console.error('Error fetching voice device:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch voice session' },
+      { error: 'Failed to fetch voice device' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/voice/sessions/[sessionId] - End a voice session
+// PUT /api/voice/devices/[deviceId] - Update device
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -64,52 +64,46 @@ export async function PUT(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Verify session ownership
-    const voiceSession = await prisma.voiceSession.findFirst({
+    const body = await request.json();
+    const { name, status } = body;
+
+    // Verify ownership
+    const device = await prisma.voiceDevice.findFirst({
       where: {
-        id: params.sessionId,
+        id: params.deviceId,
         userId: session.user.id
       }
     });
 
-    if (!voiceSession) {
+    if (!device) {
       return NextResponse.json(
-        { error: 'Session not found' },
+        { error: 'Device not found' },
         { status: 404 }
       );
     }
 
-    // End the session
-    const updatedSession = await prisma.voiceSession.update({
+    const updatedDevice = await prisma.voiceDevice.update({
       where: {
-        id: params.sessionId
+        id: params.deviceId
       },
       data: {
-        endTime: new Date()
+        ...(name && { name }),
+        ...(status && { status }),
+        lastLogin: status === 'online' ? new Date() : undefined
       }
     });
 
-    // Update device status to offline
-    await prisma.voiceDevice.update({
-      where: {
-        id: voiceSession.deviceId
-      },
-      data: {
-        status: 'offline'
-      }
-    });
-
-    return NextResponse.json({ session: updatedSession });
+    return NextResponse.json({ device: updatedDevice });
   } catch (error) {
-    console.error('Error ending voice session:', error);
+    console.error('Error updating voice device:', error);
     return NextResponse.json(
-      { error: 'Failed to end voice session' },
+      { error: 'Failed to update voice device' },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/voice/sessions/[sessionId] - Delete a voice session and its messages
+// DELETE /api/voice/devices/[deviceId] - Delete device
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -121,33 +115,33 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Verify session ownership
-    const voiceSession = await prisma.voiceSession.findFirst({
+    // Verify ownership
+    const device = await prisma.voiceDevice.findFirst({
       where: {
-        id: params.sessionId,
+        id: params.deviceId,
         userId: session.user.id
       }
     });
 
-    if (!voiceSession) {
+    if (!device) {
       return NextResponse.json(
-        { error: 'Session not found' },
+        { error: 'Device not found' },
         { status: 404 }
       );
     }
 
-    // Delete session (messages will be cascade deleted)
-    await prisma.voiceSession.delete({
+    // Delete device (sessions will be cascade deleted)
+    await prisma.voiceDevice.delete({
       where: {
-        id: params.sessionId
+        id: params.deviceId
       }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting voice session:', error);
+    console.error('Error deleting voice device:', error);
     return NextResponse.json(
-      { error: 'Failed to delete voice session' },
+      { error: 'Failed to delete voice device' },
       { status: 500 }
     );
   }
